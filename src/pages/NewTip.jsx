@@ -7,7 +7,7 @@ export default function NewTip() {
   const navigate = useNavigate()
 
   return (
-    <div>
+    <div className="detail-page">
       <Link to="/" className="detail-back">← 返回首页</Link>
       <h1 className="page-title" style={{ marginBottom: 24 }}>
         <span className="hand-underline">新建技巧</span>

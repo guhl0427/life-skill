@@ -6,6 +6,7 @@ import EditTip from "./pages/EditTip"
 import TipDetail from "./pages/TipDetail"
 import Categories from "./pages/Categories"
 import Tags from "./pages/Tags"
+import Stats from "./pages/Stats"
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/tips/:id/edit" element={<EditTip />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/tags" element={<Tags />} />
+        <Route path="/stats" element={<Stats />} />
       </Routes>
     </Layout>
   )

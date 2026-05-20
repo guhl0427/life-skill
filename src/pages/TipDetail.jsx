@@ -11,11 +11,22 @@ function formatDate(ts) {
   return y + "/" + m + "/" + day
 }
 
+function formatDateFull(ts) {
+  const d = new Date(ts)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  const h = String(d.getHours()).padStart(2, "0")
+  const min = String(d.getMinutes()).padStart(2, "0")
+  return y + "/" + m + "/" + day + " " + h + ":" + min
+}
+
 export default function TipDetail() {
   const { id } = useParams()
-  const { getTip, categories, tags, deleteTip } = useApp()
+  const { getTip, categories, tags, toggleStar, deleteTip } = useApp()
   const navigate = useNavigate()
   const [showDelete, setShowDelete] = useState(false)
+  const [copied, setCopied] = useState(false)
   const tip = getTip(id)
 
   if (!tip) {
@@ -39,6 +50,25 @@ export default function TipDetail() {
     navigate("/")
   }
 
+  const handleCopy = async () => {
+    const parts = []
+    if (cat) parts.push("[" + cat.emoji + " " + cat.name + "]")
+    parts.push(tip.title)
+    parts.push("")
+    parts.push(tip.content)
+    if (tipTags.length > 0) {
+      parts.push("")
+      parts.push("标签: " + tipTags.map((t) => "#" + t.name).join(" "))
+    }
+    parts.push("")
+    parts.push("来源: LifeSkill (" + formatDateFull(tip.createdAt) + ")")
+    try {
+      await navigator.clipboard.writeText(parts.join("\n"))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch { /* silent fail */ }
+  }
+
   return (
     <div className="detail-page">
       <Link to="/" className="detail-back">← 返回首页</Link>
@@ -53,6 +83,9 @@ export default function TipDetail() {
               {cat.emoji} {cat.name}
             </span>
           )}
+          <button className="star-btn-detail" onClick={() => toggleStar(id)}>
+            {tip.starred ? "⭐" : "☆"}
+          </button>
           <span style={{ fontFamily: "var(--font-hand)", color: "var(--text-light)", fontSize: 14 }}>
             {formatDate(tip.createdAt)}
           </span>
@@ -74,6 +107,9 @@ export default function TipDetail() {
         <Link to={"/tips/" + id + "/edit"} className="btn btn-primary">
           编辑
         </Link>
+        <button className="btn btn-outline" onClick={handleCopy}>
+          {copied ? "✅ 已复制" : "📋 复制"}
+        </button>
         <button className="btn btn-danger" onClick={() => setShowDelete(true)}>
           删除
         </button>

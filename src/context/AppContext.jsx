@@ -18,7 +18,7 @@ export function AppProvider({ children }) {
   const addTip = useCallback((tip) => {
     const now = Date.now()
     setTips((prev) => [
-      { ...tip, id: genId(), createdAt: now, updatedAt: now },
+      { ...tip, id: genId(), starred: false, createdAt: now, updatedAt: now },
       ...prev,
     ])
   }, [setTips])
@@ -31,6 +31,12 @@ export function AppProvider({ children }) {
 
   const deleteTip = useCallback((id) => {
     setTips((prev) => prev.filter((t) => t.id !== id))
+  }, [setTips])
+
+  const toggleStar = useCallback((id) => {
+    setTips((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, starred: !t.starred } : t))
+    )
   }, [setTips])
 
   const getTip = useCallback((id) => tips.find((t) => t.id === id), [tips])
@@ -67,7 +73,7 @@ export function AppProvider({ children }) {
     <AppContext.Provider
       value={{
         tips, categories, tags,
-        addTip, updateTip, deleteTip, getTip,
+        addTip, updateTip, deleteTip, getTip, toggleStar,
         addCategory, updateCategory, deleteCategory,
         addTag, updateTag, deleteTag,
       }}

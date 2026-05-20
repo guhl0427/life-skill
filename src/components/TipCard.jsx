@@ -9,27 +9,55 @@ function formatDate(ts) {
   return y + "/" + m + "/" + day
 }
 
-export default function TipCard({ tip, showActions, onDelete }) {
-  const { categories, tags } = useApp()
+function highlightText(text, query) {
+  if (!query || !text) return text
+  const lower = text.toLowerCase()
+  const q = query.toLowerCase()
+  const parts = []
+  let last = 0
+  let idx = lower.indexOf(q)
+  while (idx !== -1) {
+    if (idx > last) parts.push(text.slice(last, idx))
+    parts.push(<mark key={idx} className="search-highlight">{text.slice(idx, idx + q.length)}</mark>)
+    last = idx + q.length
+    idx = lower.indexOf(q, last)
+  }
+  if (last < text.length) parts.push(text.slice(last))
+  return parts.length > 0 ? parts : text
+}
+
+export default function TipCard({ tip, search, showActions, onDelete }) {
+  const { categories, tags, toggleStar } = useApp()
   const cat = categories.find((c) => c.id === tip.categoryId)
   const tipTags = tags.filter((t) => tip.tagIds?.includes(t.id))
 
+  const handleStar = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    toggleStar(tip.id)
+  }
+
   return (
-    <div className="tip-card">
+    <div className={"tip-card" + (tip.starred ? " starred" : "")}>
       <div className="tip-card-header">
-        {cat && (
-          <span
-            className="tip-card-category"
-            style={{ background: cat.color + "18", color: cat.color }}
-          >
-            {cat.emoji} {cat.name}
-          </span>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
+          <button className="star-btn" onClick={handleStar}>
+            {tip.starred ? "⭐" : "☆"}
+          </button>
+          {cat && (
+            <span
+              className="tip-card-category"
+              style={{ background: cat.color + "18", color: cat.color }}
+            >
+              {cat.emoji} {cat.name}
+            </span>
+          )}
+        </div>
         <span className="tip-card-date">{formatDate(tip.createdAt)}</span>
       </div>
       <Link to={"/tips/" + tip.id} style={{ textDecoration: "none", color: "inherit" }}>
-        <h3 className="tip-card-title">{tip.title}</h3>
-        <p className="tip-card-excerpt">{tip.content}</p>
+        <h3 className="tip-card-title">{search ? highlightText(tip.title, search) : tip.title}</h3>
+        <p className="tip-card-excerpt">{search ? highlightText(tip.content, search) : tip.content}</p>
       </Link>
       {tipTags.length > 0 && (
         <div className="tip-card-tags">

@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useState, useMemo, useCallback } from "react"
+import { useSearchParams, useNavigate } from "react-router-dom"
 import { useApp } from "../context/AppContext"
 import TipCard from "../components/TipCard"
 import FilterBar from "../components/FilterBar"
@@ -7,14 +7,17 @@ import ConfirmDialog from "../components/ConfirmDialog"
 
 export default function Home() {
   const { tips, deleteTip } = useApp()
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeCat = searchParams.get("cat") || ""
   const search = searchParams.get("q") || ""
+  const activeStarred = searchParams.get("starred") === "1"
   const [sort, setSort] = useState("newest")
   const [deleteId, setDeleteId] = useState(null)
 
   const filtered = useMemo(() => {
     let result = [...tips]
+    if (activeStarred) result = result.filter((t) => t.starred)
     if (activeCat) result = result.filter((t) => t.categoryId === activeCat)
     if (search) {
       const q = search.toLowerCase()
@@ -26,10 +29,25 @@ export default function Home() {
     else if (sort === "oldest") result.sort((a, b) => a.createdAt - b.createdAt)
     else if (sort === "title") result.sort((a, b) => a.title.localeCompare(b.title, "zh"))
     return result
-  }, [tips, activeCat, search, sort])
+  }, [tips, activeCat, search, sort, activeStarred])
+
+  const handleRandom = useCallback(() => {
+    if (tips.length === 0) return
+    const i = Math.floor(Math.random() * tips.length)
+    navigate("/tips/" + tips[i].id)
+  }, [tips, navigate])
+
+  const handleStarredChange = () => {
+    const params = new URLSearchParams(searchParams)
+    if (activeStarred) params.delete("starred")
+    else params.set("starred", "1")
+    params.delete("cat")
+    setSearchParams(params)
+  }
 
   const handleCatChange = (id) => {
     const params = new URLSearchParams(searchParams)
+    params.delete("starred")
     if (id) params.set("cat", id)
     else params.delete("cat")
     setSearchParams(params)
@@ -47,9 +65,17 @@ export default function Home() {
       <FilterBar
         activeCat={activeCat}
         onCatChange={handleCatChange}
+        activeStarred={activeStarred}
+        onStarredChange={handleStarredChange}
         sort={sort}
         onSortChange={setSort}
       />
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        <button className="btn btn-outline btn-sm" onClick={handleRandom}>
+          🎲 随机一条
+        </button>
+      </div>
 
       {search && (
         <div style={{ marginBottom: 16, fontSize: 14, color: "var(--text-secondary)" }}>
@@ -73,6 +99,7 @@ export default function Home() {
             <TipCard
               key={tip.id}
               tip={tip}
+              search={search}
               showActions
               onDelete={setDeleteId}
             />

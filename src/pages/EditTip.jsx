@@ -2,6 +2,14 @@ import { useParams, useNavigate, Link } from "react-router-dom"
 import { useApp } from "../context/AppContext"
 import TipForm from "../components/TipForm"
 
+function goBack(navigate, fallback) {
+  if (window.history.length > 1) {
+    navigate(-1)
+  } else {
+    navigate(fallback)
+  }
+}
+
 export default function EditTip() {
   const { id } = useParams()
   const { getTip, updateTip } = useApp()
@@ -22,8 +30,8 @@ export default function EditTip() {
   }
 
   return (
-    <div>
-      <Link to={"/tips/" + id} className="detail-back">← 返回详情</Link>
+    <div className="detail-page">
+      <button className="detail-back" onClick={() => goBack(navigate, "/")}>← 返回</button>
       <h1 className="page-title" style={{ marginBottom: 24 }}>
         <span className="hand-underline">编辑技巧</span>
       </h1>
@@ -31,9 +39,9 @@ export default function EditTip() {
         initial={tip}
         onSubmit={(data) => {
           updateTip(id, data)
-          navigate("/tips/" + id)
+          goBack(navigate, "/")
         }}
-        onCancel={() => navigate("/tips/" + id)}
+        onCancel={() => goBack(navigate, "/")}
       />
     </div>
   )
