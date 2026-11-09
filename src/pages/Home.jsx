@@ -6,10 +6,11 @@ import FilterBar from "../components/FilterBar"
 import ConfirmDialog from "../components/ConfirmDialog"
 import { buildBackup, parseBackup } from "../utils/backup"
 import { formatDate } from "../utils/format"
+import { matchesTip } from "../utils/search"
 import { btnOutline, btnSm, pageTitle, pageDesc } from "../components/ui"
 
 export default function Home() {
-  const { tips, categories, tags, deleteTip, importData } = useApp()
+  const { tips, categories, tags, categoryMap, tagMap, deleteTip, importData } = useApp()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeCat = searchParams.get("cat") || ""
@@ -33,17 +34,14 @@ export default function Home() {
     if (activeStarred) result = result.filter((t) => t.starred)
     if (activeCat) result = result.filter((t) => t.categoryId === activeCat)
     if (search) {
-      const q = search.toLowerCase()
-      result = result.filter(
-        (t) => t.title.toLowerCase().includes(q) || t.content.toLowerCase().includes(q)
-      )
+      result = result.filter((t) => matchesTip(t, search, categoryMap, tagMap))
     }
     if (sort === "newest") result.sort((a, b) => b.createdAt - a.createdAt)
     else if (sort === "oldest") result.sort((a, b) => a.createdAt - b.createdAt)
     else if (sort === "updated") result.sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt))
     else if (sort === "title") result.sort((a, b) => a.title.localeCompare(b.title, "zh"))
     return result
-  }, [tips, activeCat, search, sort, activeStarred])
+  }, [tips, activeCat, search, sort, activeStarred, categoryMap, tagMap])
 
   const handleRandom = useCallback(() => {
     if (tips.length === 0) return

@@ -71,6 +71,15 @@ describe("Home 排序", () => {
   })
 })
 
+describe("Home 搜索", () => {
+  it("可以通过标签名搜索到技巧", () => {
+    renderHome(["/?q=省钱"])
+
+    expect(screen.getByText("香蕉保鲜法")).toBeInTheDocument()
+    expect(screen.queryByText("衣服折叠法省空间")).not.toBeInTheDocument()
+  })
+})
+
 describe("Home 备份入口", () => {
   it("点击导出后生成备份文件并提示结果", async () => {
     renderHome()

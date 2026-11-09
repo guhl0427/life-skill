@@ -167,7 +167,7 @@ export default function Layout({ children }) {
               key={location.key}
               type="text"
               name="q"
-              placeholder="搜索技巧..."
+              placeholder="搜索标题、内容、标签..."
               defaultValue={urlQuery}
               className="min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-faint focus:outline-none"
             />
