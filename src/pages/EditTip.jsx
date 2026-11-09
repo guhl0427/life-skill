@@ -36,6 +36,7 @@ export default function EditTip() {
         <span className="hand-underline">编辑技巧</span>
       </h1>
       <TipForm
+        key={tip.id}
         initial={tip}
         onSubmit={(data) => {
           updateTip(id, data)

@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from "react"
-import { NavLink, Link, useNavigate } from "react-router-dom"
+import { NavLink, Link, useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { useApp } from "../context/AppContext"
 
 export default function Layout({ children }) {
   const { tips, categories } = useApp()
   const [menuOpen, setMenuOpen] = useState(false)
   const [closing, setClosing] = useState(false)
-  const [query, setQuery] = useState("")
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+  const urlQuery = searchParams.get("q") || ""
   const [dark, setDark] = useState(() => localStorage.getItem("ls_dark") === "true")
   const navigate = useNavigate()
 
@@ -17,8 +19,9 @@ export default function Layout({ children }) {
 
   const handleSearch = (e) => {
     e.preventDefault()
-    if (query.trim()) {
-      navigate("/?q=" + encodeURIComponent(query.trim()))
+    const q = (new FormData(e.currentTarget).get("q") || "").trim()
+    if (q) {
+      navigate("/?q=" + encodeURIComponent(q))
     } else {
       navigate("/")
     }
@@ -104,10 +107,11 @@ export default function Layout({ children }) {
           <form className="search-box" onSubmit={handleSearch}>
             <span className="icon">🔍</span>
             <input
+              key={location.key}
               type="text"
+              name="q"
               placeholder="搜索技巧..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              defaultValue={urlQuery}
             />
           </form>
           <span className="top-bar-grow" />

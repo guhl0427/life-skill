@@ -12,7 +12,8 @@ export default function Home() {
   const activeCat = searchParams.get("cat") || ""
   const search = searchParams.get("q") || ""
   const activeStarred = searchParams.get("starred") === "1"
-  const [sort, setSort] = useState("newest")
+  const sortParam = searchParams.get("sort")
+  const sort = ["newest", "oldest", "title"].includes(sortParam) ? sortParam : "newest"
   const [deleteId, setDeleteId] = useState(null)
 
   const filtered = useMemo(() => {
@@ -41,15 +42,20 @@ export default function Home() {
     const params = new URLSearchParams(searchParams)
     if (activeStarred) params.delete("starred")
     else params.set("starred", "1")
-    params.delete("cat")
     setSearchParams(params)
   }
 
   const handleCatChange = (id) => {
     const params = new URLSearchParams(searchParams)
-    params.delete("starred")
     if (id) params.set("cat", id)
     else params.delete("cat")
+    setSearchParams(params)
+  }
+
+  const handleSortChange = (value) => {
+    const params = new URLSearchParams(searchParams)
+    if (value === "newest") params.delete("sort")
+    else params.set("sort", value)
     setSearchParams(params)
   }
 
@@ -68,7 +74,7 @@ export default function Home() {
         activeStarred={activeStarred}
         onStarredChange={handleStarredChange}
         sort={sort}
-        onSortChange={setSort}
+        onSortChange={handleSortChange}
       />
 
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
