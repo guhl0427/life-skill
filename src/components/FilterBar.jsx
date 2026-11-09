@@ -51,6 +51,7 @@ export default function FilterBar({ activeCat, onCatChange, activeStarred, onSta
         aria-label="排序方式"
       >
         <option value="newest">最新</option>
+        <option value="updated">最近更新</option>
         <option value="oldest">最早</option>
         <option value="title">标题 A-Z</option>
       </select>

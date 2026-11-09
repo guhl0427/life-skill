@@ -59,6 +59,9 @@ export default function TipCard({ tip, search, showActions, onDelete }) {
         </div>
         <span className="whitespace-nowrap font-hand text-[13px] text-ink-faint">
           {formatDate(tip.createdAt)}
+          {tip.updatedAt > tip.createdAt && (
+            <span className="ml-1">· 已编辑</span>
+          )}
         </span>
       </div>
       <Link to={"/tips/" + tip.id} className="text-inherit">

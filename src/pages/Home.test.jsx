@@ -34,6 +34,43 @@ describe("Home 筛选", () => {
   })
 })
 
+describe("Home 排序", () => {
+  it("按最近更新排序，并标记已编辑的技巧", () => {
+    localStorage.setItem(
+      "ls_tips",
+      JSON.stringify([
+        {
+          id: "tip-a",
+          title: "新近编辑",
+          content: "内容",
+          categoryId: null,
+          tagIds: [],
+          starred: false,
+          createdAt: 1000,
+          updatedAt: 3000,
+        },
+        {
+          id: "tip-b",
+          title: "刚创建未编辑",
+          content: "内容",
+          categoryId: null,
+          tagIds: [],
+          starred: false,
+          createdAt: 2000,
+          updatedAt: 2000,
+        },
+      ])
+    )
+    renderHome()
+
+    fireEvent.change(screen.getByLabelText("排序方式"), { target: { value: "updated" } })
+
+    const titles = screen.getAllByRole("heading", { level: 3 }).map((el) => el.textContent)
+    expect(titles).toEqual(["新近编辑", "刚创建未编辑"])
+    expect(screen.getByText("· 已编辑")).toBeInTheDocument()
+  })
+})
+
 describe("Home 备份入口", () => {
   it("点击导出后生成备份文件并提示结果", async () => {
     renderHome()

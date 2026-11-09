@@ -16,7 +16,7 @@ export default function Home() {
   const search = searchParams.get("q") || ""
   const activeStarred = searchParams.get("starred") === "1"
   const sortParam = searchParams.get("sort")
-  const sort = ["newest", "oldest", "title"].includes(sortParam) ? sortParam : "newest"
+  const sort = ["newest", "oldest", "title", "updated"].includes(sortParam) ? sortParam : "newest"
   const [deleteId, setDeleteId] = useState(null)
   const [pendingImport, setPendingImport] = useState(null)
   const [notice, setNotice] = useState("")
@@ -40,6 +40,7 @@ export default function Home() {
     }
     if (sort === "newest") result.sort((a, b) => b.createdAt - a.createdAt)
     else if (sort === "oldest") result.sort((a, b) => a.createdAt - b.createdAt)
+    else if (sort === "updated") result.sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt))
     else if (sort === "title") result.sort((a, b) => a.title.localeCompare(b.title, "zh"))
     return result
   }, [tips, activeCat, search, sort, activeStarred])
