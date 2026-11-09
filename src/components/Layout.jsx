@@ -12,6 +12,7 @@ export default function Layout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [closing, setClosing] = useState(false)
   const [storageError, setStorageError] = useState(false)
+  const [syncNotice, setSyncNotice] = useState(false)
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const urlQuery = searchParams.get("q") || ""
@@ -35,6 +36,21 @@ export default function Layout({ children }) {
     const onError = () => setStorageError(true)
     window.addEventListener("ls-storage-error", onError)
     return () => window.removeEventListener("ls-storage-error", onError)
+  }, [])
+
+  useEffect(() => {
+    let timer
+    const onSync = (e) => {
+      if (!["ls_tips", "ls_categories", "ls_tags"].includes(e.detail?.key)) return
+      setSyncNotice(true)
+      clearTimeout(timer)
+      timer = setTimeout(() => setSyncNotice(false), 3000)
+    }
+    window.addEventListener("ls-storage-sync", onSync)
+    return () => {
+      window.removeEventListener("ls-storage-sync", onSync)
+      clearTimeout(timer)
+    }
   }, [])
 
   const handleSearch = (e) => {
@@ -80,6 +96,15 @@ export default function Layout({ children }) {
           >
             ✕
           </button>
+        </div>
+      )}
+
+      {syncNotice && (
+        <div
+          role="status"
+          className="fixed left-1/2 top-16 z-[105] -translate-x-1/2 rounded-sketch border-2 border-primary bg-card px-4 py-2 text-sm text-ink shadow-ink"
+        >
+          已同步其他标签页的修改
         </div>
       )}
 
@@ -167,7 +192,7 @@ export default function Layout({ children }) {
               key={location.key}
               type="text"
               name="q"
-              placeholder="搜索技巧..."
+              placeholder="搜索标题、内容、标签..."
               defaultValue={urlQuery}
               className="min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-faint focus:outline-none"
             />

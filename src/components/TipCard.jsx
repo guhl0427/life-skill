@@ -1,23 +1,17 @@
 import { Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import { formatDate } from "../utils/format"
+import { getSnippet, splitByKeywords } from "../utils/search"
 import { btnOutline, btnDanger, btnSm } from "./ui"
 
 function highlightText(text, query) {
-  if (!query || !text) return text
-  const lower = text.toLowerCase()
-  const q = query.toLowerCase()
-  const parts = []
-  let last = 0
-  let idx = lower.indexOf(q)
-  while (idx !== -1) {
-    if (idx > last) parts.push(text.slice(last, idx))
-    parts.push(<mark key={idx} className="rounded-[3px] bg-accent/30 px-0.5 text-inherit">{text.slice(idx, idx + q.length)}</mark>)
-    last = idx + q.length
-    idx = lower.indexOf(q, last)
-  }
-  if (last < text.length) parts.push(text.slice(last))
-  return parts.length > 0 ? parts : text
+  const parts = splitByKeywords(text, query)
+  if (parts.length === 0) return text
+  return parts.map((part, i) =>
+    part.match
+      ? <mark key={i} className="rounded-[3px] bg-accent/30 px-0.5 text-inherit">{part.text}</mark>
+      : part.text
+  )
 }
 
 export default function TipCard({ tip, search, showActions, onDelete }) {
@@ -53,12 +47,15 @@ export default function TipCard({ tip, search, showActions, onDelete }) {
               className="whitespace-nowrap rounded-sketch-sm px-2.5 py-0.5 text-xs"
               style={{ background: cat.color + "18", color: cat.color }}
             >
-              {cat.emoji} {cat.name}
+              {cat.emoji} {search ? highlightText(cat.name, search) : cat.name}
             </span>
           )}
         </div>
         <span className="whitespace-nowrap font-hand text-[13px] text-ink-faint">
           {formatDate(tip.createdAt)}
+          {tip.updatedAt > tip.createdAt && (
+            <span className="ml-1">· 已编辑</span>
+          )}
         </span>
       </div>
       <Link to={"/tips/" + tip.id} className="text-inherit">
@@ -66,7 +63,7 @@ export default function TipCard({ tip, search, showActions, onDelete }) {
           {search ? highlightText(tip.title, search) : tip.title}
         </h3>
         <p className="mt-1 line-clamp-3 flex-1 text-sm leading-relaxed text-ink-soft max-md:text-[13px] max-md:line-clamp-2">
-          {search ? highlightText(tip.content, search) : tip.content}
+          {search ? highlightText(getSnippet(tip.content, search), search) : tip.content}
         </p>
       </Link>
       {tipTags.length > 0 && (
@@ -76,13 +73,13 @@ export default function TipCard({ tip, search, showActions, onDelete }) {
               key={t.id}
               className="rounded-sketch-sm border border-line-soft bg-paper-deep px-2.5 py-0.5 font-hand text-xs text-ink-soft"
             >
-              {t.name}
+              {search ? highlightText(t.name, search) : t.name}
             </span>
           ))}
         </div>
       )}
       {showActions && (
-        <div className="tip-card-footer mt-1 flex justify-end gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        <div className="tip-card-footer mt-1 flex justify-end gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 max-md:opacity-100">
           <Link to={"/tips/" + tip.id + "/edit"} className={`${btnOutline} ${btnSm}`}>
             编辑
           </Link>

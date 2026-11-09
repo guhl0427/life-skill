@@ -32,6 +32,7 @@ export function useLocalStorage(key, initialValue) {
         const next = JSON.parse(e.newValue)
         serializedRef.current = e.newValue
         setValue(next)
+        window.dispatchEvent(new CustomEvent("ls-storage-sync", { detail: { key } }))
       } catch (err) {
         console.error(`localStorage sync error [${key}]:`, err)
       }

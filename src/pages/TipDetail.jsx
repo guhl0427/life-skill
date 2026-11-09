@@ -77,6 +77,9 @@ export default function TipDetail() {
           </button>
           <span className="font-hand text-sm text-ink-faint">
             {formatDate(tip.createdAt)}
+            {tip.updatedAt > tip.createdAt && (
+              <span className="ml-1.5">· 编辑于 {formatDateTime(tip.updatedAt)}</span>
+            )}
           </span>
         </div>
         <h1 className="mb-2 font-display text-[32px] leading-tight tracking-[2px] text-ink max-md:text-2xl max-[480px]:text-[22px]">

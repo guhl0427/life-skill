@@ -5,7 +5,7 @@ const chipBase =
 const chipIdle = "border-line bg-card text-ink-soft hover:border-primary hover:text-primary"
 const chipActive = "border-primary-hover bg-primary text-white shadow-[1px_2px_0_var(--line)]"
 
-export default function FilterBar({ activeCat, onCatChange, activeStarred, onStarredChange, sort, onSortChange }) {
+export default function FilterBar({ activeCat, onCatChange, activeStarred, onStarredChange, onReset, sort, onSortChange }) {
   const { categories } = useApp()
 
   return (
@@ -16,7 +16,8 @@ export default function FilterBar({ activeCat, onCatChange, activeStarred, onSta
           <button
             type="button"
             className={`${chipBase} ${!activeCat && !activeStarred ? chipActive : chipIdle}`}
-            onClick={() => onCatChange("")}
+            onClick={() => onReset?.()}
+            aria-pressed={!activeCat && !activeStarred}
           >
             全部
           </button>
@@ -50,6 +51,7 @@ export default function FilterBar({ activeCat, onCatChange, activeStarred, onSta
         aria-label="排序方式"
       >
         <option value="newest">最新</option>
+        <option value="updated">最近更新</option>
         <option value="oldest">最早</option>
         <option value="title">标题 A-Z</option>
       </select>

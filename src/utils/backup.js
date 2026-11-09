@@ -1,6 +1,8 @@
 const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v)
 const asString = (v) => (typeof v === "string" ? v : "")
 
+export const SNAPSHOT_KEY = "ls_backup_auto"
+
 export function buildBackup({ tips, categories, tags }) {
   return {
     app: "lifeskill",
@@ -9,6 +11,46 @@ export function buildBackup({ tips, categories, tags }) {
     tips,
     categories,
     tags,
+  }
+}
+
+function mergeItems(currentItems, incomingItems, pick) {
+  const items = new Map((currentItems || []).map((item) => [item.id, item]))
+  for (const item of incomingItems || []) {
+    const existing = items.get(item.id)
+    items.set(item.id, existing ? pick(existing, item) : item)
+  }
+  return Array.from(items.values())
+}
+
+export function mergeBackup(current, incoming) {
+  return {
+    categories: mergeItems(current.categories, incoming.categories, (existing) => existing),
+    tags: mergeItems(current.tags, incoming.tags, (existing) => existing),
+    tips: mergeItems(current.tips, incoming.tips, (existing, item) =>
+      (item.updatedAt || item.createdAt || 0) > (existing.updatedAt || existing.createdAt || 0)
+        ? item
+        : existing
+    ),
+  }
+}
+
+export function saveSnapshot(data) {
+  try {
+    localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(buildBackup(data)))
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function readSnapshot() {
+  const raw = localStorage.getItem(SNAPSHOT_KEY)
+  if (!raw) return null
+  try {
+    return parseBackup(raw)
+  } catch {
+    return null
   }
 }
 
