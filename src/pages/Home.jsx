@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from "react"
-import { useSearchParams, useNavigate, useLocation } from "react-router-dom"
+import { useState, useMemo, useEffect, useRef } from "react"
+import { useSearchParams, useLocation } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import TipCard from "../components/TipCard"
 import FilterBar from "../components/FilterBar"
@@ -18,7 +18,6 @@ import { btnOutline, btnDanger, btnSm, pageTitle, pageDesc } from "../components
 
 export default function Home() {
   const { tips, categories, tags, categoryMap, tagMap, deleteTip, updateTip, restoreTip, importData } = useApp()
-  const navigate = useNavigate()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeCat = searchParams.get("cat") || ""
@@ -74,13 +73,6 @@ export default function Home() {
     return result
   }, [tips, activeCat, activeTag, untaggedOnly, search, sort, activeStarred, categoryMap, tagMap])
 
-  const handleRandom = useCallback(() => {
-    const active = tips.filter((t) => !t.deletedAt)
-    if (active.length === 0) return
-    const i = Math.floor(Math.random() * active.length)
-    navigate("/tips/" + active[i].id)
-  }, [tips, navigate])
-
   const handleStarredChange = () => {
     const params = new URLSearchParams(searchParams)
     if (activeStarred) params.delete("starred")
@@ -104,16 +96,9 @@ export default function Home() {
     setSearchParams(params)
   }
 
-  const handleClearTag = () => {
+  const handleClearQuery = (...keys) => {
     const params = new URLSearchParams(searchParams)
-    params.delete("tag")
-    setSearchParams(params)
-  }
-
-  const handleClearHealthFilter = () => {
-    const params = new URLSearchParams(searchParams)
-    params.delete("cat")
-    params.delete("untagged")
+    keys.forEach((key) => params.delete(key))
     setSearchParams(params)
   }
 
@@ -236,9 +221,6 @@ export default function Home() {
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <button className={`${btnOutline} ${btnSm}`} onClick={handleRandom}>
-          🎲 随机一条
-        </button>
         <button className={`${btnOutline} ${btnSm}`} onClick={handleExport}>
           ⬇️ 导出备份
         </button>
@@ -291,7 +273,7 @@ export default function Home() {
           <button
             type="button"
             className="text-primary hover:underline"
-            onClick={handleClearTag}
+            onClick={() => handleClearQuery("tag")}
           >
             清除
           </button>
@@ -343,7 +325,7 @@ export default function Home() {
           <button
             type="button"
             className="text-primary hover:underline"
-            onClick={handleClearHealthFilter}
+            onClick={() => handleClearQuery("cat", "untagged")}
           >
             清除
           </button>

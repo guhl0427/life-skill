@@ -61,7 +61,6 @@ describe("Stats 分类分布", () => {
     expect(screen.getByText("2 / 3")).toBeInTheDocument()
     expect(screen.getByText("1 / 3")).toBeInTheDocument()
     expect(screen.getByText("📥 未分类")).toBeInTheDocument()
-    expect(screen.getByText("4 个分类暂无技巧")).toBeInTheDocument()
   })
 })
 

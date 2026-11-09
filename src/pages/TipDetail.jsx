@@ -30,12 +30,6 @@ export default function TipDetail() {
   const tipTags = (tip.tagIds || []).map((tid) => tagMap.get(tid)).filter(Boolean)
 
   const activeTips = tips.filter((t) => !t.deletedAt)
-  const currentIndex = activeTips.findIndex((t) => t.id === tip.id)
-  const prevTip = currentIndex > 0 ? activeTips[currentIndex - 1] : null
-  const nextTip =
-    currentIndex >= 0 && currentIndex < activeTips.length - 1
-      ? activeTips[currentIndex + 1]
-      : null
   const tipTagIds = new Set(tip.tagIds || [])
   const related = activeTips
     .filter((other) => {
@@ -179,23 +173,6 @@ export default function TipDetail() {
               </Link>
             ))}
           </div>
-        </div>
-      )}
-
-      {(prevTip || nextTip) && (
-        <div className="mt-8 flex items-center justify-between gap-3 border-t-2 border-dashed border-line-soft pt-5 text-sm">
-          {prevTip ? (
-            <Link to={"/tips/" + prevTip.id} className="max-w-[48%] truncate text-ink-soft transition-colors hover:text-primary">
-              ← {prevTip.title}
-            </Link>
-          ) : (
-            <span />
-          )}
-          {nextTip && (
-            <Link to={"/tips/" + nextTip.id} className="max-w-[48%] truncate text-right text-ink-soft transition-colors hover:text-primary">
-              {nextTip.title} →
-            </Link>
-          )}
         </div>
       )}
 
