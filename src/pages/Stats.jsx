@@ -131,20 +131,6 @@ export default function Stats() {
             </div>
           </div>
         )}
-        {stats.unusedCats.length > 0 && (
-          <details className="mt-1 rounded-sketch border border-dashed border-line-soft bg-paper-deep px-3.5 py-2 text-[13px] text-ink-faint">
-            <summary className="cursor-pointer font-hand">
-              {stats.unusedCats.length} 个分类暂无技巧
-            </summary>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {stats.unusedCats.map((cat) => (
-                <span key={cat.id} className="rounded-sketch-sm bg-card px-2.5 py-0.5">
-                  {cat.emoji} {cat.name}
-                </span>
-              ))}
-            </div>
-          </details>
-        )}
       </div>
 
       {stats.tagCounts.length > 0 && (

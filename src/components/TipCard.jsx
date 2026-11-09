@@ -70,9 +70,6 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
         </div>
         <span className="whitespace-nowrap font-hand text-[13px] text-ink-faint">
           {formatDate(tip.createdAt)}
-          {tip.updatedAt > tip.createdAt && (
-            <span className="ml-1">· 已编辑</span>
-          )}
           {tip.usageCount > 0 && (
             <span className="ml-1">· 用过 {tip.usageCount} 次</span>
           )}

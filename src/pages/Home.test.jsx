@@ -35,7 +35,7 @@ describe("Home 筛选", () => {
 })
 
 describe("Home 排序", () => {
-  it("按最近更新排序，并标记已编辑的技巧", () => {
+  it("按最近更新排序", () => {
     localStorage.setItem(
       "ls_tips",
       JSON.stringify([
@@ -67,7 +67,6 @@ describe("Home 排序", () => {
 
     const titles = screen.getAllByRole("heading", { level: 3 }).map((el) => el.textContent)
     expect(titles).toEqual(["新近编辑", "刚创建未编辑"])
-    expect(screen.getByText("· 已编辑")).toBeInTheDocument()
   })
 })
 

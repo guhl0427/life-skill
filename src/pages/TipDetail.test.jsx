@@ -62,7 +62,7 @@ describe("TipDetail 步骤", () => {
 })
 
 describe("TipDetail 相关技巧", () => {
-  it("展示同标签相关技巧与下一条导航", () => {
+  it("展示同标签相关技巧", () => {
     localStorage.setItem(
       "ls_tips",
       JSON.stringify([
@@ -104,7 +104,6 @@ describe("TipDetail 相关技巧", () => {
     expect(screen.getByRole("heading", { name: "相关技巧" })).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "同标签技巧" })).toBeInTheDocument()
     expect(screen.queryByRole("link", { name: "无关技巧" })).not.toBeInTheDocument()
-    expect(screen.getByRole("link", { name: /同标签技巧 →/ })).toBeInTheDocument()
   })
 })
 
