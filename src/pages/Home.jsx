@@ -1,19 +1,32 @@
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect, useRef } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
-import { useApp } from "../context/AppContext"
+import { useApp } from "../context/useApp"
 import TipCard from "../components/TipCard"
 import FilterBar from "../components/FilterBar"
 import ConfirmDialog from "../components/ConfirmDialog"
+import { buildBackup, parseBackup } from "../utils/backup"
+import { formatDate } from "../utils/format"
+import { btnOutline, btnSm, pageTitle, pageDesc } from "../components/ui"
 
 export default function Home() {
-  const { tips, deleteTip } = useApp()
+  const { tips, categories, tags, deleteTip, importData } = useApp()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeCat = searchParams.get("cat") || ""
   const search = searchParams.get("q") || ""
   const activeStarred = searchParams.get("starred") === "1"
-  const [sort, setSort] = useState("newest")
+  const sortParam = searchParams.get("sort")
+  const sort = ["newest", "oldest", "title"].includes(sortParam) ? sortParam : "newest"
   const [deleteId, setDeleteId] = useState(null)
+  const [pendingImport, setPendingImport] = useState(null)
+  const [notice, setNotice] = useState("")
+  const fileRef = useRef(null)
+
+  useEffect(() => {
+    if (!notice) return
+    const timer = setTimeout(() => setNotice(""), 4000)
+    return () => clearTimeout(timer)
+  }, [notice])
 
   const filtered = useMemo(() => {
     let result = [...tips]
@@ -41,24 +54,62 @@ export default function Home() {
     const params = new URLSearchParams(searchParams)
     if (activeStarred) params.delete("starred")
     else params.set("starred", "1")
-    params.delete("cat")
     setSearchParams(params)
   }
 
   const handleCatChange = (id) => {
     const params = new URLSearchParams(searchParams)
-    params.delete("starred")
     if (id) params.set("cat", id)
     else params.delete("cat")
     setSearchParams(params)
   }
 
+  const handleSortChange = (value) => {
+    const params = new URLSearchParams(searchParams)
+    if (value === "newest") params.delete("sort")
+    else params.set("sort", value)
+    setSearchParams(params)
+  }
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(buildBackup({ tips, categories, tags }), null, 2)], {
+      type: "application/json",
+    })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "lifeskill-" + formatDate(Date.now()).replaceAll("/", "-") + ".json"
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 0)
+    setNotice(`已导出 ${tips.length} 条技巧、${categories.length} 个分类、${tags.length} 个标签`)
+  }
+
+  const handleImportFile = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file) return
+    try {
+      setPendingImport(parseBackup(await file.text()))
+    } catch (err) {
+      setNotice("导入失败：" + err.message)
+    }
+  }
+
+  const handleConfirmImport = () => {
+    if (!pendingImport) return
+    importData(pendingImport)
+    setNotice(`已导入 ${pendingImport.tips.length} 条技巧，原有数据已被覆盖`)
+    setPendingImport(null)
+  }
+
   return (
     <div>
-      <h1 className="page-title">
+      <h1 className={pageTitle}>
         <span className="hand-underline">生活小技巧</span>
       </h1>
-      <p className="page-desc">
+      <p className={pageDesc}>
         记录那些让生活更美好的小妙招 ✨
       </p>
 
@@ -68,26 +119,48 @@ export default function Home() {
         activeStarred={activeStarred}
         onStarredChange={handleStarredChange}
         sort={sort}
-        onSortChange={setSort}
+        onSortChange={handleSortChange}
       />
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        <button className="btn btn-outline btn-sm" onClick={handleRandom}>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <button className={`${btnOutline} ${btnSm}`} onClick={handleRandom}>
           🎲 随机一条
         </button>
+        <button className={`${btnOutline} ${btnSm}`} onClick={handleExport}>
+          ⬇️ 导出备份
+        </button>
+        <button className={`${btnOutline} ${btnSm}`} onClick={() => fileRef.current?.click()}>
+          ⬆️ 导入备份
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={handleImportFile}
+        />
       </div>
 
+      {notice && (
+        <div
+          role="status"
+          className="mb-4 rounded-sketch border-2 border-primary bg-primary-light px-4 py-2.5 text-sm text-ink"
+        >
+          {notice}
+        </div>
+      )}
+
       {search && (
-        <div style={{ marginBottom: 16, fontSize: 14, color: "var(--text-secondary)" }}>
+        <div className="mb-4 text-sm text-ink-soft">
           搜索 &ldquo;{search}&rdquo; 共 {filtered.length} 条结果
         </div>
       )}
 
       {filtered.length === 0 ? (
-        <div className="empty-state">
-          <div className="icon">🔍</div>
-          <h3>没有找到技巧</h3>
-          <p>
+        <div className="px-5 py-16 text-center">
+          <div className="mb-3 text-5xl">🔍</div>
+          <h3 className="mb-2 font-display text-xl text-ink">没有找到技巧</h3>
+          <p className="mb-5 text-sm text-ink-soft">
             {search
               ? "换个关键词试试，或者点击「+ 新技巧」添加"
               : "点击「+ 新技巧」开始记录你的第一个生活妙招吧"}
@@ -113,6 +186,16 @@ export default function Home() {
           message="确定要删除这个技巧吗？删除后无法恢复。"
           onConfirm={() => { deleteTip(deleteId); setDeleteId(null) }}
           onCancel={() => setDeleteId(null)}
+        />
+      )}
+
+      {pendingImport && (
+        <ConfirmDialog
+          title="导入备份"
+          message={`导入将覆盖当前所有数据（${tips.length} 条技巧、${categories.length} 个分类、${tags.length} 个标签），且无法恢复。确定继续吗？`}
+          confirmText="覆盖并导入"
+          onConfirm={handleConfirmImport}
+          onCancel={() => setPendingImport(null)}
         />
       )}
     </div>

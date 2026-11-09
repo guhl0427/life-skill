@@ -1,13 +1,7 @@
 import { Link } from "react-router-dom"
-import { useApp } from "../context/AppContext"
-
-function formatDate(ts) {
-  const d = new Date(ts)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
-  return y + "/" + m + "/" + day
-}
+import { useApp } from "../context/useApp"
+import { formatDate } from "../utils/format"
+import { btnOutline, btnDanger, btnSm } from "./ui"
 
 function highlightText(text, query) {
   if (!query || !text) return text
@@ -18,7 +12,7 @@ function highlightText(text, query) {
   let idx = lower.indexOf(q)
   while (idx !== -1) {
     if (idx > last) parts.push(text.slice(last, idx))
-    parts.push(<mark key={idx} className="search-highlight">{text.slice(idx, idx + q.length)}</mark>)
+    parts.push(<mark key={idx} className="rounded-[3px] bg-accent/30 px-0.5 text-inherit">{text.slice(idx, idx + q.length)}</mark>)
     last = idx + q.length
     idx = lower.indexOf(q, last)
   }
@@ -27,9 +21,9 @@ function highlightText(text, query) {
 }
 
 export default function TipCard({ tip, search, showActions, onDelete }) {
-  const { categories, tags, toggleStar } = useApp()
-  const cat = categories.find((c) => c.id === tip.categoryId)
-  const tipTags = tags.filter((t) => tip.tagIds?.includes(t.id))
+  const { categoryMap, tagMap, toggleStar } = useApp()
+  const cat = categoryMap.get(tip.categoryId)
+  const tipTags = (tip.tagIds || []).map((id) => tagMap.get(id)).filter(Boolean)
 
   const handleStar = (e) => {
     e.preventDefault()
@@ -38,40 +32,61 @@ export default function TipCard({ tip, search, showActions, onDelete }) {
   }
 
   return (
-    <div className={"tip-card" + (tip.starred ? " starred" : "")}>
-      <div className="tip-card-header">
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
-          <button className="star-btn" onClick={handleStar}>
+    <div
+      className={
+        "tip-card group relative flex cursor-pointer flex-col gap-2.5 overflow-hidden rounded-sketch-lg border-2 bg-card p-5 shadow-ink transition-[transform,box-shadow,border-color] duration-[250ms] ease-spring hover:shadow-ink-hover max-[480px]:p-3.5 " +
+        (tip.starred ? "border-accent" : "border-line hover:border-primary")
+      }
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <button
+            className="shrink-0 text-lg leading-none transition-transform duration-200 hover:scale-125"
+            onClick={handleStar}
+            aria-label={tip.starred ? "取消收藏" : "收藏"}
+            aria-pressed={!!tip.starred}
+          >
             {tip.starred ? "⭐" : "☆"}
           </button>
           {cat && (
             <span
-              className="tip-card-category"
+              className="whitespace-nowrap rounded-sketch-sm px-2.5 py-0.5 text-xs"
               style={{ background: cat.color + "18", color: cat.color }}
             >
               {cat.emoji} {cat.name}
             </span>
           )}
         </div>
-        <span className="tip-card-date">{formatDate(tip.createdAt)}</span>
+        <span className="whitespace-nowrap font-hand text-[13px] text-ink-faint">
+          {formatDate(tip.createdAt)}
+        </span>
       </div>
-      <Link to={"/tips/" + tip.id} style={{ textDecoration: "none", color: "inherit" }}>
-        <h3 className="tip-card-title">{search ? highlightText(tip.title, search) : tip.title}</h3>
-        <p className="tip-card-excerpt">{search ? highlightText(tip.content, search) : tip.content}</p>
+      <Link to={"/tips/" + tip.id} className="text-inherit">
+        <h3 className="line-clamp-2 font-display text-lg leading-snug text-ink max-[480px]:text-base">
+          {search ? highlightText(tip.title, search) : tip.title}
+        </h3>
+        <p className="mt-1 line-clamp-3 flex-1 text-sm leading-relaxed text-ink-soft max-md:text-[13px] max-md:line-clamp-2">
+          {search ? highlightText(tip.content, search) : tip.content}
+        </p>
       </Link>
       {tipTags.length > 0 && (
-        <div className="tip-card-tags">
+        <div className="mt-1 flex flex-wrap gap-1.5">
           {tipTags.map((t) => (
-            <span key={t.id} className="tag">{t.name}</span>
+            <span
+              key={t.id}
+              className="rounded-sketch-sm border border-line-soft bg-paper-deep px-2.5 py-0.5 font-hand text-xs text-ink-soft"
+            >
+              {t.name}
+            </span>
           ))}
         </div>
       )}
       {showActions && (
-        <div className="tip-card-footer">
-          <Link to={"/tips/" + tip.id + "/edit"} className="btn btn-outline btn-sm">
+        <div className="tip-card-footer mt-1 flex justify-end gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <Link to={"/tips/" + tip.id + "/edit"} className={`${btnOutline} ${btnSm}`}>
             编辑
           </Link>
-          <button className="btn btn-danger btn-sm" onClick={() => onDelete?.(tip.id)}>
+          <button className={`${btnDanger} ${btnSm}`} onClick={() => onDelete?.(tip.id)}>
             删除
           </button>
         </div>
