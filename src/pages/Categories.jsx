@@ -48,6 +48,7 @@ export default function Categories() {
   const countByCat = useMemo(() => {
     const counts = new Map()
     for (const tip of tips) {
+      if (tip.deletedAt) continue
       if (tip.categoryId) counts.set(tip.categoryId, (counts.get(tip.categoryId) || 0) + 1)
     }
     return counts

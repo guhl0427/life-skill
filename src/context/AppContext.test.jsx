@@ -70,6 +70,66 @@ describe("AppProvider", () => {
     expect(created.updatedAt).toBeGreaterThan(0)
   })
 
+  it("删除为软删除，可恢复或永久删除", () => {
+    renderApp()
+
+    act(() => api.deleteTip("tip-1"))
+    expect(api.tips.find((t) => t.id === "tip-1").deletedAt).toBeGreaterThan(0)
+    expect(api.getTip("tip-1")).toBeUndefined()
+
+    act(() => api.restoreTip("tip-1"))
+    expect(api.tips.find((t) => t.id === "tip-1").deletedAt).toBeNull()
+    expect(api.getTip("tip-1")).toBeTruthy()
+
+    act(() => {
+      api.deleteTip("tip-1")
+      api.purgeTip("tip-1")
+    })
+    expect(api.tips.some((t) => t.id === "tip-1")).toBe(false)
+  })
+
+  it("清空回收站只移除已删除的技巧", () => {
+    renderApp()
+
+    act(() => {
+      api.deleteTip("tip-1")
+      api.deleteTip("tip-2")
+      api.emptyTrash()
+    })
+
+    expect(api.tips.some((t) => t.id === "tip-1")).toBe(false)
+    expect(api.tips.some((t) => t.id === "tip-2")).toBe(false)
+    expect(api.tips.some((t) => t.id === "tip-3")).toBe(true)
+  })
+
+  it("标记使用会累加次数且不改变更新时间", () => {
+    renderApp()
+    const before = api.tips.find((t) => t.id === "tip-1")
+
+    act(() => api.markUsed("tip-1"))
+
+    const after = api.tips.find((t) => t.id === "tip-1")
+    expect(after.usageCount).toBe((before.usageCount || 0) + 1)
+    expect(after.lastUsedAt).toBeGreaterThan(0)
+    expect(after.updatedAt).toBe(before.updatedAt)
+  })
+
+  it("新建分类与标签时返回带 id 的对象", () => {
+    renderApp()
+
+    let category
+    let tag
+    act(() => {
+      category = api.addCategory({ name: "返回测试分类", emoji: "📌", color: "#7EB8A0" })
+      tag = api.addTag({ name: "返回测试标签" })
+    })
+
+    expect(category.id).toBeTruthy()
+    expect(api.categories.some((c) => c.id === category.id)).toBe(true)
+    expect(tag.id).toBeTruthy()
+    expect(api.tags.some((t) => t.id === tag.id)).toBe(true)
+  })
+
   it("导入备份时整体替换三类数据", () => {
     renderApp()
 

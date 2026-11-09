@@ -14,7 +14,7 @@ function highlightText(text, query) {
   )
 }
 
-export default function TipCard({ tip, search, showActions, onDelete }) {
+export default function TipCard({ tip, search, showActions, onDelete, selectable, selected, onSelect }) {
   const { categoryMap, tagMap, toggleStar } = useApp()
   const cat = categoryMap.get(tip.categoryId)
   const tipTags = (tip.tagIds || []).map((id) => tagMap.get(id)).filter(Boolean)
@@ -29,11 +29,28 @@ export default function TipCard({ tip, search, showActions, onDelete }) {
     <div
       className={
         "tip-card group relative flex cursor-pointer flex-col gap-2.5 overflow-hidden rounded-sketch-lg border-2 bg-card p-5 shadow-ink transition-[transform,box-shadow,border-color] duration-[250ms] ease-spring hover:shadow-ink-hover max-[480px]:p-3.5 " +
-        (tip.starred ? "border-accent" : "border-line hover:border-primary")
+        (tip.starred ? "border-accent" : "border-line hover:border-primary") +
+        (selected ? " border-primary shadow-ink-hover" : "")
       }
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2">
+          {selectable && (
+            <button
+              type="button"
+              className={
+                "shrink-0 rounded border-2 px-1.5 py-0.5 text-xs leading-none transition-colors duration-200 " +
+                (selected
+                  ? "border-primary bg-primary text-white"
+                  : "border-line text-ink-faint hover:border-primary")
+              }
+              aria-label={(selected ? "取消选择 " : "选择 ") + tip.title}
+              aria-pressed={!!selected}
+              onClick={() => onSelect?.(tip.id)}
+            >
+              {selected ? "✓" : "○"}
+            </button>
+          )}
           <button
             className="shrink-0 text-lg leading-none transition-transform duration-200 hover:scale-125"
             onClick={handleStar}
@@ -56,6 +73,9 @@ export default function TipCard({ tip, search, showActions, onDelete }) {
           {tip.updatedAt > tip.createdAt && (
             <span className="ml-1">· 已编辑</span>
           )}
+          {tip.usageCount > 0 && (
+            <span className="ml-1">· 用过 {tip.usageCount} 次</span>
+          )}
         </span>
       </div>
       <Link to={"/tips/" + tip.id} className="text-inherit">
@@ -69,12 +89,13 @@ export default function TipCard({ tip, search, showActions, onDelete }) {
       {tipTags.length > 0 && (
         <div className="mt-1 flex flex-wrap gap-1.5">
           {tipTags.map((t) => (
-            <span
+            <Link
               key={t.id}
-              className="rounded-sketch-sm border border-line-soft bg-paper-deep px-2.5 py-0.5 font-hand text-xs text-ink-soft"
+              to={"/?tag=" + encodeURIComponent(t.id)}
+              className="rounded-sketch-sm border border-line-soft bg-paper-deep px-2.5 py-0.5 font-hand text-xs text-ink-soft transition-colors duration-200 hover:border-primary hover:text-primary"
             >
               {search ? highlightText(t.name, search) : t.name}
-            </span>
+            </Link>
           ))}
         </div>
       )}

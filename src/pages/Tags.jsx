@@ -18,6 +18,7 @@ export default function Tags() {
   const countByTag = useMemo(() => {
     const counts = new Map()
     for (const tip of tips) {
+      if (tip.deletedAt) continue
       for (const id of tip.tagIds || []) {
         counts.set(id, (counts.get(id) || 0) + 1)
       }
