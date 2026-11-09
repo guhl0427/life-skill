@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from "vitest"
+import { describe, expect, it, beforeEach, vi } from "vitest"
 import { act, renderHook } from "@testing-library/react"
 import { useLocalStorage } from "./useLocalStorage"
 
@@ -28,5 +28,24 @@ describe("useLocalStorage", () => {
     })
 
     expect(result.current[0]).toEqual([1, 2, 3])
+  })
+
+  it("同步其他标签页数据后广播通知事件", () => {
+    const onSync = vi.fn()
+    window.addEventListener("ls-storage-sync", onSync)
+    renderHook(() => useLocalStorage("ls_test", []))
+
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "ls_test",
+          newValue: JSON.stringify([1, 2, 3]),
+        })
+      )
+    })
+
+    expect(onSync).toHaveBeenCalledTimes(1)
+    expect(onSync.mock.calls[0][0].detail.key).toBe("ls_test")
+    window.removeEventListener("ls-storage-sync", onSync)
   })
 })

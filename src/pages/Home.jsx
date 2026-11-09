@@ -4,7 +4,14 @@ import { useApp } from "../context/useApp"
 import TipCard from "../components/TipCard"
 import FilterBar from "../components/FilterBar"
 import ConfirmDialog from "../components/ConfirmDialog"
-import { buildBackup, parseBackup } from "../utils/backup"
+import {
+  buildBackup,
+  parseBackup,
+  mergeBackup,
+  readSnapshot,
+  saveSnapshot,
+  SNAPSHOT_KEY,
+} from "../utils/backup"
 import { formatDate } from "../utils/format"
 import { matchesTip } from "../utils/search"
 import { btnOutline, btnSm, pageTitle, pageDesc } from "../components/ui"
@@ -20,6 +27,8 @@ export default function Home() {
   const sort = ["newest", "oldest", "title", "updated"].includes(sortParam) ? sortParam : "newest"
   const [deleteId, setDeleteId] = useState(null)
   const [pendingImport, setPendingImport] = useState(null)
+  const [pendingSource, setPendingSource] = useState("file")
+  const [hasSnapshot, setHasSnapshot] = useState(() => Boolean(localStorage.getItem(SNAPSHOT_KEY)))
   const [notice, setNotice] = useState("")
   const fileRef = useRef(null)
 
@@ -97,16 +106,41 @@ export default function Home() {
     e.target.value = ""
     if (!file) return
     try {
+      setPendingSource("file")
       setPendingImport(parseBackup(await file.text()))
     } catch (err) {
       setNotice("导入失败：" + err.message)
     }
   }
 
-  const handleConfirmImport = () => {
+  const handleSnapshotRestore = () => {
+    const snapshot = readSnapshot()
+    if (!snapshot) {
+      setHasSnapshot(false)
+      setNotice("没有可恢复的自动备份")
+      return
+    }
+    setPendingSource("snapshot")
+    setPendingImport(snapshot)
+  }
+
+  const handleConfirmImport = (mode = "overwrite") => {
     if (!pendingImport) return
-    importData(pendingImport)
-    setNotice(`已导入 ${pendingImport.tips.length} 条技巧，原有数据已被覆盖`)
+    const current = { tips, categories, tags }
+    const snapshotSaved = saveSnapshot(current)
+    if (snapshotSaved) setHasSnapshot(true)
+
+    const next = mode === "merge" ? mergeBackup(current, pendingImport) : pendingImport
+    importData(next)
+
+    const prefix = snapshotSaved ? "" : "自动备份失败。"
+    if (mode === "merge") {
+      setNotice(`${prefix}已合并导入 ${pendingImport.tips.length} 条技巧，当前共 ${next.tips.length} 条`)
+    } else if (pendingSource === "snapshot") {
+      setNotice(`${prefix}已恢复上次导入前的 ${next.tips.length} 条技巧`)
+    } else {
+      setNotice(`${prefix}已导入 ${pendingImport.tips.length} 条技巧，原有数据已被覆盖`)
+    }
     setPendingImport(null)
   }
 
@@ -139,6 +173,11 @@ export default function Home() {
         <button className={`${btnOutline} ${btnSm}`} onClick={() => fileRef.current?.click()}>
           ⬆️ 导入备份
         </button>
+        {hasSnapshot && (
+          <button className={`${btnOutline} ${btnSm}`} onClick={handleSnapshotRestore}>
+            ↩️ 恢复导入前备份
+          </button>
+        )}
         <input
           ref={fileRef}
           type="file"
@@ -198,10 +237,16 @@ export default function Home() {
 
       {pendingImport && (
         <ConfirmDialog
-          title="导入备份"
-          message={`导入将覆盖当前所有数据（${tips.length} 条技巧、${categories.length} 个分类、${tags.length} 个标签），且无法恢复。确定继续吗？`}
-          confirmText="覆盖并导入"
-          onConfirm={handleConfirmImport}
+          title={pendingSource === "snapshot" ? "恢复自动备份" : "导入备份"}
+          message={
+            pendingSource === "snapshot"
+              ? `将把当前数据恢复为上次导入前的 ${pendingImport.tips.length} 条技巧；当前数据会先另存为新的自动备份。`
+              : `当前数据（${tips.length} 条技巧、${categories.length} 个分类、${tags.length} 个标签）会先自动备份。覆盖导入会替换全部数据；合并导入会按 id 去重并保留更新时间较新的版本。`
+          }
+          confirmText={pendingSource === "snapshot" ? "恢复备份" : "覆盖并导入"}
+          secondaryText={pendingSource === "snapshot" ? undefined : "合并导入"}
+          onSecondary={pendingSource === "snapshot" ? undefined : () => handleConfirmImport("merge")}
+          onConfirm={() => handleConfirmImport("overwrite")}
           onCancel={() => setPendingImport(null)}
         />
       )}

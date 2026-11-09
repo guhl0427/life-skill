@@ -5,6 +5,8 @@ export default function ConfirmDialog({
   title,
   message,
   confirmText = "确认删除",
+  secondaryText,
+  onSecondary,
   onConfirm,
   onCancel,
 }) {
@@ -64,6 +66,11 @@ export default function ConfirmDialog({
           <button ref={cancelRef} className={`${btnOutline} max-md:w-full`} onClick={onCancel}>
             取消
           </button>
+          {secondaryText && (
+            <button className={`${btnOutline} max-md:w-full`} onClick={onSecondary}>
+              {secondaryText}
+            </button>
+          )}
           <button ref={confirmRef} className={`${btnDanger} max-md:w-full`} onClick={onConfirm}>
             {confirmText}
           </button>
