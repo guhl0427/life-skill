@@ -22,10 +22,13 @@ export default function Layout({ children }) {
   const tipsByCategory = useMemo(() => {
     const counts = new Map()
     for (const tip of tips) {
+      if (tip.deletedAt) continue
       if (tip.categoryId) counts.set(tip.categoryId, (counts.get(tip.categoryId) || 0) + 1)
     }
     return counts
   }, [tips])
+
+  const trashedCount = useMemo(() => tips.filter((t) => t.deletedAt).length, [tips])
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", dark ? "dark" : "")
@@ -138,6 +141,13 @@ export default function Layout({ children }) {
 
         <NavLink to="/tags" className={navClass} onClick={closeMenu}>
           <span className="text-lg">🏷️</span> 标签管理
+        </NavLink>
+
+        <NavLink to="/trash" className={navClass} onClick={closeMenu}>
+          <span className="text-lg">🗑️</span> 回收站
+          {trashedCount > 0 && (
+            <span className="ml-auto text-xs opacity-60">{trashedCount}</span>
+          )}
         </NavLink>
 
         <div className="mt-3 border-t-2 border-dashed border-line-soft pt-3">

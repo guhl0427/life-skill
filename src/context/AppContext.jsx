@@ -23,7 +23,15 @@ export function AppProvider({ children }) {
   const addTip = useCallback((tip) => {
     const now = Date.now()
     setTips((prev) => [
-      { ...tip, id: genId(), starred: false, createdAt: now, updatedAt: now },
+      {
+        ...tip,
+        id: genId(),
+        starred: false,
+        usageCount: 0,
+        lastUsedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      },
       ...prev,
     ])
   }, [setTips])
@@ -35,7 +43,23 @@ export function AppProvider({ children }) {
   }, [setTips])
 
   const deleteTip = useCallback((id) => {
+    setTips((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, deletedAt: Date.now() } : t))
+    )
+  }, [setTips])
+
+  const restoreTip = useCallback((id) => {
+    setTips((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, deletedAt: null } : t))
+    )
+  }, [setTips])
+
+  const purgeTip = useCallback((id) => {
     setTips((prev) => prev.filter((t) => t.id !== id))
+  }, [setTips])
+
+  const emptyTrash = useCallback(() => {
+    setTips((prev) => prev.filter((t) => !t.deletedAt))
   }, [setTips])
 
   const toggleStar = useCallback((id) => {
@@ -44,10 +68,25 @@ export function AppProvider({ children }) {
     )
   }, [setTips])
 
-  const getTip = useCallback((id) => tips.find((t) => t.id === id), [tips])
+  const markUsed = useCallback((id) => {
+    setTips((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? { ...t, usageCount: (t.usageCount || 0) + 1, lastUsedAt: Date.now() }
+          : t
+      )
+    )
+  }, [setTips])
+
+  const getTip = useCallback(
+    (id) => tips.find((t) => t.id === id && !t.deletedAt),
+    [tips]
+  )
 
   const addCategory = useCallback((cat) => {
-    setCategories((prev) => [...prev, { ...cat, id: genId() }])
+    const created = { ...cat, id: genId() }
+    setCategories((prev) => [...prev, created])
+    return created
   }, [setCategories])
 
   const updateCategory = useCallback((id, updates) => {
@@ -62,7 +101,9 @@ export function AppProvider({ children }) {
   }, [setCategories, setTips])
 
   const addTag = useCallback((tag) => {
-    setTags((prev) => [...prev, { ...tag, id: genId() }])
+    const created = { ...tag, id: genId() }
+    setTags((prev) => [...prev, created])
+    return created
   }, [setTags])
 
   const updateTag = useCallback((id, updates) => {
@@ -84,7 +125,8 @@ export function AppProvider({ children }) {
     <AppContext.Provider
       value={{
         tips, categories, tags, categoryMap, tagMap,
-        addTip, updateTip, deleteTip, getTip, toggleStar,
+        addTip, updateTip, deleteTip, restoreTip, purgeTip, emptyTrash,
+        getTip, toggleStar, markUsed,
         addCategory, updateCategory, deleteCategory,
         addTag, updateTag, deleteTag, importData,
       }}

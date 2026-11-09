@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import { formatDate } from "../utils/format"
 import { pageTitle, pageDesc } from "../components/ui"
@@ -7,15 +8,16 @@ export default function Stats() {
   const { tips, categories, tags } = useApp()
 
   const stats = useMemo(() => {
-    const total = tips.length
-    const starred = tips.filter((t) => t.starred).length
+    const active = tips.filter((t) => !t.deletedAt)
+    const total = active.length
+    const starred = active.filter((t) => t.starred).length
 
     const catCount = new Map()
     const tagCount = new Map()
     const categoryIds = new Set(categories.map((cat) => cat.id))
     let uncategorized = 0
 
-    for (const tip of tips) {
+    for (const tip of active) {
       if (tip.categoryId && categoryIds.has(tip.categoryId)) {
         catCount.set(tip.categoryId, (catCount.get(tip.categoryId) || 0) + 1)
       } else {
@@ -48,11 +50,17 @@ export default function Stats() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
 
-    const newest = tips.length > 0
-      ? tips.reduce((a, b) => (a.createdAt > b.createdAt ? a : b))
+    const newest = active.length > 0
+      ? active.reduce((a, b) => (a.createdAt > b.createdAt ? a : b))
       : null
 
-    return { total, starred, usedCats, unusedCats, uncategorizedStat, tagCounts, newest }
+    const untagged = active.filter((t) => !(t.tagIds || []).length).length
+    const trashedCount = tips.filter((t) => t.deletedAt).length
+
+    return {
+      total, starred, usedCats, unusedCats, uncategorizedStat,
+      tagCounts, newest, untagged, trashedCount,
+    }
   }, [tips, categories, tags])
 
   if (stats.total === 0) {
@@ -155,6 +163,38 @@ export default function Stats() {
           </div>
         </>
       )}
+
+      <h2 className="mb-4 font-display text-lg text-ink">数据健康</h2>
+      <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
+        <Link
+          to="/?cat=__none__"
+          className="flex items-center justify-between gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
+        >
+          <span className="font-hand text-[13px] text-ink-soft">📥 未分类技巧</span>
+          <span className="font-display text-lg text-primary">{stats.uncategorizedStat.count}</span>
+        </Link>
+        <Link
+          to="/?untagged=1"
+          className="flex items-center justify-between gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
+        >
+          <span className="font-hand text-[13px] text-ink-soft">🏷️ 无标签技巧</span>
+          <span className="font-display text-lg text-primary">{stats.untagged}</span>
+        </Link>
+        <Link
+          to="/categories"
+          className="flex items-center justify-between gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
+        >
+          <span className="font-hand text-[13px] text-ink-soft">📋 空分类</span>
+          <span className="font-display text-lg text-primary">{stats.unusedCats.length}</span>
+        </Link>
+        <Link
+          to="/trash"
+          className="flex items-center justify-between gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
+        >
+          <span className="font-hand text-[13px] text-ink-soft">🗑️ 回收站</span>
+          <span className="font-display text-lg text-primary">{stats.trashedCount}</span>
+        </Link>
+      </div>
 
       {stats.newest && (
         <div className="rounded-sketch border border-dashed border-line-soft bg-paper-deep p-4 text-center font-hand text-[13px] text-ink-soft">

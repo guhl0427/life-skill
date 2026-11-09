@@ -38,6 +38,31 @@ describe("parseBackup", () => {
     expect(result.categories[0].color).toBeTruthy()
   })
 
+  it("保留使用记录、步骤与回收站状态", () => {
+    const result = parseBackup(
+      JSON.stringify({
+        tips: [
+          {
+            id: "tip-1",
+            title: "标题",
+            content: "内容",
+            steps: ["第一步", " ", "第二步"],
+            usageCount: 3,
+            lastUsedAt: 1234,
+            deletedAt: 5678,
+          },
+        ],
+        categories: [],
+        tags: [],
+      })
+    )
+
+    expect(result.tips[0].steps).toEqual(["第一步", "第二步"])
+    expect(result.tips[0].usageCount).toBe(3)
+    expect(result.tips[0].lastUsedAt).toBe(1234)
+    expect(result.tips[0].deletedAt).toBe(5678)
+  })
+
   it("拒绝非法内容", () => {
     expect(() => parseBackup("not json")).toThrow("合法的 JSON")
     expect(() => parseBackup(JSON.stringify({ tips: [] }))).toThrow("格式不正确")

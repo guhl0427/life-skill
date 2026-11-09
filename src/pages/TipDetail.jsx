@@ -3,11 +3,11 @@ import { useParams, useNavigate, Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import ConfirmDialog from "../components/ConfirmDialog"
 import { formatDate, formatDateTime } from "../utils/format"
-import { btnPrimary, btnOutline, btnDanger, backLink } from "../components/ui"
+import { btnPrimary, btnOutline, btnDanger, btnSm, backLink } from "../components/ui"
 
 export default function TipDetail() {
   const { id } = useParams()
-  const { getTip, categoryMap, tagMap, toggleStar, deleteTip } = useApp()
+  const { tips, getTip, categoryMap, tagMap, toggleStar, deleteTip, markUsed } = useApp()
   const navigate = useNavigate()
   const [showDelete, setShowDelete] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -29,9 +29,25 @@ export default function TipDetail() {
   const cat = categoryMap.get(tip.categoryId)
   const tipTags = (tip.tagIds || []).map((tid) => tagMap.get(tid)).filter(Boolean)
 
+  const activeTips = tips.filter((t) => !t.deletedAt)
+  const currentIndex = activeTips.findIndex((t) => t.id === tip.id)
+  const prevTip = currentIndex > 0 ? activeTips[currentIndex - 1] : null
+  const nextTip =
+    currentIndex >= 0 && currentIndex < activeTips.length - 1
+      ? activeTips[currentIndex + 1]
+      : null
+  const tipTagIds = new Set(tip.tagIds || [])
+  const related = activeTips
+    .filter((other) => {
+      if (other.id === tip.id) return false
+      if (tip.categoryId && other.categoryId === tip.categoryId) return true
+      return (other.tagIds || []).some((tagId) => tipTagIds.has(tagId))
+    })
+    .slice(0, 3)
+
   const handleDelete = () => {
     deleteTip(id)
-    navigate("/")
+    navigate("/", { state: { deletedId: id } })
   }
 
   const handleCopy = async () => {
@@ -40,6 +56,11 @@ export default function TipDetail() {
     parts.push(tip.title)
     parts.push("")
     parts.push(tip.content)
+    if (tip.steps?.length > 0) {
+      parts.push("")
+      parts.push("步骤：")
+      tip.steps.forEach((step, index) => parts.push(`${index + 1}. ${step}`))
+    }
     if (tipTags.length > 0) {
       parts.push("")
       parts.push("标签: " + tipTags.map((t) => "#" + t.name).join(" "))
@@ -91,15 +112,43 @@ export default function TipDetail() {
         {tip.content}
       </div>
 
+      {tip.steps?.length > 0 && (
+        <ol className="mt-5 flex flex-col gap-2.5">
+          {tip.steps.map((step, index) => (
+            <li
+              key={index}
+              className="flex gap-3 rounded-sketch border-2 border-line bg-card p-4 shadow-ink max-[480px]:p-2.5"
+            >
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-white">
+                {index + 1}
+              </span>
+              <span className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink">{step}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button className={`${btnOutline} ${btnSm}`} onClick={() => markUsed(id)}>
+          ✅ 今天用到了
+        </button>
+        <span className="font-hand text-sm text-ink-soft">
+          {tip.usageCount
+            ? `已使用 ${tip.usageCount} 次${tip.lastUsedAt ? " · 最近 " + formatDate(tip.lastUsedAt) : ""}`
+            : "还没有使用记录"}
+        </span>
+      </div>
+
       {tipTags.length > 0 && (
         <div className="mt-5 flex flex-wrap gap-2">
           {tipTags.map((t) => (
-            <span
+            <Link
               key={t.id}
-              className="rounded-sketch-sm border border-line-soft bg-paper-deep px-3.5 py-1 font-hand text-[13px] text-ink-soft"
+              to={"/?tag=" + encodeURIComponent(t.id)}
+              className="rounded-sketch-sm border border-line-soft bg-paper-deep px-3.5 py-1 font-hand text-[13px] text-ink-soft transition-colors duration-200 hover:border-primary hover:text-primary"
             >
               {t.name}
-            </span>
+            </Link>
           ))}
         </div>
       )}
@@ -116,10 +165,44 @@ export default function TipDetail() {
         </button>
       </div>
 
+      {related.length > 0 && (
+        <div className="mt-8">
+          <h2 className="mb-3 font-display text-lg text-ink">相关技巧</h2>
+          <div className="flex flex-col gap-2">
+            {related.map((item) => (
+              <Link
+                key={item.id}
+                to={"/tips/" + item.id}
+                className="rounded-sketch border-2 border-line bg-card px-4 py-3 text-sm text-ink-soft shadow-ink transition-colors duration-200 hover:border-primary hover:text-primary"
+              >
+                {item.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(prevTip || nextTip) && (
+        <div className="mt-8 flex items-center justify-between gap-3 border-t-2 border-dashed border-line-soft pt-5 text-sm">
+          {prevTip ? (
+            <Link to={"/tips/" + prevTip.id} className="max-w-[48%] truncate text-ink-soft transition-colors hover:text-primary">
+              ← {prevTip.title}
+            </Link>
+          ) : (
+            <span />
+          )}
+          {nextTip && (
+            <Link to={"/tips/" + nextTip.id} className="max-w-[48%] truncate text-right text-ink-soft transition-colors hover:text-primary">
+              {nextTip.title} →
+            </Link>
+          )}
+        </div>
+      )}
+
       {showDelete && (
         <ConfirmDialog
           title="删除技巧"
-          message="确定要删除这个技巧吗？删除后无法恢复。"
+          message="删除后会移入回收站，可在回收站恢复或永久删除。"
           onConfirm={handleDelete}
           onCancel={() => setShowDelete(false)}
         />

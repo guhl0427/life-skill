@@ -96,7 +96,13 @@ export function parseBackup(raw) {
       content: asString(t.content),
       categoryId: categoryIds.has(t.categoryId) ? t.categoryId : null,
       tagIds: Array.isArray(t.tagIds) ? t.tagIds.filter((id) => tagIds.has(id)) : [],
+      steps: Array.isArray(t.steps)
+        ? t.steps.filter((s) => typeof s === "string" && s.trim()).map((s) => s.trim())
+        : [],
       starred: Boolean(t.starred),
+      usageCount: Number.isFinite(t.usageCount) ? t.usageCount : 0,
+      lastUsedAt: Number.isFinite(t.lastUsedAt) ? t.lastUsedAt : null,
+      deletedAt: Number.isFinite(t.deletedAt) ? t.deletedAt : null,
       createdAt: Number.isFinite(t.createdAt) ? t.createdAt : now,
       updatedAt: Number.isFinite(t.updatedAt) ? t.updatedAt : now,
     }))
