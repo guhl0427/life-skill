@@ -11,15 +11,28 @@ beforeEach(() => {
   vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {})
 })
 
-function renderHome() {
+function renderHome(initialEntries = ["/"]) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <AppProvider>
         <Home />
       </AppProvider>
     </MemoryRouter>
   )
 }
+
+describe("Home 筛选", () => {
+  it("点击全部时同时清除分类和收藏筛选", () => {
+    renderHome(["/?cat=cat-1&starred=1"])
+
+    expect(screen.getByText("柠檬除水垢")).toBeInTheDocument()
+    expect(screen.queryByText("香蕉保鲜法")).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "全部" }))
+
+    expect(screen.getByText("香蕉保鲜法")).toBeInTheDocument()
+  })
+})
 
 describe("Home 备份入口", () => {
   it("点击导出后生成备份文件并提示结果", async () => {

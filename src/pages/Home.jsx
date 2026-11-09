@@ -64,6 +64,13 @@ export default function Home() {
     setSearchParams(params)
   }
 
+  const handleResetFilters = () => {
+    const params = new URLSearchParams(searchParams)
+    params.delete("cat")
+    params.delete("starred")
+    setSearchParams(params)
+  }
+
   const handleSortChange = (value) => {
     const params = new URLSearchParams(searchParams)
     if (value === "newest") params.delete("sort")
@@ -118,6 +125,7 @@ export default function Home() {
         onCatChange={handleCatChange}
         activeStarred={activeStarred}
         onStarredChange={handleStarredChange}
+        onReset={handleResetFilters}
         sort={sort}
         onSortChange={handleSortChange}
       />
