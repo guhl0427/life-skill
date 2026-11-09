@@ -69,4 +69,14 @@ describe("AppProvider", () => {
     expect(created.createdAt).toBeGreaterThan(0)
     expect(created.updatedAt).toBeGreaterThan(0)
   })
+
+  it("导入备份时整体替换三类数据", () => {
+    renderApp()
+
+    act(() => api.importData({ tips: [], categories: [], tags: [] }))
+
+    expect(api.tips).toEqual([])
+    expect(api.categories).toEqual([])
+    expect(api.tags).toEqual([])
+  })
 })

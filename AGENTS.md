@@ -17,8 +17,8 @@ No type checker. CI (`.github/workflows/ci.yml`) runs lint + test + build on Nod
 
 - **JSX only** — `.jsx` extension, no TypeScript, no type checking
 - **React Context** — a single `AppProvider` holds all state (tips, categories, tags); `useApp` lives in `src/context/useApp.js` so the provider file stays fast-refresh friendly
-- **localStorage** — `useLocalStorage` hook auto-syncs on state change; keys prefixed `ls_`; write failures dispatch a `ls-storage-error` event that Layout renders as a banner
-- **Routing** — `react-router-dom` v7 with 7 flat routes; search/filter/sort via `URLSearchParams`
+- **localStorage** — `useLocalStorage` hook auto-syncs on state change; keys prefixed `ls_`; listens to `storage` events so multiple tabs stay in sync; write failures dispatch a `ls-storage-error` event that Layout renders as a banner
+- **Routing** — `react-router-dom` v7 with 8 flat routes; search/filter/sort via `URLSearchParams`
 - **Tailwind CSS 4** — set up through `@tailwindcss/vite`; design tokens in `index.css` via `@theme inline`, dark mode via `data-theme="dark"`
 
 ## Data model (src/data/seed.js)
@@ -50,10 +50,11 @@ src/
 │   ├── AppContext.jsx        # AppProvider, all CRUD methods, categoryMap/tagMap
 │   └── AppContext.test.jsx
 ├── components/               # Layout, TipCard, TipForm, FilterBar, ConfirmDialog, ui.js
-├── pages/                    # Home, NewTip, EditTip, TipDetail, Categories, Tags, Stats
+├── pages/                    # Home, NewTip, EditTip, TipDetail, Categories, Tags, Stats, NotFound
 ├── data/seed.js              # initial seed data
-├── hooks/useLocalStorage.js  # persistence hook
+├── hooks/useLocalStorage.js  # persistence + cross-tab sync hook
 ├── utils/format.js           # formatDate / formatDateTime
+├── utils/backup.js           # buildBackup / parseBackup validation
 ├── test/setup.js             # jest-dom matchers
 ├── index.css                 # Tailwind entry + theme + hand-drawn effects
 ├── App.jsx                   # route definitions
@@ -71,6 +72,7 @@ src/
 | `/categories` | Categories | Inline edit mode; duplicate names rejected; delete cascades categoryId→null on tips |
 | `/tags` | Tags | Inline edit mode; duplicate names rejected; delete removes tagId from all tips' tagIds |
 | `/stats` | Stats | Totals, per-category bars, top 5 tags |
+| `*` | NotFound | Fallback for unknown paths |
 
 ## Notable quirks
 
@@ -80,3 +82,5 @@ src/
 - Random card rotation uses `:nth-child(3n|5n|7n)` pseudo-selectors in `index.css`
 - Dark mode is applied by an inline script in `index.html` before React mounts to avoid a flash
 - `selected`/`active` states are passed as `aria-pressed`, and clickable chips/tags are real `<button>` elements
+- Backup export/import lives on Home (`utils/backup.js`); import replaces all data after confirmation
+- Static hosting needs an SPA fallback: `vercel.json` and `public/_redirects` cover Vercel and Netlify

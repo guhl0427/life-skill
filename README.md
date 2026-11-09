@@ -14,7 +14,8 @@
 - **统计看板 📊** — 总技巧数、分类分布柱状图、最常用标签 Top 5
 - **暗色模式 🌙** — 侧边栏一键切换，设置持久化到 localStorage
 - **手绘风格** — ZCOOL KuaiLe 字体，随机卡片旋转，SVG 毛边滤镜
-- **数据持久化** — 所有数据自动同步到 localStorage
+- **数据持久化** — 所有数据自动同步到 localStorage，多标签页实时同步
+- **导入 / 导出备份** — 首页一键导出 JSON 备份，导入时校验格式并二次确认
 
 ## 技术栈
 
@@ -41,10 +42,11 @@ npm test         # Vitest 单元测试
 src/
 ├── context/                  # AppProvider（全局状态）+ useApp + context 对象
 ├── components/               # Layout, TipCard, TipForm, FilterBar, ConfirmDialog, ui.js（共享类名）
-├── pages/                    # Home, NewTip, EditTip, TipDetail, Categories, Tags, Stats
+├── pages/                    # Home, NewTip, EditTip, TipDetail, Categories, Tags, Stats, NotFound
 ├── data/seed.js              # 初始种子数据（6 条技巧、5 个分类、6 个标签）
-├── hooks/useLocalStorage.js  # localStorage 同步 Hook
+├── hooks/useLocalStorage.js  # localStorage 同步 Hook（含跨标签页 storage 事件）
 ├── utils/format.js           # 日期格式化工具
+├── utils/backup.js           # 备份导出 / 解析校验
 ├── test/setup.js             # Vitest 环境初始化
 ├── index.css                 # Tailwind 入口 + 主题变量 + 手绘效果
 ├── App.jsx                   # 路由定义
@@ -60,3 +62,13 @@ src/
 | Tag | id, name | `ls_tags` |
 
 所有数据存储在浏览器 localStorage 中，首次访问自动加载种子数据。
+
+## 部署
+
+应用使用 `BrowserRouter`，静态托管需要把未知路径回退到 `index.html`，否则直接访问
+`/tips/:id` 或刷新页面会 404。仓库已内置：
+
+- `vercel.json` — Vercel 的 rewrite 规则
+- `public/_redirects` — Netlify 的 rewrite 规则（构建时复制到 `dist/`）
+
+其他平台请配置等价的 SPA fallback 规则。

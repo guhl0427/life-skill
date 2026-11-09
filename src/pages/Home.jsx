@@ -1,13 +1,15 @@
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect, useRef } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import TipCard from "../components/TipCard"
 import FilterBar from "../components/FilterBar"
 import ConfirmDialog from "../components/ConfirmDialog"
+import { buildBackup, parseBackup } from "../utils/backup"
+import { formatDate } from "../utils/format"
 import { btnOutline, btnSm, pageTitle, pageDesc } from "../components/ui"
 
 export default function Home() {
-  const { tips, deleteTip } = useApp()
+  const { tips, categories, tags, deleteTip, importData } = useApp()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeCat = searchParams.get("cat") || ""
@@ -16,6 +18,15 @@ export default function Home() {
   const sortParam = searchParams.get("sort")
   const sort = ["newest", "oldest", "title"].includes(sortParam) ? sortParam : "newest"
   const [deleteId, setDeleteId] = useState(null)
+  const [pendingImport, setPendingImport] = useState(null)
+  const [notice, setNotice] = useState("")
+  const fileRef = useRef(null)
+
+  useEffect(() => {
+    if (!notice) return
+    const timer = setTimeout(() => setNotice(""), 4000)
+    return () => clearTimeout(timer)
+  }, [notice])
 
   const filtered = useMemo(() => {
     let result = [...tips]
@@ -60,6 +71,39 @@ export default function Home() {
     setSearchParams(params)
   }
 
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(buildBackup({ tips, categories, tags }), null, 2)], {
+      type: "application/json",
+    })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "lifeskill-" + formatDate(Date.now()).replaceAll("/", "-") + ".json"
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 0)
+    setNotice(`已导出 ${tips.length} 条技巧、${categories.length} 个分类、${tags.length} 个标签`)
+  }
+
+  const handleImportFile = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file) return
+    try {
+      setPendingImport(parseBackup(await file.text()))
+    } catch (err) {
+      setNotice("导入失败：" + err.message)
+    }
+  }
+
+  const handleConfirmImport = () => {
+    if (!pendingImport) return
+    importData(pendingImport)
+    setNotice(`已导入 ${pendingImport.tips.length} 条技巧，原有数据已被覆盖`)
+    setPendingImport(null)
+  }
+
   return (
     <div>
       <h1 className={pageTitle}>
@@ -78,11 +122,33 @@ export default function Home() {
         onSortChange={handleSortChange}
       />
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
         <button className={`${btnOutline} ${btnSm}`} onClick={handleRandom}>
           🎲 随机一条
         </button>
+        <button className={`${btnOutline} ${btnSm}`} onClick={handleExport}>
+          ⬇️ 导出备份
+        </button>
+        <button className={`${btnOutline} ${btnSm}`} onClick={() => fileRef.current?.click()}>
+          ⬆️ 导入备份
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={handleImportFile}
+        />
       </div>
+
+      {notice && (
+        <div
+          role="status"
+          className="mb-4 rounded-sketch border-2 border-primary bg-primary-light px-4 py-2.5 text-sm text-ink"
+        >
+          {notice}
+        </div>
+      )}
 
       {search && (
         <div className="mb-4 text-sm text-ink-soft">
@@ -120,6 +186,16 @@ export default function Home() {
           message="确定要删除这个技巧吗？删除后无法恢复。"
           onConfirm={() => { deleteTip(deleteId); setDeleteId(null) }}
           onCancel={() => setDeleteId(null)}
+        />
+      )}
+
+      {pendingImport && (
+        <ConfirmDialog
+          title="导入备份"
+          message={`导入将覆盖当前所有数据（${tips.length} 条技巧、${categories.length} 个分类、${tags.length} 个标签），且无法恢复。确定继续吗？`}
+          confirmText="覆盖并导入"
+          onConfirm={handleConfirmImport}
+          onCancel={() => setPendingImport(null)}
         />
       )}
     </div>

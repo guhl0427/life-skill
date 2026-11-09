@@ -74,13 +74,19 @@ export function AppProvider({ children }) {
     setTips((prev) => prev.map((t) => ({ ...t, tagIds: t.tagIds.filter((tid) => tid !== id) })))
   }, [setTags, setTips])
 
+  const importData = useCallback(({ tips: nextTips, categories: nextCategories, tags: nextTags }) => {
+    setTips(nextTips)
+    setCategories(nextCategories)
+    setTags(nextTags)
+  }, [setTips, setCategories, setTags])
+
   return (
     <AppContext.Provider
       value={{
         tips, categories, tags, categoryMap, tagMap,
         addTip, updateTip, deleteTip, getTip, toggleStar,
         addCategory, updateCategory, deleteCategory,
-        addTag, updateTag, deleteTag,
+        addTag, updateTag, deleteTag, importData,
       }}
     >
       {children}
