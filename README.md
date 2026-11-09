@@ -21,7 +21,8 @@
 - **React 19** — 函数组件 + Hooks
 - **react-router-dom v7** — 声明式路由，URL 驱动筛选
 - **Vite** — 构建工具
-- **纯 CSS** — 无 UI 框架，全部手写样式 + CSS 变量换肤
+- **Tailwind CSS 4** — 工具类 + `@theme` 设计令牌；手绘效果保留在 `index.css` 的 `@layer components`
+- **Vitest + Testing Library** — 单元测试
 
 ## 快速开始
 
@@ -31,18 +32,21 @@ npm run dev      # http://localhost:5173
 npm run build    # 生产构建到 dist/
 npm run preview  # 预览生产构建
 npm run lint     # ESLint 检查
+npm test         # Vitest 单元测试
 ```
 
 ## 项目结构
 
 ```
 src/
-├── context/AppContext.jsx    # 全局状态，所有 CRUD 方法
-├── components/               # Layout, TipCard, TipForm, FilterBar, ConfirmDialog
+├── context/                  # AppProvider（全局状态）+ useApp + context 对象
+├── components/               # Layout, TipCard, TipForm, FilterBar, ConfirmDialog, ui.js（共享类名）
 ├── pages/                    # Home, NewTip, EditTip, TipDetail, Categories, Tags, Stats
 ├── data/seed.js              # 初始种子数据（6 条技巧、5 个分类、6 个标签）
 ├── hooks/useLocalStorage.js  # localStorage 同步 Hook
-├── index.css                 # 全部样式
+├── utils/format.js           # 日期格式化工具
+├── test/setup.js             # Vitest 环境初始化
+├── index.css                 # Tailwind 入口 + 主题变量 + 手绘效果
 ├── App.jsx                   # 路由定义
 └── main.jsx                  # 入口
 ```

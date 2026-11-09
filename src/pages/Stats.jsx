@@ -1,13 +1,7 @@
 import { useMemo } from "react"
-import { useApp } from "../context/AppContext"
-
-function formatDate(ts) {
-  const d = new Date(ts)
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
-  return y + "/" + m + "/" + day
-}
+import { useApp } from "../context/useApp"
+import { formatDate } from "../utils/format"
+import { pageTitle, pageDesc } from "../components/ui"
 
 export default function Stats() {
   const { tips, categories, tags } = useApp()
@@ -16,9 +10,16 @@ export default function Stats() {
     const total = tips.length
     const starred = tips.filter((t) => t.starred).length
 
+    const catCount = new Map()
+    const tagCount = new Map()
+    for (const tip of tips) {
+      if (tip.categoryId) catCount.set(tip.categoryId, (catCount.get(tip.categoryId) || 0) + 1)
+      for (const id of tip.tagIds || []) tagCount.set(id, (tagCount.get(id) || 0) + 1)
+    }
+
     const catCounts = categories
       .map((cat) => {
-        const count = tips.filter((t) => t.categoryId === cat.id).length
+        const count = catCount.get(cat.id) || 0
         return {
           ...cat,
           count,
@@ -28,10 +29,7 @@ export default function Stats() {
       .sort((a, b) => b.count - a.count)
 
     const tagCounts = tags
-      .map((tag) => ({
-        ...tag,
-        count: tips.filter((t) => t.tagIds?.includes(tag.id)).length,
-      }))
+      .map((tag) => ({ ...tag, count: tagCount.get(tag.id) || 0 }))
       .filter((t) => t.count > 0)
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
@@ -46,12 +44,12 @@ export default function Stats() {
   if (stats.total === 0) {
     return (
       <div>
-        <h1 className="page-title"><span className="hand-underline">统计看板</span></h1>
-        <p className="page-desc">你的生活技巧库数据概览</p>
-        <div className="empty-state">
-          <div className="icon">📊</div>
-          <h3>还没有技巧</h3>
-          <p>添加一些技巧后再来看看统计数据吧</p>
+        <h1 className={pageTitle}><span className="hand-underline">统计看板</span></h1>
+        <p className={pageDesc}>你的生活技巧库数据概览</p>
+        <div className="px-5 py-16 text-center">
+          <div className="mb-3 text-5xl">📊</div>
+          <h3 className="mb-2 font-display text-xl text-ink">还没有技巧</h3>
+          <p className="text-sm text-ink-soft">添加一些技巧后再来看看统计数据吧</p>
         </div>
       </div>
     )
@@ -59,39 +57,39 @@ export default function Stats() {
 
   return (
     <div>
-      <h1 className="page-title"><span className="hand-underline">统计看板</span></h1>
-      <p className="page-desc">你的生活技巧库数据概览</p>
+      <h1 className={pageTitle}><span className="hand-underline">统计看板</span></h1>
+      <p className={pageDesc}>你的生活技巧库数据概览</p>
 
-      <div className="stats-grid">
-        <div className="stats-card">
-          <div className="stats-num">{stats.total}</div>
-          <div className="stats-label">总技巧数</div>
+      <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 max-[480px]:grid-cols-2">
+        <div className="rounded-sketch-lg border-2 border-line bg-card p-5 text-center shadow-ink">
+          <div className="font-display text-4xl leading-tight text-primary max-[480px]:text-[28px]">{stats.total}</div>
+          <div className="mt-1 font-hand text-[13px] text-ink-soft">总技巧数</div>
         </div>
-        <div className="stats-card">
-          <div className="stats-num">{categories.length}</div>
-          <div className="stats-label">分类数</div>
+        <div className="rounded-sketch-lg border-2 border-line bg-card p-5 text-center shadow-ink">
+          <div className="font-display text-4xl leading-tight text-primary max-[480px]:text-[28px]">{categories.length}</div>
+          <div className="mt-1 font-hand text-[13px] text-ink-soft">分类数</div>
         </div>
-        <div className="stats-card">
-          <div className="stats-num">{tags.length}</div>
-          <div className="stats-label">标签数</div>
+        <div className="rounded-sketch-lg border-2 border-line bg-card p-5 text-center shadow-ink">
+          <div className="font-display text-4xl leading-tight text-primary max-[480px]:text-[28px]">{tags.length}</div>
+          <div className="mt-1 font-hand text-[13px] text-ink-soft">标签数</div>
         </div>
-        <div className="stats-card">
-          <div className="stats-num">{stats.starred}</div>
-          <div className="stats-label">已收藏</div>
+        <div className="rounded-sketch-lg border-2 border-line bg-card p-5 text-center shadow-ink">
+          <div className="font-display text-4xl leading-tight text-primary max-[480px]:text-[28px]">{stats.starred}</div>
+          <div className="mt-1 font-hand text-[13px] text-ink-soft">已收藏</div>
         </div>
       </div>
 
-      <h2 className="stats-section-title">分类分布</h2>
-      <div className="stats-bar-list">
+      <h2 className="mb-4 font-display text-lg text-ink">分类分布</h2>
+      <div className="mb-8 flex flex-col gap-3">
         {stats.catCounts.map((cat) => (
-          <div key={cat.id} className="stats-bar-item">
-            <div className="stats-bar-head">
-              <span className="stats-bar-label">{cat.emoji} {cat.name}</span>
-              <span className="stats-bar-num">{cat.count} / {stats.total}</span>
+          <div key={cat.id} className="py-1">
+            <div className="mb-1.5 flex justify-between text-sm">
+              <span className="font-display">{cat.emoji} {cat.name}</span>
+              <span className="text-[13px] text-ink-soft">{cat.count} / {stats.total}</span>
             </div>
-            <div className="stats-bar-track">
+            <div className="h-2 overflow-hidden rounded border border-line-soft bg-paper-deep">
               <div
-                className="stats-bar-fill"
+                className="h-full min-w-1 rounded transition-[width] duration-[600ms] ease-spring"
                 style={{ width: cat.percentage + "%", background: cat.color }}
               />
             </div>
@@ -101,12 +99,15 @@ export default function Stats() {
 
       {stats.tagCounts.length > 0 && (
         <>
-          <h2 className="stats-section-title">最常用标签 Top 5</h2>
-          <div className="stats-tags">
+          <h2 className="mb-4 font-display text-lg text-ink">最常用标签 Top 5</h2>
+          <div className="mb-8 flex flex-wrap gap-2.5">
             {stats.tagCounts.map((tag) => (
-              <span key={tag.id} className="stats-tag">
+              <span
+                key={tag.id}
+                className="flex items-center gap-2 rounded-sketch border border-line-soft bg-paper-deep px-3.5 py-1.5 font-hand text-[15px]"
+              >
                 {tag.name}
-                <span className="stats-tag-count">{tag.count}</span>
+                <span className="rounded-md bg-card px-2 text-xs text-ink-faint">{tag.count}</span>
               </span>
             ))}
           </div>
@@ -114,7 +115,7 @@ export default function Stats() {
       )}
 
       {stats.newest && (
-        <div className="stats-footer">
+        <div className="rounded-sketch border border-dashed border-line-soft bg-paper-deep p-4 text-center font-hand text-[13px] text-ink-soft">
           最新技巧：「{stats.newest.title}」— {formatDate(stats.newest.createdAt)}
         </div>
       )}

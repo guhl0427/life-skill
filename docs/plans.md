@@ -13,7 +13,8 @@
 | 状态管理 | React Context |
 | 数据持久化 | localStorage |
 | 字体 | ZCOOL KuaiLe（中文手绘）+ Caveat（英文手写） |
-| 样式方案 | 纯 CSS + CSS Variables |
+| 样式方案 | Tailwind CSS 4（`@theme` 设计令牌 + 工具类），手绘效果保留自定义 CSS |
+| 测试 | Vitest + Testing Library + jsdom |
 
 ## 数据模型
 

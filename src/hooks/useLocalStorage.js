@@ -15,6 +15,7 @@ export function useLocalStorage(key, initialValue) {
       localStorage.setItem(key, JSON.stringify(value))
     } catch (e) {
       console.error(`localStorage error [${key}]:`, e)
+      window.dispatchEvent(new CustomEvent("ls-storage-error", { detail: { key } }))
     }
   }, [key, value])
 

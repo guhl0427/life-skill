@@ -1,4 +1,5 @@
-import { createContext, useContext, useCallback } from "react"
+import { useMemo, useCallback } from "react"
+import { AppContext } from "./app-context"
 import { useLocalStorage } from "../hooks/useLocalStorage"
 import { seedCategories, seedTags, seedTips } from "../data/seed"
 
@@ -8,12 +9,16 @@ function genId() {
   return "id-" + Date.now().toString(36) + "-" + _id
 }
 
-const AppContext = createContext(null)
-
 export function AppProvider({ children }) {
   const [tips, setTips] = useLocalStorage("ls_tips", seedTips)
   const [categories, setCategories] = useLocalStorage("ls_categories", seedCategories)
   const [tags, setTags] = useLocalStorage("ls_tags", seedTags)
+
+  const categoryMap = useMemo(
+    () => new Map(categories.map((c) => [c.id, c])),
+    [categories]
+  )
+  const tagMap = useMemo(() => new Map(tags.map((t) => [t.id, t])), [tags])
 
   const addTip = useCallback((tip) => {
     const now = Date.now()
@@ -72,7 +77,7 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider
       value={{
-        tips, categories, tags,
+        tips, categories, tags, categoryMap, tagMap,
         addTip, updateTip, deleteTip, getTip, toggleStar,
         addCategory, updateCategory, deleteCategory,
         addTag, updateTag, deleteTag,
@@ -81,10 +86,4 @@ export function AppProvider({ children }) {
       {children}
     </AppContext.Provider>
   )
-}
-
-export function useApp() {
-  const ctx = useContext(AppContext)
-  if (!ctx) throw new Error("useApp must be used within AppProvider")
-  return ctx
 }

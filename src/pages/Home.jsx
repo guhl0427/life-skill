@@ -1,9 +1,10 @@
 import { useState, useMemo, useCallback } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
-import { useApp } from "../context/AppContext"
+import { useApp } from "../context/useApp"
 import TipCard from "../components/TipCard"
 import FilterBar from "../components/FilterBar"
 import ConfirmDialog from "../components/ConfirmDialog"
+import { btnOutline, btnSm, pageTitle, pageDesc } from "../components/ui"
 
 export default function Home() {
   const { tips, deleteTip } = useApp()
@@ -61,10 +62,10 @@ export default function Home() {
 
   return (
     <div>
-      <h1 className="page-title">
+      <h1 className={pageTitle}>
         <span className="hand-underline">生活小技巧</span>
       </h1>
-      <p className="page-desc">
+      <p className={pageDesc}>
         记录那些让生活更美好的小妙招 ✨
       </p>
 
@@ -77,23 +78,23 @@ export default function Home() {
         onSortChange={handleSortChange}
       />
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-        <button className="btn btn-outline btn-sm" onClick={handleRandom}>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button className={`${btnOutline} ${btnSm}`} onClick={handleRandom}>
           🎲 随机一条
         </button>
       </div>
 
       {search && (
-        <div style={{ marginBottom: 16, fontSize: 14, color: "var(--text-secondary)" }}>
+        <div className="mb-4 text-sm text-ink-soft">
           搜索 &ldquo;{search}&rdquo; 共 {filtered.length} 条结果
         </div>
       )}
 
       {filtered.length === 0 ? (
-        <div className="empty-state">
-          <div className="icon">🔍</div>
-          <h3>没有找到技巧</h3>
-          <p>
+        <div className="px-5 py-16 text-center">
+          <div className="mb-3 text-5xl">🔍</div>
+          <h3 className="mb-2 font-display text-xl text-ink">没有找到技巧</h3>
+          <p className="mb-5 text-sm text-ink-soft">
             {search
               ? "换个关键词试试，或者点击「+ 新技巧」添加"
               : "点击「+ 新技巧」开始记录你的第一个生活妙招吧"}
