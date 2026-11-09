@@ -82,7 +82,7 @@ export default function TipCard({ tip, search, showActions, onDelete }) {
         </div>
       )}
       {showActions && (
-        <div className="tip-card-footer mt-1 flex justify-end gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        <div className="tip-card-footer mt-1 flex justify-end gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 max-md:opacity-100">
           <Link to={"/tips/" + tip.id + "/edit"} className={`${btnOutline} ${btnSm}`}>
             编辑
           </Link>
