@@ -12,8 +12,15 @@ export default function Stats() {
 
     const catCount = new Map()
     const tagCount = new Map()
+    const categoryIds = new Set(categories.map((cat) => cat.id))
+    let uncategorized = 0
+
     for (const tip of tips) {
-      if (tip.categoryId) catCount.set(tip.categoryId, (catCount.get(tip.categoryId) || 0) + 1)
+      if (tip.categoryId && categoryIds.has(tip.categoryId)) {
+        catCount.set(tip.categoryId, (catCount.get(tip.categoryId) || 0) + 1)
+      } else {
+        uncategorized++
+      }
       for (const id of tip.tagIds || []) tagCount.set(id, (tagCount.get(id) || 0) + 1)
     }
 
@@ -28,6 +35,13 @@ export default function Stats() {
       })
       .sort((a, b) => b.count - a.count)
 
+    const usedCats = catCounts.filter((cat) => cat.count > 0)
+    const unusedCats = catCounts.filter((cat) => cat.count === 0)
+    const uncategorizedStat = {
+      count: uncategorized,
+      percentage: total > 0 ? Math.round((uncategorized / total) * 100) : 0,
+    }
+
     const tagCounts = tags
       .map((tag) => ({ ...tag, count: tagCount.get(tag.id) || 0 }))
       .filter((t) => t.count > 0)
@@ -38,7 +52,7 @@ export default function Stats() {
       ? tips.reduce((a, b) => (a.createdAt > b.createdAt ? a : b))
       : null
 
-    return { total, starred, catCounts, tagCounts, newest }
+    return { total, starred, usedCats, unusedCats, uncategorizedStat, tagCounts, newest }
   }, [tips, categories, tags])
 
   if (stats.total === 0) {
@@ -81,7 +95,7 @@ export default function Stats() {
 
       <h2 className="mb-4 font-display text-lg text-ink">分类分布</h2>
       <div className="mb-8 flex flex-col gap-3">
-        {stats.catCounts.map((cat) => (
+        {stats.usedCats.map((cat) => (
           <div key={cat.id} className="py-1">
             <div className="mb-1.5 flex justify-between text-sm">
               <span className="font-display">{cat.emoji} {cat.name}</span>
@@ -95,6 +109,34 @@ export default function Stats() {
             </div>
           </div>
         ))}
+        {stats.uncategorizedStat.count > 0 && (
+          <div className="py-1">
+            <div className="mb-1.5 flex justify-between text-sm">
+              <span className="font-display">📥 未分类</span>
+              <span className="text-[13px] text-ink-soft">{stats.uncategorizedStat.count} / {stats.total}</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded border border-line-soft bg-paper-deep">
+              <div
+                className="h-full min-w-1 rounded bg-ink-faint transition-[width] duration-[600ms] ease-spring"
+                style={{ width: stats.uncategorizedStat.percentage + "%" }}
+              />
+            </div>
+          </div>
+        )}
+        {stats.unusedCats.length > 0 && (
+          <details className="mt-1 rounded-sketch border border-dashed border-line-soft bg-paper-deep px-3.5 py-2 text-[13px] text-ink-faint">
+            <summary className="cursor-pointer font-hand">
+              {stats.unusedCats.length} 个分类暂无技巧
+            </summary>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {stats.unusedCats.map((cat) => (
+                <span key={cat.id} className="rounded-sketch-sm bg-card px-2.5 py-0.5">
+                  {cat.emoji} {cat.name}
+                </span>
+              ))}
+            </div>
+          </details>
+        )}
       </div>
 
       {stats.tagCounts.length > 0 && (
