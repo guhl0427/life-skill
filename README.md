@@ -1,74 +1,41 @@
 # LifeSkill — 生活小技巧
 
-一个手绘风格的 SPA，用于记录、管理和发现生活小妙招。
+一个手绘风格的单页应用（SPA），用于记录、分类和检索生活小妙招。纯前端实现，数据保存在浏览器 `localStorage`，无需后端服务。
 
-## 功能
+## 功能概览
 
-- **技巧管理** — 创建、编辑、删除生活技巧，支持分类和标签
-- **分类 & 标签** — 自定义分类（含 emoji + 颜色）和标签，删除时自动级联清理
-- **搜索 & 筛选** — 关键词搜索，按分类/收藏筛选，多种排序（最新/最早/标题）
-- **收藏 ⭐** — 标记常用技巧，首页可单独筛选已收藏内容
-- **随机一条 🎲** — 一键随机跳转，适合灵感浏览
-- **一键复制 📋** — 详情页复制技巧内容到剪贴板
-- **搜索高亮 🔍** — 搜索结果中关键词自动高亮
-- **统计看板 📊** — 总技巧数、分类分布柱状图、最常用标签 Top 5
-- **暗色模式 🌙** — 侧边栏一键切换，设置持久化到 localStorage
-- **手绘风格** — ZCOOL KuaiLe 字体，随机卡片旋转，SVG 毛边滤镜
-- **数据持久化** — 所有数据自动同步到 localStorage，多标签页实时同步
-- **导入 / 导出备份** — 首页一键导出 JSON 备份，导入时校验格式并二次确认
+- **技巧管理** — 创建、查看、编辑、软删除，支持可选的分步说明
+- **分类与标签** — 自定义分类（emoji + 颜色）和标签，删除时自动级联清理关联数据
+- **搜索** — 标题、正文、分类名、标签名全文匹配，多关键词 AND，结果高亮
+- **筛选与排序** — 按分类、收藏、标签、未分类、无标签筛选；最新 / 最早 / 最近更新 / 最常用 / 标题排序
+- **回收站** — 删除先进入回收站，可恢复、永久删除或清空
+- **使用记录** — 记录使用次数与最近使用时间，并支持“最常用”排序
+- **批量操作** — 多选后批量设置分类或批量移入回收站
+- **备份** — JSON 导出、覆盖 / 合并导入、导入前自动快照与恢复
+- **统计看板** — 总量、分类分布、Top 5 标签、数据健康入口
+- **体验** — 暗色模式、跨标签页实时同步、响应式侧边栏 / 抽屉、手绘风格
 
 ## 技术栈
 
-- **React 19** — 函数组件 + Hooks
-- **react-router-dom v7** — 声明式路由，URL 驱动筛选
-- **Vite** — 构建工具
-- **Tailwind CSS 4** — 工具类 + `@theme` 设计令牌；手绘效果保留在 `index.css` 的 `@layer components`
-- **Vitest + Testing Library** — 单元测试
+React 19 · react-router-dom v7 · Vite · Tailwind CSS 4 · Vitest + Testing Library
 
 ## 快速开始
 
 ```sh
 npm install
-npm run dev      # http://localhost:5173
+npm run dev      # 开发服务器，默认 http://localhost:5173
 npm run build    # 生产构建到 dist/
 npm run preview  # 预览生产构建
 npm run lint     # ESLint 检查
 npm test         # Vitest 单元测试
 ```
 
-## 项目结构
+## 文档
 
-```
-src/
-├── context/                  # AppProvider（全局状态）+ useApp + context 对象
-├── components/               # Layout, TipCard, TipForm, FilterBar, ConfirmDialog, ui.js（共享类名）
-├── pages/                    # Home, NewTip, EditTip, TipDetail, Categories, Tags, Stats, NotFound
-├── data/seed.js              # 初始种子数据（6 条技巧、5 个分类、6 个标签）
-├── hooks/useLocalStorage.js  # localStorage 同步 Hook（含跨标签页 storage 事件）
-├── utils/format.js           # 日期格式化工具
-├── utils/backup.js           # 备份导出 / 解析校验
-├── test/setup.js             # Vitest 环境初始化
-├── index.css                 # Tailwind 入口 + 主题变量 + 手绘效果
-├── App.jsx                   # 路由定义
-└── main.jsx                  # 入口
-```
-
-## 数据模型
-
-| 实体 | 字段 | localStorage 键 |
-|---|---|---|
-| Tip | id, title, content, categoryId, tagIds[], starred, createdAt, updatedAt | `ls_tips` |
-| Category | id, name, emoji, color | `ls_categories` |
-| Tag | id, name | `ls_tags` |
-
-所有数据存储在浏览器 localStorage 中，首次访问自动加载种子数据。
+- [Code Wiki](docs/CODE_WIKI.md) — 整体架构、模块职责、关键函数、数据模型、依赖关系、样式系统、测试与部署细节
+- [需求文档](docs/plans.md)
+- [项目背景](docs/introduce.md)
 
 ## 部署
 
-应用使用 `BrowserRouter`，静态托管需要把未知路径回退到 `index.html`，否则直接访问
-`/tips/:id` 或刷新页面会 404。仓库已内置：
-
-- `vercel.json` — Vercel 的 rewrite 规则
-- `public/_redirects` — Netlify 的 rewrite 规则（构建时复制到 `dist/`）
-
-其他平台请配置等价的 SPA fallback 规则。
+应用使用 `BrowserRouter`，静态托管需要配置 SPA fallback；仓库已内置 Vercel 与 Netlify 配置，GitHub Pages 由 CI 构建并生成 `404.html`。完整说明见 Code Wiki 的“构建、CI 与部署”章节。
