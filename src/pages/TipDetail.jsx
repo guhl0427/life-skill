@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import ConfirmDialog from "../components/ConfirmDialog"
 import { formatDate, formatDateTime } from "../utils/format"
-import { btnPrimary, btnOutline, btnDanger, btnSm, backLink } from "../components/ui"
+import { btnPrimary, btnOutline, btnDanger, btnSm } from "../components/ui"
 
 export default function TipDetail() {
   const { id } = useParams()
@@ -70,8 +70,6 @@ export default function TipDetail() {
 
   return (
     <div className="mx-auto max-w-[720px]">
-      <Link to="/" className={backLink}>← 返回首页</Link>
-
       <div className="mb-6">
         <div className="mb-3 flex flex-wrap items-center gap-3">
           {cat && (

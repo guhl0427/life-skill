@@ -18,5 +18,3 @@ export const pageTitle =
   "mb-2 font-display text-[28px] tracking-[2px] text-ink max-[480px]:text-[22px]"
 
 export const pageDesc = "mb-6 text-sm text-ink-soft"
-
-export const backLink = "mb-4 inline-flex items-center gap-1.5 text-sm text-ink-soft transition-colors duration-200 hover:text-primary"

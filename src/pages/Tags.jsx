@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import ConfirmDialog from "../components/ConfirmDialog"
-import { backLink, btnPrimary, btnOutline, btnDanger, btnSm, field, pageTitle } from "../components/ui"
+import { btnPrimary, btnOutline, btnDanger, btnSm, field, pageTitle } from "../components/ui"
 
 const editInput =
   "min-w-0 flex-1 rounded-sketch border-2 border-line bg-card px-2.5 py-1.5 text-sm focus:border-primary focus:shadow-[0_0_0_3px_var(--primary-light)] focus:outline-none"
@@ -57,7 +56,6 @@ export default function Tags() {
 
   return (
     <div className="mx-auto max-w-[640px]">
-      <Link to="/" className={backLink}>← 返回首页</Link>
       <div className="mb-6 flex items-center justify-between">
         <h1 className={pageTitle}><span className="hand-underline">标签管理</span></h1>
       </div>
