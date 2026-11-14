@@ -48,7 +48,7 @@ export default function ConfirmDialog({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/30 animate-[fadeIn_0.2s_ease-out]"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-[rgb(74_66_56_/_0.28)] backdrop-blur-[2px] animate-[fadeIn_0.2s_ease-out] dark:bg-[rgb(0_0_0_/_0.6)]"
       onClick={onCancel}
     >
       <div
