@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import TipForm from "../components/TipForm"
-import { backLink, btnPrimary, pageTitle } from "../components/ui"
+import { btnPrimary, pageTitle } from "../components/ui"
 
 function goBack(navigate, fallback) {
   if (window.history.length > 1) {
@@ -32,7 +32,6 @@ export default function EditTip() {
 
   return (
     <div className="mx-auto max-w-[720px]">
-      <button className={backLink} onClick={() => goBack(navigate, "/")}>← 返回</button>
       <h1 className={`${pageTitle} mb-6`}>
         <span className="hand-underline">编辑技巧</span>
       </h1>

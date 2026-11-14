@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import ConfirmDialog from "../components/ConfirmDialog"
 import { formatDateTime } from "../utils/format"
-import { backLink, btnOutline, btnDanger, btnSm, pageTitle, pageDesc } from "../components/ui"
+import { btnOutline, btnDanger, btnSm, pageTitle, pageDesc } from "../components/ui"
 
 export default function Trash() {
   const { tips, restoreTip, purgeTip, emptyTrash } = useApp()
@@ -17,7 +16,6 @@ export default function Trash() {
 
   return (
     <div className="mx-auto max-w-[720px]">
-      <Link to="/" className={backLink}>← 返回首页</Link>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className={pageTitle}><span className="hand-underline">回收站</span></h1>

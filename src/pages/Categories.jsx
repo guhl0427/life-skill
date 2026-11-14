@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import ConfirmDialog from "../components/ConfirmDialog"
-import { backLink, btnPrimary, btnOutline, btnDanger, btnSm, field, label, pageTitle } from "../components/ui"
+import { btnPrimary, btnOutline, btnDanger, btnSm, field, label, pageTitle } from "../components/ui"
 
 const colorOptions = ["#7EB8A0","#F4A261","#E8A87C","#A8D5BA","#C9B8E0","#F7C6C6","#B8D4E3","#D4C9B8"]
 
@@ -151,7 +150,6 @@ export default function Categories() {
 
   return (
     <div className="mx-auto max-w-[640px]">
-      <Link to="/" className={backLink}>← 返回首页</Link>
       <div className="mb-6 flex items-center justify-between">
         <h1 className={pageTitle}><span className="hand-underline">分类管理</span></h1>
       </div>
