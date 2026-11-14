@@ -38,7 +38,7 @@ npm install          # 安装依赖
 npm run dev          # 开发服务器，默认 http://localhost:5173
 npm run build        # 生产构建，输出到 dist/
 npm run preview      # 本地预览生产构建
-npm run lint         # ESLint 检查
+npm run lint         # Oxlint 检查
 npm test             # Vitest 单次运行
 npm run test:watch   # Vitest 监听模式
 ```
@@ -70,12 +70,12 @@ base: process.env.PAGES_BASE || '/'
 
 | 依赖 | 用途 |
 |---|---|
-| `vite` ^8.3.6 | 开发服务器与构建 |
+| `vite` ^8.3.8 | 开发服务器与构建 |
 | `@vitejs/plugin-react` | JSX / Fast Refresh |
 | `tailwindcss` ^4.3.5 + `@tailwindcss/vite` | 原子化样式与设计令牌 |
 | `vitest` ^5.1.0 + `jsdom` | 单元测试与 DOM 环境 |
 | `@testing-library/react`、`@testing-library/jest-dom` | 组件测试与断言 |
-| `eslint` ^10 + `eslint-plugin-react-hooks` + `eslint-plugin-react-refresh` | 代码检查 |
+| `oxlint` ^1.93.0 | 代码检查（含 React Hooks / React Refresh 规则） |
 
 > 项目**不使用 TypeScript**，没有类型检查步骤；源文件统一为 `.jsx`。
 

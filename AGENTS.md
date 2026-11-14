@@ -5,7 +5,7 @@
 ```sh
 npm run dev      # dev server at localhost:5173
 npm run build    # production build to dist/
-npm run lint     # eslint (JSX, not TS)
+npm run lint     # oxlint (JSX, not TS)
 npm test         # vitest run
 npm run test:watch
 npm run preview  # preview production build

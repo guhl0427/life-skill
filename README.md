@@ -26,7 +26,7 @@ npm install
 npm run dev      # 开发服务器，默认 http://localhost:5173
 npm run build    # 生产构建到 dist/
 npm run preview  # 预览生产构建
-npm run lint     # ESLint 检查
+npm run lint     # Oxlint 检查
 npm test         # Vitest 单元测试
 ```
 
