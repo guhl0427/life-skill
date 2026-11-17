@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react"
+import { Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import ConfirmDialog from "../components/ConfirmDialog"
 import { formatDateTime } from "../utils/format"
-import { btnOutline, btnDanger, btnSm, pageTitle } from "../components/ui"
+import { btnOutline, btnDanger, btnSm, btnPrimary, pageTitle } from "../components/ui"
 
 export default function Trash() {
   const { tips, restoreTip, purgeTip, emptyTrash } = useApp()
@@ -28,20 +29,21 @@ export default function Trash() {
       <div className="mx-auto max-w-[720px]">
         {trashed.length === 0 ? (
           <div className="px-5 py-16 text-center">
-            <div className="mb-3 text-5xl">🗑️</div>
-            <h3 className="font-display text-xl text-ink">回收站是空的</h3>
+            <div className="mb-3 text-3xl">🗑️</div>
+            <h3 className="mb-4 font-display text-xl text-ink">回收站是空的</h3>
+            <Link to="/" className={btnPrimary}>回到首页</Link>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
             {trashed.map((tip) => (
               <div
                 key={tip.id}
-                className="rounded-sketch border-2 border-line bg-card p-4 shadow-ink"
+                className="rounded-sketch border-[1.5px] border-line bg-card p-4 shadow-ink"
               >
                 <div className="mb-1 font-display text-[15px] text-ink">{tip.title}</div>
                 <p className="mb-2 line-clamp-2 text-sm leading-relaxed text-ink-soft">{tip.content}</p>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-hand text-xs text-ink-faint">
+                  <span className="text-xs tabular-nums text-ink-faint">
                     删除于 {formatDateTime(tip.deletedAt)}
                   </span>
                   <div className="ml-auto flex gap-2">

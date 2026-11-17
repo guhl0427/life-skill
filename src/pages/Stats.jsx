@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
-import { pageTitle } from "../components/ui"
+import { pageTitle, btnPrimary } from "../components/ui"
 
 export default function Stats() {
   const { tips, categories, tags } = useApp()
@@ -63,8 +63,9 @@ export default function Stats() {
       <div>
         <h1 className={`${pageTitle} mb-6`}><span className="hand-underline">统计看板</span></h1>
         <div className="px-5 py-16 text-center">
-          <div className="mb-3 text-5xl">📊</div>
-          <h3 className="font-display text-xl text-ink">还没有技巧</h3>
+          <div className="mb-3 text-3xl">📊</div>
+          <h3 className="mb-4 font-display text-xl text-ink">还没有技巧</h3>
+          <Link to="/tips/new" className={btnPrimary}>新建技巧</Link>
         </div>
       </div>
     )
@@ -74,22 +75,22 @@ export default function Stats() {
     <div>
       <h1 className={`${pageTitle} mb-6`}><span className="hand-underline">统计看板</span></h1>
 
-      <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 max-[480px]:grid-cols-2">
-        <div className="rounded-sketch-lg border-2 border-line bg-card p-5 text-center shadow-ink">
-          <div className="font-display text-4xl leading-tight text-primary max-[480px]:text-[28px]">{stats.total}</div>
-          <div className="mt-1 font-hand text-[13px] text-ink-soft">总技巧数</div>
+      <div className="mb-8 grid grid-cols-2 gap-px overflow-hidden rounded-sketch-lg border-2 border-line bg-line-soft shadow-ink md:grid-cols-4">
+        <div className="bg-card px-4 py-4 text-center">
+          <div className="font-display text-[26px] leading-tight tabular-nums text-primary max-[480px]:text-[22px]">{stats.total}</div>
+          <div className="mt-1 text-xs text-ink-soft">总技巧数</div>
         </div>
-        <div className="rounded-sketch-lg border-2 border-line bg-card p-5 text-center shadow-ink">
-          <div className="font-display text-4xl leading-tight text-primary max-[480px]:text-[28px]">{categories.length}</div>
-          <div className="mt-1 font-hand text-[13px] text-ink-soft">分类数</div>
+        <div className="bg-card px-4 py-4 text-center">
+          <div className="font-display text-[26px] leading-tight tabular-nums text-primary max-[480px]:text-[22px]">{categories.length}</div>
+          <div className="mt-1 text-xs text-ink-soft">分类数</div>
         </div>
-        <div className="rounded-sketch-lg border-2 border-line bg-card p-5 text-center shadow-ink">
-          <div className="font-display text-4xl leading-tight text-primary max-[480px]:text-[28px]">{tags.length}</div>
-          <div className="mt-1 font-hand text-[13px] text-ink-soft">标签数</div>
+        <div className="bg-card px-4 py-4 text-center">
+          <div className="font-display text-[26px] leading-tight tabular-nums text-primary max-[480px]:text-[22px]">{tags.length}</div>
+          <div className="mt-1 text-xs text-ink-soft">标签数</div>
         </div>
-        <div className="rounded-sketch-lg border-2 border-line bg-card p-5 text-center shadow-ink">
-          <div className="font-display text-4xl leading-tight text-primary max-[480px]:text-[28px]">{stats.starred}</div>
-          <div className="mt-1 font-hand text-[13px] text-ink-soft">已收藏</div>
+        <div className="bg-card px-4 py-4 text-center">
+          <div className="font-display text-[26px] leading-tight tabular-nums text-primary max-[480px]:text-[22px]">{stats.starred}</div>
+          <div className="mt-1 text-xs text-ink-soft">已收藏</div>
         </div>
       </div>
 
@@ -99,7 +100,7 @@ export default function Stats() {
           <div key={cat.id} className="py-1">
             <div className="mb-1.5 flex justify-between text-sm">
               <span className="font-display">{cat.emoji} {cat.name}</span>
-              <span className="text-[13px] text-ink-soft">{cat.count} / {stats.total}</span>
+              <span className="text-[13px] tabular-nums text-ink-soft">{cat.count} / {stats.total}</span>
             </div>
             <div className="h-2 overflow-hidden rounded border border-line-soft bg-paper-deep">
               <div
@@ -113,7 +114,7 @@ export default function Stats() {
           <div className="py-1">
             <div className="mb-1.5 flex justify-between text-sm">
               <span className="font-display">📥 未分类</span>
-              <span className="text-[13px] text-ink-soft">{stats.uncategorizedStat.count} / {stats.total}</span>
+              <span className="text-[13px] tabular-nums text-ink-soft">{stats.uncategorizedStat.count} / {stats.total}</span>
             </div>
             <div className="h-2 overflow-hidden rounded border border-line-soft bg-paper-deep">
               <div
@@ -132,10 +133,10 @@ export default function Stats() {
             {stats.tagCounts.map((tag) => (
               <span
                 key={tag.id}
-                className="flex items-center gap-2 rounded-sketch border border-line-soft bg-paper-deep px-3.5 py-1.5 font-hand text-[15px]"
+                className="flex items-center gap-2 rounded-sketch border border-line-soft bg-paper-deep px-3.5 py-1.5 text-[15px]"
               >
                 {tag.name}
-                <span className="rounded-md bg-card px-2 text-xs text-ink-faint">{tag.count}</span>
+                <span className="rounded-sketch-sm bg-card px-2 text-xs tabular-nums text-ink-faint">{tag.count}</span>
               </span>
             ))}
           </div>
@@ -145,31 +146,31 @@ export default function Stats() {
       <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
         <Link
           to="/?cat=__none__"
-          className="flex items-center justify-between gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
+          className="flex items-center justify-between gap-3 rounded-sketch border-[1.5px] border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
         >
-          <span className="font-hand text-[13px] text-ink-soft">📥 未分类技巧</span>
-          <span className="font-display text-lg text-primary">{stats.uncategorizedStat.count}</span>
+          <span className="text-[13px] text-ink-soft">📥 未分类技巧</span>
+          <span className="font-display text-lg tabular-nums text-primary">{stats.uncategorizedStat.count}</span>
         </Link>
         <Link
           to="/?untagged=1"
-          className="flex items-center justify-between gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
+          className="flex items-center justify-between gap-3 rounded-sketch border-[1.5px] border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
         >
-          <span className="font-hand text-[13px] text-ink-soft">🏷️ 无标签技巧</span>
-          <span className="font-display text-lg text-primary">{stats.untagged}</span>
+          <span className="text-[13px] text-ink-soft">🏷️ 无标签技巧</span>
+          <span className="font-display text-lg tabular-nums text-primary">{stats.untagged}</span>
         </Link>
         <Link
           to="/categories"
-          className="flex items-center justify-between gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
+          className="flex items-center justify-between gap-3 rounded-sketch border-[1.5px] border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
         >
-          <span className="font-hand text-[13px] text-ink-soft">📋 空分类</span>
-          <span className="font-display text-lg text-primary">{stats.unusedCats.length}</span>
+          <span className="text-[13px] text-ink-soft">📋 空分类</span>
+          <span className="font-display text-lg tabular-nums text-primary">{stats.unusedCats.length}</span>
         </Link>
         <Link
           to="/trash"
-          className="flex items-center justify-between gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
+          className="flex items-center justify-between gap-3 rounded-sketch border-[1.5px] border-line bg-card px-4 py-3 shadow-ink transition-colors duration-200 hover:border-primary"
         >
-          <span className="font-hand text-[13px] text-ink-soft">🗑️ 回收站</span>
-          <span className="font-display text-lg text-primary">{stats.trashedCount}</span>
+          <span className="text-[13px] text-ink-soft">🗑️ 回收站</span>
+          <span className="font-display text-lg tabular-nums text-primary">{stats.trashedCount}</span>
         </Link>
       </div>
     </div>

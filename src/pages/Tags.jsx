@@ -60,7 +60,7 @@ export default function Tags() {
 
       <div className="mx-auto max-w-[640px]">
         <form
-          className="mb-5 flex items-end gap-2.5 rounded-sketch border-2 border-dashed border-line bg-card p-4 max-md:flex-col max-md:items-stretch"
+          className="mb-5 flex items-end gap-2.5 rounded-sketch border-2 border-line bg-card p-4 max-md:flex-col max-md:items-stretch"
           onSubmit={(e) => { e.preventDefault(); handleAdd() }}
         >
           <div className="flex-1">
@@ -85,7 +85,7 @@ export default function Tags() {
           {tags.map((tag) => (
             <div
               key={tag.id}
-              className="mgmt-item group flex items-center gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-all duration-200 hover:border-primary hover:shadow-ink-hover max-[480px]:p-2.5"
+              className="mgmt-item group flex items-center gap-3 rounded-sketch border-[1.5px] border-line bg-card px-4 py-3 shadow-ink transition-all duration-200 hover:border-primary hover:shadow-ink-hover max-[480px]:p-2.5"
             >
               {editingId === tag.id ? (
                 <>
@@ -105,7 +105,7 @@ export default function Tags() {
                   <span className="shrink-0 text-2xl">🏷️</span>
                   <div className="flex-1">
                     <div className="font-display text-[15px]">{tag.name}</div>
-                    <div className="font-hand text-[13px] text-ink-faint">{countByTag.get(tag.id) || 0} 个技巧</div>
+                    <div className="text-[13px] tabular-nums text-ink-faint">{countByTag.get(tag.id) || 0} 个技巧</div>
                   </div>
                   <div className="flex gap-1.5 opacity-40 transition-opacity duration-200 group-hover:opacity-100 max-md:opacity-100">
                     <button className={`${btnOutline} ${btnSm}`} onClick={() => startEdit(tag)}>编辑</button>

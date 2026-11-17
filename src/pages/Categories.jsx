@@ -56,7 +56,7 @@ function ColorControl({ value, onPick }) {
           type="button"
           aria-label={"选择颜色 " + c}
           aria-pressed={value === c}
-          className="h-6 w-6 shrink-0 cursor-pointer rounded-md border-2 transition-transform duration-150 hover:scale-110"
+          className="h-6 w-6 shrink-0 cursor-pointer rounded-sketch-sm border-2 transition-transform duration-150 hover:scale-110"
           style={{
             background: c,
             borderColor: value === c ? "var(--ink)" : "transparent",
@@ -66,7 +66,7 @@ function ColorControl({ value, onPick }) {
       ))}
       <span className="mx-0.5 h-5 w-px bg-line" aria-hidden="true" />
       <label
-        className="relative flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md border-2 border-dashed border-line bg-card text-sm transition-colors duration-200 hover:border-primary"
+        className="relative flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-sketch-sm border-2 border-line bg-card text-sm transition-colors duration-200 hover:border-primary"
         title="调色盘"
       >
         <span aria-hidden="true">🎨</span>
@@ -79,7 +79,7 @@ function ColorControl({ value, onPick }) {
         />
       </label>
       <input
-        className={`${miniInput} w-24 px-2 py-1.5 text-left text-sm uppercase`}
+        className={`${miniInput} w-20 px-2 py-1.5 text-left text-sm uppercase`}
         aria-label="输入颜色色值"
         title="输入十六进制色值，如 #7EB8A0"
         value={value}
@@ -154,7 +154,7 @@ export default function Categories() {
 
       <div className="mx-auto max-w-[640px]">
         <form
-          className="mb-5 flex flex-col gap-3 rounded-sketch border-2 border-dashed border-line bg-card p-4"
+          className="mb-5 flex flex-col gap-3 rounded-sketch border-2 border-line bg-card p-4"
           onSubmit={(e) => { e.preventDefault(); handleAdd() }}
         >
           <div>
@@ -168,13 +168,19 @@ export default function Categories() {
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div>
-            <div className={label}>图标</div>
-            <EmojiControl value={emoji} onChange={setEmoji} />
-          </div>
-          <div>
-            <div className={label}>颜色</div>
-            <ColorControl value={color} onPick={setColor} />
+          <div className="flex flex-col gap-3 rounded-sketch border border-line-soft bg-paper-deep p-3">
+            <div className="flex items-start gap-3">
+              <span className="w-9 shrink-0 pt-1.5 text-[13px] text-ink-soft">图标</span>
+              <div className="min-w-0 flex-1">
+                <EmojiControl value={emoji} onChange={setEmoji} />
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="w-9 shrink-0 pt-1.5 text-[13px] text-ink-soft">颜色</span>
+              <div className="min-w-0 flex-1">
+                <ColorControl value={color} onPick={setColor} />
+              </div>
+            </div>
           </div>
           <div className="flex justify-end">
             <button type="submit" className={`${btnPrimary} ${btnSm}`}>
@@ -189,7 +195,7 @@ export default function Categories() {
           {categories.map((cat) => (
             <div
               key={cat.id}
-              className="mgmt-item group flex items-center gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-all duration-200 hover:border-primary hover:shadow-ink-hover max-[480px]:p-2.5"
+              className="mgmt-item group flex items-center gap-3 rounded-sketch border-[1.5px] border-line bg-card px-4 py-3 shadow-ink transition-all duration-200 hover:border-primary hover:shadow-ink-hover max-[480px]:p-2.5"
             >
               {editingId === cat.id ? (
                 <div className="flex w-full flex-col gap-3">
@@ -217,13 +223,13 @@ export default function Categories() {
               ) : (
                 <>
                   <div
-                    className="h-8 w-8 shrink-0 rounded-lg border-2 border-line"
+                    className="h-8 w-8 shrink-0 rounded-sketch-sm border-2 border-line"
                     style={{ background: cat.color }}
                   />
                   <span className="shrink-0 text-2xl">{cat.emoji}</span>
                   <div className="flex-1">
                     <div className="font-display text-[15px]">{cat.name}</div>
-                    <div className="font-hand text-[13px] text-ink-faint">{countByCat.get(cat.id) || 0} 个技巧</div>
+                    <div className="text-[13px] tabular-nums text-ink-faint">{countByCat.get(cat.id) || 0} 个技巧</div>
                   </div>
                   <div className="flex gap-1.5 opacity-40 transition-opacity duration-200 group-hover:opacity-100 max-md:opacity-100">
                     <button className={`${btnOutline} ${btnSm}`} onClick={() => startEdit(cat)}>编辑</button>

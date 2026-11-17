@@ -700,8 +700,8 @@ main.jsx
 - `src/index.css` 通过 `@import "tailwindcss"` 引入。
 - `@custom-variant dark` 定义暗色变体，匹配 `[data-theme="dark"]` 及其后代。
 - `@theme inline` 把 CSS 变量映射为 Tailwind 设计令牌：
-  - 颜色：`paper`、`paper-deep`、`card`、`primary`、`primary-hover`、`primary-light`、`accent*`、`danger*`、`ink*`、`line*`。
-  - 字体：`font-display`（中文手绘 ZCOOL KuaiLe）、`font-hand`（Caveat）。
+  - 颜色：`paper`、`paper-deep`、`card`、`primary`、`primary-hover`、`primary-light`、`accent*`、`danger*`、`on-primary`、`on-danger`、`ink*`、`line*`。
+  - 字体：`font-display`（标题，ZCOOL KuaiLe）、`font-body`（正文，Noto Sans SC）、`font-hand`（Caveat，仅英文批注与序号）。
   - 阴影：`shadow-ink`、`shadow-ink-hover`。
   - 圆角：`rounded-sketch-sm/sketch/sketch-lg/pill`（不规则手绘圆角）。
   - 缓动：`ease-spring`。
@@ -718,17 +718,17 @@ main.jsx
 |---|---|
 | `.hand-underline` | 标题下方手绘感下划线（伪元素） |
 | `.hand-card` | 外层虚线描边 |
-| `.tip-card:nth-child(...)` | 卡片随机微旋转（奇数 / 3n / 5n / 7n），hover 回正并上浮 |
-| `.tip-card` / `.mgmt-item` | `slideUp` 入场动画与错峰延迟 |
+| `.tip-card` / `.mgmt-item` | `slideUp` 入场动画（0.22s，前 6 张错峰） |
 | `.btn-wiggle` | hover 轻微摇摆 |
 | `.tip-grid` | 自适应卡片网格（`minmax(300px, 1fr)`） |
 | `.select-arrow` | 自定义下拉箭头 |
 | `.app-sidebar` / `.sidebar-overlay` | 桌面常驻、移动端抽屉与遮罩动画 |
-| `.filter-scroll` | 移动端筛选条横向滚动并隐藏滚动条 |
 
 - 动画关键帧：`fadeIn`、`fadeOut`、`slideUp`、`slideIn`、`slideOut`、`wiggle`。
+- 卡片不再随机旋转，hover 仅上浮；虚线只保留侧栏分隔与表单底部。
+- 功能图标统一使用 `components/Icon.jsx` 的线性 SVG，分类与标签的 emoji 仍作为数据保留。
 - `index.html` 预置 SVG 滤镜 `#rough`、`#rough-edge`、`#scribble`（基于 `feTurbulence` + `feDisplacementMap`）。
-- `@media (hover: none)` 下卡片操作按钮常显、取消 hover 位移，保证触屏可用。
+- `@media (hover: none)` 下卡片操作按钮常显、取消 hover 位移；`prefers-reduced-motion` 下关闭入场动画。
 
 ---
 

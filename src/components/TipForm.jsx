@@ -222,7 +222,7 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
                 className={
                   "rounded-sketch border-2 px-3.5 py-1.5 text-[13px] transition-all duration-200 " +
                   (selected
-                    ? "border-primary-hover bg-primary text-white shadow-[1px_2px_0_var(--line)]"
+                    ? "border-primary-hover bg-primary text-on-primary shadow-[1px_2px_0_var(--line)]"
                     : "border-line-soft bg-card text-ink-soft hover:border-primary hover:text-primary")
                 }
                 onClick={() => toggleTag(tag.id)}

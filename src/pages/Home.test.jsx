@@ -155,7 +155,7 @@ describe("Home 标签筛选", () => {
   it("卡片上的标签可点击进入标签筛选", () => {
     renderHome()
 
-    fireEvent.click(screen.getAllByRole("link", { name: "省钱" })[0])
+    fireEvent.click(screen.getAllByRole("link", { name: "#省钱" })[0])
 
     expect(screen.getByRole("button", { name: "清除标签筛选：省钱" })).toBeInTheDocument()
   })
@@ -165,7 +165,7 @@ describe("Home 批量操作", () => {
   it("批量设置分类", () => {
     renderHome()
 
-    fireEvent.click(screen.getByRole("button", { name: "☑️ 批量选择" }))
+    fireEvent.click(screen.getByRole("button", { name: "批量选择" }))
     fireEvent.click(screen.getByRole("button", { name: "选择 柠檬除水垢" }))
     fireEvent.change(screen.getByLabelText("批量设置分类"), { target: { value: "cat-2" } })
     fireEvent.click(screen.getByRole("button", { name: "应用分类" }))
@@ -177,7 +177,7 @@ describe("Home 批量操作", () => {
   it("批量删除移入回收站", () => {
     renderHome()
 
-    fireEvent.click(screen.getByRole("button", { name: "☑️ 批量选择" }))
+    fireEvent.click(screen.getByRole("button", { name: "批量选择" }))
     fireEvent.click(screen.getByRole("button", { name: "选择 柠檬除水垢" }))
     fireEvent.click(screen.getByRole("button", { name: "选择 香蕉保鲜法" }))
     fireEvent.click(screen.getByRole("button", { name: "批量删除" }))
@@ -249,7 +249,8 @@ describe("Home 备份入口", () => {
   it("点击导出后生成备份文件并提示结果", async () => {
     renderHome()
 
-    fireEvent.click(screen.getByText("⬇️ 导出备份"))
+    fireEvent.click(screen.getByRole("button", { name: "⋯ 更多" }))
+    fireEvent.click(screen.getByRole("menuitem", { name: "导出备份" }))
 
     expect(URL.createObjectURL).toHaveBeenCalledTimes(1)
     const blob = URL.createObjectURL.mock.calls[0][0]

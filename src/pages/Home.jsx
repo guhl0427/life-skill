@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react"
-import { useSearchParams, useLocation } from "react-router-dom"
+import { useSearchParams, useLocation, Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import TipCard from "../components/TipCard"
 import FilterBar from "../components/FilterBar"
@@ -14,7 +14,8 @@ import {
 } from "../utils/backup"
 import { formatDate } from "../utils/format"
 import { matchesTip } from "../utils/search"
-import { btnOutline, btnDanger, btnSm, pageTitle } from "../components/ui"
+import Icon from "../components/Icon"
+import { btnOutline, btnDanger, btnSm, btnPrimary, pageTitle } from "../components/ui"
 
 export default function Home() {
   const { tips, categories, tags, categoryMap, tagMap, deleteTip, updateTip, restoreTip, importData } = useApp()
@@ -40,13 +41,31 @@ export default function Home() {
   const [selectedIds, setSelectedIds] = useState([])
   const [batchCat, setBatchCat] = useState("")
   const [confirmBatchDelete, setConfirmBatchDelete] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
   const fileRef = useRef(null)
+  const moreRef = useRef(null)
 
   useEffect(() => {
     if (!notice) return
     const timer = setTimeout(() => { setNotice(""); setUndoId(null) }, 4000)
     return () => clearTimeout(timer)
   }, [notice])
+
+  useEffect(() => {
+    if (!moreOpen) return
+    const onPointerDown = (e) => {
+      if (!moreRef.current?.contains(e.target)) setMoreOpen(false)
+    }
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setMoreOpen(false)
+    }
+    document.addEventListener("mousedown", onPointerDown)
+    document.addEventListener("keydown", onKeyDown)
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown)
+      document.removeEventListener("keydown", onKeyDown)
+    }
+  }, [moreOpen])
 
   const handleUndoDelete = () => {
     if (!undoId) return
@@ -221,23 +240,61 @@ export default function Home() {
         onSortChange={handleSortChange}
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <button className={`${btnOutline} ${btnSm}`} onClick={handleExport}>
-          ⬇️ 导出备份
-        </button>
-        <button className={`${btnOutline} ${btnSm}`} onClick={() => fileRef.current?.click()}>
-          ⬆️ 导入备份
-        </button>
-        {hasSnapshot && (
-          <button className={`${btnOutline} ${btnSm}`} onClick={handleSnapshotRestore}>
-            ↩️ 恢复导入前备份
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+        <div className="relative" ref={moreRef}>
+          <button
+            type="button"
+            className={`${btnOutline} ${btnSm}`}
+            aria-haspopup="menu"
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen((v) => !v)}
+          >
+            ⋯ 更多
           </button>
-        )}
+          {moreOpen && (
+            <div
+              role="menu"
+              className="absolute right-0 z-20 mt-2 w-44 rounded-sketch border-2 border-line bg-card p-1.5 shadow-ink"
+            >
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full rounded-sketch-sm px-3 py-1.5 text-left text-[13px] text-ink-soft transition-colors duration-150 hover:bg-primary-light hover:text-ink"
+                onClick={() => { setMoreOpen(false); handleExport() }}
+              >
+                导出备份
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="block w-full rounded-sketch-sm px-3 py-1.5 text-left text-[13px] text-ink-soft transition-colors duration-150 hover:bg-primary-light hover:text-ink"
+                onClick={() => { setMoreOpen(false); fileRef.current?.click() }}
+              >
+                导入备份
+              </button>
+              {hasSnapshot && (
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="block w-full rounded-sketch-sm px-3 py-1.5 text-left text-[13px] text-ink-soft transition-colors duration-150 hover:bg-primary-light hover:text-ink"
+                  onClick={() => { setMoreOpen(false); handleSnapshotRestore() }}
+                >
+                  恢复导入前备份
+                </button>
+              )}
+            </div>
+          )}
+        </div>
         <button
           className={`${selectMode ? btnDanger : btnOutline} ${btnSm}`}
           onClick={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
         >
-          {selectMode ? "✕ 退出多选" : "☑️ 批量选择"}
+          {selectMode ? "退出多选" : (
+            <>
+              <Icon name="checkbox" className="h-4 w-4" />
+              批量选择
+            </>
+          )}
         </button>
         <input
           ref={fileRef}
@@ -263,8 +320,8 @@ export default function Home() {
       )}
 
       {selectMode && (
-        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-sketch border-2 border-dashed border-primary bg-card p-3">
-          <span className="font-hand text-sm text-ink-soft">已选 {selectedIds.length} 条</span>
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-sketch border-2 border-primary bg-card p-3">
+          <span className="text-sm text-ink-soft">已选 {selectedIds.length} 条</span>
           <button type="button" className={`${btnOutline} ${btnSm}`} onClick={handleSelectAll}>
             全选 / 取消全选
           </button>
@@ -303,12 +360,15 @@ export default function Home() {
 
       {filtered.length === 0 ? (
         <div className="px-5 py-16 text-center">
-          <div className="mb-3 text-5xl">🔍</div>
-          <h3 className="font-display text-xl text-ink">
+          <div className="mb-3 text-3xl">🔍</div>
+          <h3 className="mb-4 font-display text-xl text-ink">
             {search || activeCat || activeStarred || activeTag || untaggedOnly
               ? "没有匹配的技巧"
               : "还没有技巧"}
           </h3>
+          <Link to="/tips/new" className={btnPrimary}>
+            新建技巧
+          </Link>
         </div>
       ) : (
         <div className="tip-grid">
