@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { NavLink, Link, useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { useApp } from "../context/useApp"
+import Icon from "./Icon"
 import { btnPrimary, btnSm } from "./ui"
 
 const navClass = ({ isActive }) =>
   "flex items-center gap-2.5 rounded-sketch px-3.5 py-2.5 text-[15px] transition-colors duration-200 " +
-  (isActive ? "bg-primary text-white" : "text-ink-soft hover:bg-primary-light hover:text-ink")
+  (isActive ? "bg-primary text-on-primary" : "text-ink-soft hover:bg-primary-light hover:text-ink")
 
 export default function Layout({ children }) {
   const { tips, categories } = useApp()
@@ -124,34 +125,34 @@ export default function Layout({ children }) {
           className="hand-underline mb-4 px-2 py-1 text-center font-display text-[22px] text-ink"
           onClick={closeMenu}
         >
-          ✏️ Life<span className="text-primary">Skill</span>
+          Life<span className="text-primary">Skill</span>
         </Link>
 
         <NavLink to="/" end className={navClass} onClick={closeMenu}>
-          <span className="text-lg">🏠</span> 首页
+          <Icon name="home" className="h-[18px] w-[18px]" /> 首页
         </NavLink>
 
         <NavLink to="/stats" className={navClass} onClick={closeMenu}>
-          <span className="text-lg">📊</span> 统计看板
+          <Icon name="chart" className="h-[18px] w-[18px]" /> 统计看板
         </NavLink>
 
         <NavLink to="/categories" className={navClass} onClick={closeMenu}>
-          <span className="text-lg">📋</span> 分类管理
+          <Icon name="grid" className="h-[18px] w-[18px]" /> 分类管理
         </NavLink>
 
         <NavLink to="/tags" className={navClass} onClick={closeMenu}>
-          <span className="text-lg">🏷️</span> 标签管理
+          <Icon name="tag" className="h-[18px] w-[18px]" /> 标签管理
         </NavLink>
 
         <NavLink to="/trash" className={navClass} onClick={closeMenu}>
-          <span className="text-lg">🗑️</span> 回收站
+          <Icon name="trash" className="h-[18px] w-[18px]" /> 回收站
           {trashedCount > 0 && (
-            <span className="ml-auto text-xs opacity-60">{trashedCount}</span>
+            <span className="ml-auto text-xs tabular-nums opacity-60">{trashedCount}</span>
           )}
         </NavLink>
 
-        <div className="mt-3 border-t-2 border-dashed border-line-soft pt-3">
-          <div className="px-3.5 pb-2 pt-1 font-hand text-xs tracking-wider text-ink-faint">
+        <div className="mt-3 border-t-2 border-line-soft pt-3">
+          <div className="px-3.5 pb-2 pt-1 text-xs tracking-wider text-ink-faint">
             分类
           </div>
           {categories.map((cat) => (
@@ -164,7 +165,7 @@ export default function Layout({ children }) {
               <span className="text-lg">{cat.emoji}</span>
               {cat.name}
               {tipsByCategory.get(cat.id) > 0 && (
-                <span className="ml-auto text-xs opacity-60">{tipsByCategory.get(cat.id)}</span>
+                <span className="ml-auto text-xs tabular-nums opacity-60">{tipsByCategory.get(cat.id)}</span>
               )}
             </Link>
           ))}
@@ -174,7 +175,7 @@ export default function Layout({ children }) {
           className="mt-auto flex items-center gap-2.5 rounded-sketch px-3.5 py-2.5 pt-3 text-sm text-ink-soft transition-colors duration-200 hover:bg-primary-light hover:text-ink"
           onClick={() => setDark((d) => !d)}
         >
-          <span className="text-lg">{dark ? "☀️" : "🌙"}</span>
+          <Icon name={dark ? "sun" : "moon"} className="h-[18px] w-[18px]" />
           {dark ? "浅色模式" : "深色模式"}
         </button>
       </aside>
@@ -186,20 +187,20 @@ export default function Layout({ children }) {
       )}
 
       <div className="flex min-h-screen min-w-0 flex-col">
-        <header className="sticky top-0 z-10 flex items-center gap-4 border-b-2 border-dashed border-line-soft bg-paper px-8 py-4 backdrop-blur-sm max-md:gap-2 max-md:px-4 max-md:py-3 max-[480px]:px-3 max-[480px]:py-2.5">
+        <header className="sticky top-0 z-10 flex items-center gap-4 border-b-2 border-line-soft bg-paper px-8 py-4 backdrop-blur-sm max-md:gap-2 max-md:px-4 max-md:py-3 max-[480px]:px-3 max-[480px]:py-2.5">
           <button
-            className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border-2 border-line bg-card text-xl max-md:flex max-[480px]:h-9 max-[480px]:w-9 max-[480px]:text-lg"
+            className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-sketch-sm border-2 border-line bg-card text-xl max-md:flex max-[480px]:h-9 max-[480px]:w-9"
             onClick={toggleMenu}
             aria-label={menuOpen ? "关闭菜单" : "打开菜单"}
             aria-expanded={menuOpen}
           >
-            {menuOpen ? "✕" : "☰"}
+            <Icon name={menuOpen ? "close" : "menu"} className="h-5 w-5" />
           </button>
           <form
             className="flex max-w-[360px] flex-1 items-center gap-2 rounded-pill border-2 border-line bg-card px-4 py-2 transition-all duration-200 focus-within:border-primary focus-within:shadow-[0_0_0_3px_var(--primary-light)] max-md:min-w-0 max-md:max-w-full"
             onSubmit={handleSearch}
           >
-            <span className="text-base text-ink-faint">🔍</span>
+            <Icon name="search" className="h-4 w-4 shrink-0 text-ink-faint" />
             <input
               key={location.key}
               type="text"

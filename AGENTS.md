@@ -34,8 +34,8 @@ No type checker. CI (`.github/workflows/ci.yml`) runs lint + test + build on Nod
 - **Imports**: No braces around default imports (React style)
 - **Styling**: Tailwind utility classes directly in JSX; shared/button/field class strings live in `src/components/ui.js`
 - **index.css**: only Tailwind import, theme variables, base resets, and hand-drawn effects in `@layer components` (card rotation, animations, sidebar drawer). Never add per-component `.css` files
-- **Design tokens**: colors map to `--color-*` (paper, paper-deep, card, primary, accent, danger, ink, ink-soft, ink-faint, line, line-soft); fonts to `font-display` / `font-hand`; shadows to `shadow-ink` / `shadow-ink-hover`
-- **Hand-drawn style**: ZCOOL KuaiLe font via Google Fonts `@import`; card rotation via `:nth-child`; SVG `feTurbulence` filter in `index.html`
+- **Design tokens**: colors map to `--color-*` (paper, paper-deep, card, primary, accent, danger, on-primary, on-danger, ink, ink-soft, ink-faint, line, line-soft); fonts to `font-display` / `font-body` / `font-hand`; shadows to `shadow-ink` / `shadow-ink-hover`
+- **Hand-drawn style**: ZCOOL KuaiLe for display text, Noto Sans SC for body copy; functional icons come from `components/Icon.jsx` (category/tag emoji stay as data); card rotation via `:nth-child`; SVG `feTurbulence` filter in `index.html`
 - **Date format**: `yyyy/MM/dd` via `src/utils/format.js` (no external date library)
 - **ID gen**: `Date.now().toString(36)` + counter in `AppProvider`
 - **Seed data**: 6 tips, 5 categories, 6 tags — loaded on first visit
@@ -49,7 +49,7 @@ src/
 │   ├── useApp.js             # consumer hook
 │   ├── AppContext.jsx        # AppProvider, all CRUD methods, categoryMap/tagMap
 │   └── AppContext.test.jsx
-├── components/               # Layout, TipCard, TipForm, FilterBar, ConfirmDialog, ui.js
+├── components/               # Layout, TipCard, TipForm, FilterBar, ConfirmDialog, Icon, ui.js
 ├── pages/                    # Home, NewTip, EditTip, TipDetail, Categories, Tags, Stats, NotFound
 ├── data/seed.js              # initial seed data
 ├── hooks/useLocalStorage.js  # persistence + cross-tab sync hook

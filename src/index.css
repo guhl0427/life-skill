@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Caveat:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Caveat:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -7,23 +7,25 @@
   --paper: #FFFDF2;
   --paper-deep: #F8F4E8;
   --card: #FFFEF9;
-  --primary: #7EB8A0;
-  --primary-hover: #6AA88E;
+  --primary: #467D67;
+  --primary-hover: #3C6E5A;
   --primary-light: #E8F5EE;
   --accent: #F4A261;
   --accent-hover: #E8914E;
   --accent-light: #FEF0E4;
-  --danger: #E87676;
-  --danger-hover: #D46060;
+  --danger: #B94F4F;
+  --danger-hover: #A64343;
+  --on-primary: #FFFFFF;
+  --on-danger: #FFFFFF;
   --ink: #3D3D3D;
-  --ink-soft: #7A7A7A;
-  --ink-faint: #B0A898;
+  --ink-soft: #63635F;
+  --ink-faint: #7E7668;
   --line: #D4C9B8;
   --line-soft: #E8E0D0;
-  --ink-shadow: 2px 3px 0 var(--line);
-  --ink-shadow-hover: 4px 6px 0 var(--line);
+  --ink-shadow: 2px 2px 0 var(--line);
+  --ink-shadow-hover: 3px 4px 0 var(--line);
   --type-display: 'ZCOOL KuaiLe', cursive;
-  --type-body: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+  --type-body: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --type-hand: 'Caveat', cursive;
   --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --header-height: 64px;
@@ -34,14 +36,20 @@
   --paper: #1C1C1E;
   --paper-deep: #2C2C2E;
   --card: #3A3A3C;
+  --primary: #8FC9B1;
+  --primary-hover: #A6D8C3;
+  --danger: #E88A8A;
+  --danger-hover: #F2A0A0;
+  --on-primary: #1C1C1E;
+  --on-danger: #1C1C1E;
   --ink: #E5E5E5;
   --ink-soft: #A0A0A0;
-  --ink-faint: #7A7A7A;
-  --line: #555557;
-  --line-soft: #444446;
+  --ink-faint: #8A8A8A;
+  --line: #5E5E60;
+  --line-soft: #4A4A4D;
   --primary-light: #2A3D35;
-  --ink-shadow: 2px 3px 0 #000;
-  --ink-shadow-hover: 4px 6px 0 #000;
+  --ink-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  --ink-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.55);
 }
 
 @theme inline {
@@ -61,6 +69,8 @@
   --color-ink-faint: var(--ink-faint);
   --color-line: var(--line);
   --color-line-soft: var(--line-soft);
+  --color-on-primary: var(--on-primary);
+  --color-on-danger: var(--on-danger);
 
   --font-display: var(--type-display);
   --font-body: var(--type-body);
@@ -86,8 +96,8 @@
   to { opacity: 0; }
 }
 @keyframes slideUp {
-  from { opacity: 0; transform: rotate(-0.3deg) translateY(20px); }
-  to { opacity: 1; transform: rotate(-0.3deg) translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes slideIn {
   from { transform: translateX(-100%); }
@@ -151,13 +161,13 @@
   .hand-underline::after {
     content: '';
     position: absolute;
-    bottom: -4px;
+    bottom: -3px;
     left: -2px;
     right: -2px;
-    height: 3px;
+    height: 2px;
     background: var(--primary);
     border-radius: 2px;
-    opacity: 0.5;
+    opacity: 0.4;
   }
 
   .hand-card {
@@ -173,28 +183,20 @@
     pointer-events: none;
   }
 
-  .tip-card:nth-child(odd) { transform: rotate(-0.6deg); }
-  .tip-card:nth-child(3n) { transform: rotate(0.4deg); }
-  .tip-card:nth-child(5n) { transform: rotate(-0.3deg); }
-  .tip-card:nth-child(7n) { transform: rotate(0.6deg); }
   .tip-card:hover {
-    transform: rotate(0deg) translateY(-4px) scale(1.01);
+    transform: translateY(-3px);
   }
 
   .tip-card,
   .mgmt-item {
-    animation: slideUp 0.4s var(--spring) both;
+    animation: slideUp 0.22s ease-out both;
   }
   .tip-card:nth-child(1) { animation-delay: 0.02s; }
-  .tip-card:nth-child(2) { animation-delay: 0.05s; }
-  .tip-card:nth-child(3) { animation-delay: 0.08s; }
-  .tip-card:nth-child(4) { animation-delay: 0.11s; }
-  .tip-card:nth-child(5) { animation-delay: 0.14s; }
-  .tip-card:nth-child(6) { animation-delay: 0.17s; }
-  .tip-card:nth-child(7) { animation-delay: 0.20s; }
-  .tip-card:nth-child(8) { animation-delay: 0.23s; }
-  .tip-card:nth-child(9) { animation-delay: 0.26s; }
-  .tip-card:nth-child(10) { animation-delay: 0.29s; }
+  .tip-card:nth-child(2) { animation-delay: 0.035s; }
+  .tip-card:nth-child(3) { animation-delay: 0.05s; }
+  .tip-card:nth-child(4) { animation-delay: 0.065s; }
+  .tip-card:nth-child(5) { animation-delay: 0.08s; }
+  .tip-card:nth-child(6) { animation-delay: 0.095s; }
 
   .btn-wiggle:hover {
     animation: wiggle 0.3s ease-in-out;
@@ -261,14 +263,6 @@
     .sidebar-overlay.closing {
       animation: fadeOut 0.2s ease-in forwards;
     }
-    .filter-scroll {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .filter-scroll::-webkit-scrollbar {
-      display: none;
-    }
   }
 
   @media (hover: none) {
@@ -277,6 +271,19 @@
     }
     .tip-card:hover {
       transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tip-card,
+    .mgmt-item {
+      animation: none;
+    }
+    .tip-card:hover {
+      transform: none;
+    }
+    .btn-wiggle:hover {
+      animation: none;
     }
   }
 }

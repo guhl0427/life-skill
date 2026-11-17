@@ -28,7 +28,7 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
   return (
     <div
       className={
-        "tip-card group relative flex cursor-pointer flex-col gap-2.5 overflow-hidden rounded-sketch-lg border-2 bg-card p-5 shadow-ink transition-[transform,box-shadow,border-color] duration-[250ms] ease-spring hover:shadow-ink-hover max-[480px]:p-3.5 " +
+        "tip-card group relative flex cursor-pointer flex-col gap-2.5 overflow-hidden rounded-sketch-lg border-[1.5px] bg-card p-5 shadow-ink transition-[transform,box-shadow,border-color] duration-200 ease-out hover:shadow-ink-hover max-[480px]:p-3.5 " +
         (tip.starred ? "border-accent" : "border-line hover:border-primary") +
         (selected ? " border-primary shadow-ink-hover" : "")
       }
@@ -39,9 +39,9 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
             <button
               type="button"
               className={
-                "shrink-0 rounded border-2 px-1.5 py-0.5 text-xs leading-none transition-colors duration-200 " +
+                "shrink-0 rounded-sketch-sm border-2 px-1.5 py-0.5 text-xs leading-none transition-colors duration-200 " +
                 (selected
-                  ? "border-primary bg-primary text-white"
+                  ? "border-primary bg-primary text-on-primary"
                   : "border-line text-ink-faint hover:border-primary")
               }
               aria-label={(selected ? "取消选择 " : "选择 ") + tip.title}
@@ -61,14 +61,14 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
           </button>
           {cat && (
             <span
-              className="whitespace-nowrap rounded-sketch-sm px-2.5 py-0.5 text-xs"
-              style={{ background: cat.color + "18", color: cat.color }}
+              className="flex items-center gap-1 whitespace-nowrap rounded-sketch-sm border border-line-soft border-l-2 bg-paper-deep px-2.5 py-0.5 text-xs text-ink-soft"
+              style={{ borderLeftColor: cat.color }}
             >
               {cat.emoji} {search ? highlightText(cat.name, search) : cat.name}
             </span>
           )}
         </div>
-        <span className="whitespace-nowrap font-hand text-[13px] text-ink-faint">
+        <span className="whitespace-nowrap text-xs tabular-nums text-ink-faint">
           {formatDate(tip.createdAt)}
           {tip.usageCount > 0 && (
             <span className="ml-1">· 用过 {tip.usageCount} 次</span>
@@ -76,22 +76,22 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
         </span>
       </div>
       <Link to={"/tips/" + tip.id} className="text-inherit">
-        <h3 className="line-clamp-2 font-display text-lg leading-snug text-ink max-[480px]:text-base">
+        <h3 className="line-clamp-2 font-display text-[17px] leading-snug text-ink max-[480px]:text-base">
           {search ? highlightText(tip.title, search) : tip.title}
         </h3>
-        <p className="mt-1 line-clamp-3 flex-1 text-sm leading-relaxed text-ink-soft max-md:text-[13px] max-md:line-clamp-2">
+        <p className="mt-1.5 line-clamp-3 flex-1 text-sm leading-relaxed text-ink-soft max-md:text-[13px] max-md:line-clamp-2">
           {search ? highlightText(getSnippet(tip.content, search), search) : tip.content}
         </p>
       </Link>
       {tipTags.length > 0 && (
-        <div className="mt-1 flex flex-wrap gap-1.5">
+        <div className="mt-1 flex flex-wrap gap-x-2.5 gap-y-1">
           {tipTags.map((t) => (
             <Link
               key={t.id}
               to={"/?tag=" + encodeURIComponent(t.id)}
-              className="rounded-sketch-sm border border-line-soft bg-paper-deep px-2.5 py-0.5 font-hand text-xs text-ink-soft transition-colors duration-200 hover:border-primary hover:text-primary"
+              className="text-xs text-ink-faint transition-colors duration-200 hover:text-primary"
             >
-              {search ? highlightText(t.name, search) : t.name}
+              #{search ? highlightText(t.name, search) : t.name}
             </Link>
           ))}
         </div>

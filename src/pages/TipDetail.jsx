@@ -69,7 +69,7 @@ export default function TipDetail() {
 
   return (
     <div>
-      <h1 className="mb-6 font-display text-[32px] leading-tight tracking-[2px] text-ink max-md:text-2xl max-[480px]:text-[22px]">
+      <h1 className="mb-6 font-display text-[30px] leading-tight tracking-[0.5px] text-ink max-md:text-2xl max-[480px]:text-[22px]">
         {tip.title}
       </h1>
 
@@ -77,8 +77,8 @@ export default function TipDetail() {
         <div className="mb-3 flex flex-wrap items-center gap-3">
           {cat && (
             <span
-              className="whitespace-nowrap rounded-sketch-sm px-2.5 py-0.5 text-[13px]"
-              style={{ background: cat.color + "18", color: cat.color }}
+              className="flex items-center gap-1 whitespace-nowrap rounded-sketch-sm border border-line-soft border-l-2 bg-paper-deep px-2.5 py-0.5 text-[13px] text-ink-soft"
+              style={{ borderLeftColor: cat.color }}
             >
               {cat.emoji} {cat.name}
             </span>
@@ -91,12 +91,12 @@ export default function TipDetail() {
           >
             {tip.starred ? "⭐" : "☆"}
           </button>
-          <span className="font-hand text-sm text-ink-faint">
+          <span className="text-sm tabular-nums text-ink-faint">
             {formatDate(tip.createdAt)}
           </span>
         </div>
 
-        <div className="whitespace-pre-wrap rounded-sketch-lg border-2 border-line bg-card p-6 text-base leading-loose text-ink shadow-ink max-md:p-[18px] max-[480px]:p-3.5">
+        <div className="whitespace-pre-wrap rounded-sketch-lg border-[1.5px] border-line bg-card p-6 text-base leading-loose text-ink shadow-ink max-md:p-[18px] max-[480px]:p-3.5">
           {tip.content}
         </div>
 
@@ -105,9 +105,9 @@ export default function TipDetail() {
             {tip.steps.map((step, index) => (
               <li
                 key={index}
-                className="flex gap-3 rounded-sketch border-2 border-line bg-card p-4 shadow-ink max-[480px]:p-2.5"
+                className="flex gap-3 rounded-sketch border-[1.5px] border-line bg-card p-4 shadow-ink max-[480px]:p-2.5"
               >
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-white">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-on-primary">
                   {index + 1}
                 </span>
                 <span className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink">{step}</span>
@@ -121,7 +121,7 @@ export default function TipDetail() {
             ✅ 今天用到了
           </button>
           {tip.usageCount > 0 && (
-            <span className="font-hand text-sm text-ink-soft">
+            <span className="text-sm tabular-nums text-ink-soft">
               已使用 {tip.usageCount} 次
               {tip.lastUsedAt ? " · 最近 " + formatDate(tip.lastUsedAt) : ""}
             </span>
@@ -129,29 +129,31 @@ export default function TipDetail() {
         </div>
 
         {tipTags.length > 0 && (
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-5 flex flex-wrap gap-x-3 gap-y-1">
             {tipTags.map((t) => (
               <Link
                 key={t.id}
                 to={"/?tag=" + encodeURIComponent(t.id)}
-                className="rounded-sketch-sm border border-line-soft bg-paper-deep px-3.5 py-1 font-hand text-[13px] text-ink-soft transition-colors duration-200 hover:border-primary hover:text-primary"
+                className="text-[13px] text-ink-faint transition-colors duration-200 hover:text-primary"
               >
-                {t.name}
+                #{t.name}
               </Link>
             ))}
           </div>
         )}
 
-        <div className="mt-6 flex gap-3 border-t-2 border-dashed border-line-soft pt-5 max-md:flex-col-reverse">
-          <Link to={"/tips/" + id + "/edit"} className={btnPrimary}>
+        <div className="mt-6 flex gap-3 border-t-2 border-line-soft pt-5 max-md:flex-col">
+          <Link to={"/tips/" + id + "/edit"} className={`${btnPrimary} max-md:w-full`}>
             编辑
           </Link>
-          <button className={btnOutline} onClick={handleCopy}>
-            {copied ? "✅ 已复制" : "📋 复制"}
-          </button>
-          <button className={btnDanger} onClick={() => setShowDelete(true)}>
-            删除
-          </button>
+          <div className="flex gap-3 max-md:w-full">
+            <button className={`${btnOutline} max-md:flex-1`} onClick={handleCopy}>
+              {copied ? "✅ 已复制" : "📋 复制"}
+            </button>
+            <button className={`${btnDanger} max-md:flex-1`} onClick={() => setShowDelete(true)}>
+              删除
+            </button>
+          </div>
         </div>
 
         {related.length > 0 && (
@@ -162,7 +164,7 @@ export default function TipDetail() {
                 <Link
                   key={item.id}
                   to={"/tips/" + item.id}
-                  className="rounded-sketch border-2 border-line bg-card px-4 py-3 text-sm text-ink-soft shadow-ink transition-colors duration-200 hover:border-primary hover:text-primary"
+                  className="rounded-sketch border-[1.5px] border-line bg-card px-4 py-3 text-sm text-ink-soft shadow-ink transition-colors duration-200 hover:border-primary hover:text-primary"
                 >
                   {item.title}
                 </Link>
