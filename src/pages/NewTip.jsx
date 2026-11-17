@@ -8,17 +8,19 @@ export default function NewTip() {
   const navigate = useNavigate()
 
   return (
-    <div className="mx-auto max-w-[720px]">
+    <div>
       <h1 className={`${pageTitle} mb-6`}>
         <span className="hand-underline">新建技巧</span>
       </h1>
-      <TipForm
-        onSubmit={(data) => {
-          addTip(data)
-          navigate("/")
-        }}
-        onCancel={() => navigate("/")}
-      />
+      <div className="mx-auto max-w-[720px]">
+        <TipForm
+          onSubmit={(data) => {
+            addTip(data)
+            navigate("/")
+          }}
+          onCancel={() => navigate("/")}
+        />
+      </div>
     </div>
   )
 }

@@ -16,5 +16,3 @@ export const label = "mb-2 block font-display text-base text-ink"
 
 export const pageTitle =
   "mb-2 font-display text-[28px] tracking-[2px] text-ink max-[480px]:text-[22px]"
-
-export const pageDesc = "mb-6 text-sm text-ink-soft"

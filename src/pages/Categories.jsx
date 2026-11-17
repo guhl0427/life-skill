@@ -149,101 +149,101 @@ export default function Categories() {
   }
 
   return (
-    <div className="mx-auto max-w-[640px]">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className={pageTitle}><span className="hand-underline">分类管理</span></h1>
-      </div>
+    <div>
+      <h1 className={`${pageTitle} mb-6`}><span className="hand-underline">分类管理</span></h1>
 
-      <form
-        className="mb-5 flex flex-col gap-3 rounded-sketch border-2 border-dashed border-line bg-card p-4"
-        onSubmit={(e) => { e.preventDefault(); handleAdd() }}
-      >
-        <div>
-          <label htmlFor="cat-name" className={label}>分类名称</label>
-          <input
-            id="cat-name"
-            className={field}
-            placeholder="例如：清洁妙招"
-            maxLength={12}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-        <div>
-          <div className={label}>图标</div>
-          <EmojiControl value={emoji} onChange={setEmoji} />
-        </div>
-        <div>
-          <div className={label}>颜色</div>
-          <ColorControl value={color} onPick={setColor} />
-        </div>
-        <div className="flex justify-end">
-          <button type="submit" className={`${btnPrimary} ${btnSm}`}>
-            添加分类
-          </button>
-        </div>
-      </form>
-
-      {error && <p role="alert" className="mb-3 text-sm text-danger">{error}</p>}
-
-      <div className="flex flex-col gap-3">
-        {categories.map((cat) => (
-          <div
-            key={cat.id}
-            className="mgmt-item group flex items-center gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-all duration-200 hover:border-primary hover:shadow-ink-hover max-[480px]:p-2.5"
-          >
-            {editingId === cat.id ? (
-              <div className="flex w-full flex-col gap-3">
-                <input
-                  className={field}
-                  aria-label="分类名称"
-                  value={editName}
-                  maxLength={12}
-                  onChange={(e) => setEditName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
-                />
-                <div>
-                  <div className="mb-2 text-sm text-ink-soft">图标</div>
-                  <EmojiControl value={editEmoji} onChange={setEditEmoji} />
-                </div>
-                <div>
-                  <div className="mb-2 text-sm text-ink-soft">颜色</div>
-                  <ColorControl value={editColor} onPick={setEditColor} />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button type="button" className={`${btnPrimary} ${btnSm}`} onClick={handleUpdate}>保存</button>
-                  <button type="button" className={`${btnOutline} ${btnSm}`} onClick={() => { setEditingId(null); setError("") }}>取消</button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div
-                  className="h-8 w-8 shrink-0 rounded-lg border-2 border-line"
-                  style={{ background: cat.color }}
-                />
-                <span className="shrink-0 text-2xl">{cat.emoji}</span>
-                <div className="flex-1">
-                  <div className="font-display text-[15px]">{cat.name}</div>
-                  <div className="font-hand text-[13px] text-ink-faint">{countByCat.get(cat.id) || 0} 个技巧</div>
-                </div>
-                <div className="flex gap-1.5 opacity-40 transition-opacity duration-200 group-hover:opacity-100 max-md:opacity-100">
-                  <button className={`${btnOutline} ${btnSm}`} onClick={() => startEdit(cat)}>编辑</button>
-                  <button className={`${btnDanger} ${btnSm}`} onClick={() => setDeleteId(cat.id)}>删除</button>
-                </div>
-              </>
-            )}
+      <div className="mx-auto max-w-[640px]">
+        <form
+          className="mb-5 flex flex-col gap-3 rounded-sketch border-2 border-dashed border-line bg-card p-4"
+          onSubmit={(e) => { e.preventDefault(); handleAdd() }}
+        >
+          <div>
+            <label htmlFor="cat-name" className={label}>分类名称</label>
+            <input
+              id="cat-name"
+              className={field}
+              placeholder="例如：清洁妙招"
+              maxLength={12}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
-        ))}
-      </div>
+          <div>
+            <div className={label}>图标</div>
+            <EmojiControl value={emoji} onChange={setEmoji} />
+          </div>
+          <div>
+            <div className={label}>颜色</div>
+            <ColorControl value={color} onPick={setColor} />
+          </div>
+          <div className="flex justify-end">
+            <button type="submit" className={`${btnPrimary} ${btnSm}`}>
+              添加分类
+            </button>
+          </div>
+        </form>
 
-      {deleteId && (
-        <ConfirmDialog
-          title="删除分类"
-          message="删除后该分类下的技巧将变为未分类。确定删除吗？"
-          onConfirm={() => { deleteCategory(deleteId); setDeleteId(null) }}
-          onCancel={() => setDeleteId(null)}
-        />
-      )}
+        {error && <p role="alert" className="mb-3 text-sm text-danger">{error}</p>}
+
+        <div className="flex flex-col gap-3">
+          {categories.map((cat) => (
+            <div
+              key={cat.id}
+              className="mgmt-item group flex items-center gap-3 rounded-sketch border-2 border-line bg-card px-4 py-3 shadow-ink transition-all duration-200 hover:border-primary hover:shadow-ink-hover max-[480px]:p-2.5"
+            >
+              {editingId === cat.id ? (
+                <div className="flex w-full flex-col gap-3">
+                  <input
+                    className={field}
+                    aria-label="分类名称"
+                    value={editName}
+                    maxLength={12}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
+                  />
+                  <div>
+                    <div className="mb-2 text-sm text-ink-soft">图标</div>
+                    <EmojiControl value={editEmoji} onChange={setEditEmoji} />
+                  </div>
+                  <div>
+                    <div className="mb-2 text-sm text-ink-soft">颜色</div>
+                    <ColorControl value={editColor} onPick={setEditColor} />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button type="button" className={`${btnPrimary} ${btnSm}`} onClick={handleUpdate}>保存</button>
+                    <button type="button" className={`${btnOutline} ${btnSm}`} onClick={() => { setEditingId(null); setError("") }}>取消</button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div
+                    className="h-8 w-8 shrink-0 rounded-lg border-2 border-line"
+                    style={{ background: cat.color }}
+                  />
+                  <span className="shrink-0 text-2xl">{cat.emoji}</span>
+                  <div className="flex-1">
+                    <div className="font-display text-[15px]">{cat.name}</div>
+                    <div className="font-hand text-[13px] text-ink-faint">{countByCat.get(cat.id) || 0} 个技巧</div>
+                  </div>
+                  <div className="flex gap-1.5 opacity-40 transition-opacity duration-200 group-hover:opacity-100 max-md:opacity-100">
+                    <button className={`${btnOutline} ${btnSm}`} onClick={() => startEdit(cat)}>编辑</button>
+                    <button className={`${btnDanger} ${btnSm}`} onClick={() => setDeleteId(cat.id)}>删除</button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {deleteId && (
+          <ConfirmDialog
+            title="删除分类"
+            message="删除后该分类下的技巧将变为未分类。确定删除吗？"
+            onConfirm={() => { deleteCategory(deleteId); setDeleteId(null) }}
+            onCancel={() => setDeleteId(null)}
+          />
+        )}
+      </div>
     </div>
   )
 }

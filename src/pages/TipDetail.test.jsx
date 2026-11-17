@@ -110,7 +110,7 @@ describe("TipDetail 相关技巧", () => {
 describe("TipDetail 使用记录", () => {
   it("点击今天用到了会累计使用次数", () => {
     renderDetail()
-    expect(screen.getByText("还没有使用记录")).toBeInTheDocument()
+    expect(screen.queryByText(/已使用/)).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "✅ 今天用到了" }))
 

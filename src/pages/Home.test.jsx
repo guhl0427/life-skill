@@ -133,7 +133,7 @@ describe("Home 标签筛选", () => {
     expect(screen.getByText("柠檬除水垢")).toBeInTheDocument()
     expect(screen.getByText("香蕉保鲜法")).toBeInTheDocument()
     expect(screen.queryByText("衣服折叠法省空间")).not.toBeInTheDocument()
-    expect(screen.getByText(/标签「#省钱」共 2 条/)).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "清除标签筛选：省钱" })).toBeInTheDocument()
   })
 
   it("标签与分类同时生效", () => {
@@ -157,7 +157,7 @@ describe("Home 标签筛选", () => {
 
     fireEvent.click(screen.getAllByRole("link", { name: "省钱" })[0])
 
-    expect(screen.getByText(/标签「#省钱」共 2 条/)).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "清除标签筛选：省钱" })).toBeInTheDocument()
   })
 })
 

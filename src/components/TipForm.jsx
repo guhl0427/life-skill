@@ -88,7 +88,6 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
           className={field}
           type="text"
           maxLength={60}
-          placeholder="给这个技巧取个名字..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
@@ -100,7 +99,6 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
           id="tip-content"
           className={`${field} min-h-40 resize-y leading-relaxed`}
           maxLength={2000}
-          placeholder="详细描述这个小妙招..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
@@ -108,7 +106,7 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
 
       <div className="mb-5">
         <div className="flex items-center justify-between gap-3">
-          <span className={label}>步骤（可选）</span>
+          <span className={label}>步骤</span>
           <button
             type="button"
             className={quickAction}
@@ -117,9 +115,7 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
             + 添加步骤
           </button>
         </div>
-        {steps.length === 0 ? (
-          <p className="text-xs text-ink-faint">把做法拆成步骤，查看时会更清晰</p>
-        ) : (
+        {steps.length > 0 && (
           <div className="flex flex-col gap-2">
             {steps.map((step, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -191,7 +187,7 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
 
       <div className="mb-5">
         <div className="flex items-center justify-between gap-3">
-          <span className={label}>标签（可多选）</span>
+          <span className={label}>标签</span>
           <button
             type="button"
             className={quickAction}

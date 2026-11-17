@@ -4,20 +4,36 @@ const chipBase =
   "cursor-pointer whitespace-nowrap rounded-sketch border-2 px-3.5 py-1 text-[13px] transition-all duration-200 max-md:shrink-0 max-[480px]:px-2.5 max-[480px]:text-xs"
 const chipIdle = "border-line bg-card text-ink-soft hover:border-primary hover:text-primary"
 const chipActive = "border-primary-hover bg-primary text-white shadow-[1px_2px_0_var(--line)]"
+const chipExtra =
+  "flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-sketch border-2 border-dashed border-primary bg-primary-light px-3 py-1 text-[13px] text-ink transition-colors duration-200 hover:text-primary max-md:shrink-0 max-[480px]:px-2.5 max-[480px]:text-xs"
 
-export default function FilterBar({ activeCat, onCatChange, activeStarred, onStarredChange, activeTag, activeExtra, onReset, sort, onSortChange }) {
+export default function FilterBar({
+  activeCat,
+  onCatChange,
+  activeStarred,
+  onStarredChange,
+  activeTag,
+  activeTagName,
+  untagged,
+  uncategorized,
+  onClearTag,
+  onClearExtra,
+  onReset,
+  sort,
+  onSortChange,
+}) {
   const { categories } = useApp()
+  const isAll = !activeCat && !activeStarred && !activeTag && !untagged && !uncategorized
 
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-3 max-md:flex-nowrap max-md:gap-2">
-      <span className="mr-1 shrink-0 font-hand text-sm text-ink-faint">分类</span>
-      <div className="filter-scroll flex flex-1 items-center gap-3 max-md:min-w-0">
+    <div className="mb-6 flex flex-wrap items-center gap-3 max-md:gap-2">
+      <div className="filter-scroll flex flex-1 items-center gap-2 max-md:min-w-0">
         <div className="flex flex-wrap gap-2 max-md:flex-nowrap max-md:shrink-0">
           <button
             type="button"
-            className={`${chipBase} ${!activeCat && !activeStarred && !activeTag && !activeExtra ? chipActive : chipIdle}`}
+            className={`${chipBase} ${isAll ? chipActive : chipIdle}`}
             onClick={() => onReset?.()}
-            aria-pressed={!activeCat && !activeStarred && !activeTag && !activeExtra}
+            aria-pressed={isAll}
           >
             全部
           </button>
@@ -29,6 +45,28 @@ export default function FilterBar({ activeCat, onCatChange, activeStarred, onSta
           >
             ⭐ 已收藏
           </button>
+          {activeTag && (
+            <button
+              type="button"
+              className={chipExtra}
+              onClick={onClearTag}
+              aria-label={`清除标签筛选：${activeTagName}`}
+            >
+              #{activeTagName}
+              <span aria-hidden="true" className="text-[11px]">✕</span>
+            </button>
+          )}
+          {(untagged || uncategorized) && (
+            <button
+              type="button"
+              className={chipExtra}
+              onClick={onClearExtra}
+              aria-label={`清除${untagged ? "无标签" : "未分类"}筛选`}
+            >
+              {untagged ? "无标签" : "未分类"}
+              <span aria-hidden="true" className="text-[11px]">✕</span>
+            </button>
+          )}
           {categories.map((cat) => (
             <button
               key={cat.id}

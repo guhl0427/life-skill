@@ -17,8 +17,7 @@ export default function TipDetail() {
     return (
       <div className="px-5 py-16 text-center">
         <div className="mb-3 text-5xl">😅</div>
-        <h3 className="mb-2 font-display text-xl text-ink">技巧不存在</h3>
-        <p className="mb-5 text-sm text-ink-soft">这个技巧可能已被删除</p>
+        <h3 className="mb-5 font-display text-xl text-ink">技巧不存在</h3>
         <Link to="/" className={`${btnPrimary} mt-4`}>
           返回首页
         </Link>
@@ -69,8 +68,12 @@ export default function TipDetail() {
   }
 
   return (
-    <div className="mx-auto max-w-[720px]">
-      <div className="mb-6">
+    <div>
+      <h1 className="mb-6 font-display text-[32px] leading-tight tracking-[2px] text-ink max-md:text-2xl max-[480px]:text-[22px]">
+        {tip.title}
+      </h1>
+
+      <div className="mx-auto max-w-[720px]">
         <div className="mb-3 flex flex-wrap items-center gap-3">
           {cat && (
             <span
@@ -90,98 +93,93 @@ export default function TipDetail() {
           </button>
           <span className="font-hand text-sm text-ink-faint">
             {formatDate(tip.createdAt)}
-            {tip.updatedAt > tip.createdAt && (
-              <span className="ml-1.5">· 编辑于 {formatDateTime(tip.updatedAt)}</span>
-            )}
           </span>
         </div>
-        <h1 className="mb-2 font-display text-[32px] leading-tight tracking-[2px] text-ink max-md:text-2xl max-[480px]:text-[22px]">
-          {tip.title}
-        </h1>
-      </div>
 
-      <div className="whitespace-pre-wrap rounded-sketch-lg border-2 border-line bg-card p-6 text-base leading-loose text-ink shadow-ink max-md:p-[18px] max-[480px]:p-3.5">
-        {tip.content}
-      </div>
-
-      {tip.steps?.length > 0 && (
-        <ol className="mt-5 flex flex-col gap-2.5">
-          {tip.steps.map((step, index) => (
-            <li
-              key={index}
-              className="flex gap-3 rounded-sketch border-2 border-line bg-card p-4 shadow-ink max-[480px]:p-2.5"
-            >
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-white">
-                {index + 1}
-              </span>
-              <span className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink">{step}</span>
-            </li>
-          ))}
-        </ol>
-      )}
-
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <button className={`${btnOutline} ${btnSm}`} onClick={() => markUsed(id)}>
-          ✅ 今天用到了
-        </button>
-        <span className="font-hand text-sm text-ink-soft">
-          {tip.usageCount
-            ? `已使用 ${tip.usageCount} 次${tip.lastUsedAt ? " · 最近 " + formatDate(tip.lastUsedAt) : ""}`
-            : "还没有使用记录"}
-        </span>
-      </div>
-
-      {tipTags.length > 0 && (
-        <div className="mt-5 flex flex-wrap gap-2">
-          {tipTags.map((t) => (
-            <Link
-              key={t.id}
-              to={"/?tag=" + encodeURIComponent(t.id)}
-              className="rounded-sketch-sm border border-line-soft bg-paper-deep px-3.5 py-1 font-hand text-[13px] text-ink-soft transition-colors duration-200 hover:border-primary hover:text-primary"
-            >
-              {t.name}
-            </Link>
-          ))}
+        <div className="whitespace-pre-wrap rounded-sketch-lg border-2 border-line bg-card p-6 text-base leading-loose text-ink shadow-ink max-md:p-[18px] max-[480px]:p-3.5">
+          {tip.content}
         </div>
-      )}
 
-      <div className="mt-6 flex gap-3 border-t-2 border-dashed border-line-soft pt-5 max-md:flex-col-reverse">
-        <Link to={"/tips/" + id + "/edit"} className={btnPrimary}>
-          编辑
-        </Link>
-        <button className={btnOutline} onClick={handleCopy}>
-          {copied ? "✅ 已复制" : "📋 复制"}
-        </button>
-        <button className={btnDanger} onClick={() => setShowDelete(true)}>
-          删除
-        </button>
-      </div>
-
-      {related.length > 0 && (
-        <div className="mt-8">
-          <h2 className="mb-3 font-display text-lg text-ink">相关技巧</h2>
-          <div className="flex flex-col gap-2">
-            {related.map((item) => (
-              <Link
-                key={item.id}
-                to={"/tips/" + item.id}
-                className="rounded-sketch border-2 border-line bg-card px-4 py-3 text-sm text-ink-soft shadow-ink transition-colors duration-200 hover:border-primary hover:text-primary"
+        {tip.steps?.length > 0 && (
+          <ol className="mt-5 flex flex-col gap-2.5">
+            {tip.steps.map((step, index) => (
+              <li
+                key={index}
+                className="flex gap-3 rounded-sketch border-2 border-line bg-card p-4 shadow-ink max-[480px]:p-2.5"
               >
-                {item.title}
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-white">
+                  {index + 1}
+                </span>
+                <span className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink">{step}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <button className={`${btnOutline} ${btnSm}`} onClick={() => markUsed(id)}>
+            ✅ 今天用到了
+          </button>
+          {tip.usageCount > 0 && (
+            <span className="font-hand text-sm text-ink-soft">
+              已使用 {tip.usageCount} 次
+              {tip.lastUsedAt ? " · 最近 " + formatDate(tip.lastUsedAt) : ""}
+            </span>
+          )}
+        </div>
+
+        {tipTags.length > 0 && (
+          <div className="mt-5 flex flex-wrap gap-2">
+            {tipTags.map((t) => (
+              <Link
+                key={t.id}
+                to={"/?tag=" + encodeURIComponent(t.id)}
+                className="rounded-sketch-sm border border-line-soft bg-paper-deep px-3.5 py-1 font-hand text-[13px] text-ink-soft transition-colors duration-200 hover:border-primary hover:text-primary"
+              >
+                {t.name}
               </Link>
             ))}
           </div>
-        </div>
-      )}
+        )}
 
-      {showDelete && (
-        <ConfirmDialog
-          title="删除技巧"
-          message="删除后会移入回收站，可在回收站恢复或永久删除。"
-          onConfirm={handleDelete}
-          onCancel={() => setShowDelete(false)}
-        />
-      )}
+        <div className="mt-6 flex gap-3 border-t-2 border-dashed border-line-soft pt-5 max-md:flex-col-reverse">
+          <Link to={"/tips/" + id + "/edit"} className={btnPrimary}>
+            编辑
+          </Link>
+          <button className={btnOutline} onClick={handleCopy}>
+            {copied ? "✅ 已复制" : "📋 复制"}
+          </button>
+          <button className={btnDanger} onClick={() => setShowDelete(true)}>
+            删除
+          </button>
+        </div>
+
+        {related.length > 0 && (
+          <div className="mt-8">
+            <h2 className="mb-3 font-display text-lg text-ink">相关技巧</h2>
+            <div className="flex flex-col gap-2">
+              {related.map((item) => (
+                <Link
+                  key={item.id}
+                  to={"/tips/" + item.id}
+                  className="rounded-sketch border-2 border-line bg-card px-4 py-3 text-sm text-ink-soft shadow-ink transition-colors duration-200 hover:border-primary hover:text-primary"
+                >
+                  {item.title}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showDelete && (
+          <ConfirmDialog
+            title="删除技巧"
+            message="删除后会移入回收站，可在回收站恢复或永久删除。"
+            onConfirm={handleDelete}
+            onCancel={() => setShowDelete(false)}
+          />
+        )}
+      </div>
     </div>
   )
 }

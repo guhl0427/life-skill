@@ -151,8 +151,8 @@ export default function Layout({ children }) {
         </NavLink>
 
         <div className="mt-3 border-t-2 border-dashed border-line-soft pt-3">
-          <div className="px-3.5 pb-2 pt-1 font-hand text-xs uppercase tracking-wider text-ink-faint">
-            Categories
+          <div className="px-3.5 pb-2 pt-1 font-hand text-xs tracking-wider text-ink-faint">
+            分类
           </div>
           {categories.map((cat) => (
             <Link
@@ -163,7 +163,9 @@ export default function Layout({ children }) {
             >
               <span className="text-lg">{cat.emoji}</span>
               {cat.name}
-              <span className="ml-auto text-xs opacity-60">{tipsByCategory.get(cat.id) || 0}</span>
+              {tipsByCategory.get(cat.id) > 0 && (
+                <span className="ml-auto text-xs opacity-60">{tipsByCategory.get(cat.id)}</span>
+              )}
             </Link>
           ))}
         </div>

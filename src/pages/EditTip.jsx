@@ -21,8 +21,7 @@ export default function EditTip() {
     return (
       <div className="px-5 py-16 text-center">
         <div className="mb-3 text-5xl">😅</div>
-        <h3 className="mb-2 font-display text-xl text-ink">技巧不存在</h3>
-        <p className="mb-5 text-sm text-ink-soft">这个技巧可能已被删除</p>
+        <h3 className="mb-5 font-display text-xl text-ink">技巧不存在</h3>
         <Link to="/" className={`${btnPrimary} mt-4`}>
           返回首页
         </Link>
@@ -31,19 +30,21 @@ export default function EditTip() {
   }
 
   return (
-    <div className="mx-auto max-w-[720px]">
+    <div>
       <h1 className={`${pageTitle} mb-6`}>
         <span className="hand-underline">编辑技巧</span>
       </h1>
-      <TipForm
-        key={tip.id}
-        initial={tip}
-        onSubmit={(data) => {
-          updateTip(id, data)
-          goBack(navigate, "/")
-        }}
-        onCancel={() => goBack(navigate, "/")}
-      />
+      <div className="mx-auto max-w-[720px]">
+        <TipForm
+          key={tip.id}
+          initial={tip}
+          onSubmit={(data) => {
+            updateTip(id, data)
+            goBack(navigate, "/")
+          }}
+          onCancel={() => goBack(navigate, "/")}
+        />
+      </div>
     </div>
   )
 }

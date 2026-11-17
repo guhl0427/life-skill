@@ -1,8 +1,7 @@
 import { useMemo } from "react"
 import { Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
-import { formatDate } from "../utils/format"
-import { pageTitle, pageDesc } from "../components/ui"
+import { pageTitle } from "../components/ui"
 
 export default function Stats() {
   const { tips, categories, tags } = useApp()
@@ -50,28 +49,22 @@ export default function Stats() {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
 
-    const newest = active.length > 0
-      ? active.reduce((a, b) => (a.createdAt > b.createdAt ? a : b))
-      : null
-
     const untagged = active.filter((t) => !(t.tagIds || []).length).length
     const trashedCount = tips.filter((t) => t.deletedAt).length
 
     return {
       total, starred, usedCats, unusedCats, uncategorizedStat,
-      tagCounts, newest, untagged, trashedCount,
+      tagCounts, untagged, trashedCount,
     }
   }, [tips, categories, tags])
 
   if (stats.total === 0) {
     return (
       <div>
-        <h1 className={pageTitle}><span className="hand-underline">统计看板</span></h1>
-        <p className={pageDesc}>你的生活技巧库数据概览</p>
+        <h1 className={`${pageTitle} mb-6`}><span className="hand-underline">统计看板</span></h1>
         <div className="px-5 py-16 text-center">
           <div className="mb-3 text-5xl">📊</div>
-          <h3 className="mb-2 font-display text-xl text-ink">还没有技巧</h3>
-          <p className="text-sm text-ink-soft">添加一些技巧后再来看看统计数据吧</p>
+          <h3 className="font-display text-xl text-ink">还没有技巧</h3>
         </div>
       </div>
     )
@@ -79,8 +72,7 @@ export default function Stats() {
 
   return (
     <div>
-      <h1 className={pageTitle}><span className="hand-underline">统计看板</span></h1>
-      <p className={pageDesc}>你的生活技巧库数据概览</p>
+      <h1 className={`${pageTitle} mb-6`}><span className="hand-underline">统计看板</span></h1>
 
       <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-4 max-[480px]:grid-cols-2">
         <div className="rounded-sketch-lg border-2 border-line bg-card p-5 text-center shadow-ink">
@@ -135,7 +127,7 @@ export default function Stats() {
 
       {stats.tagCounts.length > 0 && (
         <>
-          <h2 className="mb-4 font-display text-lg text-ink">最常用标签 Top 5</h2>
+          <h2 className="mb-4 font-display text-lg text-ink">常用标签</h2>
           <div className="mb-8 flex flex-wrap gap-2.5">
             {stats.tagCounts.map((tag) => (
               <span
@@ -150,7 +142,6 @@ export default function Stats() {
         </>
       )}
 
-      <h2 className="mb-4 font-display text-lg text-ink">数据健康</h2>
       <div className="mb-8 grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
         <Link
           to="/?cat=__none__"
@@ -181,12 +172,6 @@ export default function Stats() {
           <span className="font-display text-lg text-primary">{stats.trashedCount}</span>
         </Link>
       </div>
-
-      {stats.newest && (
-        <div className="rounded-sketch border border-dashed border-line-soft bg-paper-deep p-4 text-center font-hand text-[13px] text-ink-soft">
-          最新技巧：「{stats.newest.title}」— {formatDate(stats.newest.createdAt)}
-        </div>
-      )}
     </div>
   )
 }

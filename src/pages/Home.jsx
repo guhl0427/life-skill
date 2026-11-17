@@ -14,7 +14,7 @@ import {
 } from "../utils/backup"
 import { formatDate } from "../utils/format"
 import { matchesTip } from "../utils/search"
-import { btnOutline, btnDanger, btnSm, pageTitle, pageDesc } from "../components/ui"
+import { btnOutline, btnDanger, btnSm, pageTitle } from "../components/ui"
 
 export default function Home() {
   const { tips, categories, tags, categoryMap, tagMap, deleteTip, updateTip, restoreTip, importData } = useApp()
@@ -201,12 +201,9 @@ export default function Home() {
 
   return (
     <div>
-      <h1 className={pageTitle}>
+      <h1 className={`${pageTitle} mb-6`}>
         <span className="hand-underline">生活小技巧</span>
       </h1>
-      <p className={pageDesc}>
-        记录那些让生活更美好的小妙招 ✨
-      </p>
 
       <FilterBar
         activeCat={activeCat}
@@ -214,7 +211,11 @@ export default function Home() {
         activeStarred={activeStarred}
         onStarredChange={handleStarredChange}
         activeTag={activeTag}
-        activeExtra={activeCat === "__none__" || untaggedOnly}
+        activeTagName={tagMap.get(activeTag)?.name || ""}
+        untagged={untaggedOnly}
+        uncategorized={activeCat === "__none__"}
+        onClearTag={() => handleClearQuery("tag")}
+        onClearExtra={() => handleClearQuery("cat", "untagged")}
         onReset={handleResetFilters}
         sort={sort}
         onSortChange={handleSortChange}
@@ -261,25 +262,6 @@ export default function Home() {
         </div>
       )}
 
-      {search && (
-        <div className="mb-4 text-sm text-ink-soft">
-          搜索 &ldquo;{search}&rdquo; 共 {filtered.length} 条结果
-        </div>
-      )}
-
-      {activeTag && (
-        <div className="mb-4 flex items-center gap-2 text-sm text-ink-soft">
-          标签「#{tagMap.get(activeTag)?.name}」共 {filtered.length} 条
-          <button
-            type="button"
-            className="text-primary hover:underline"
-            onClick={() => handleClearQuery("tag")}
-          >
-            清除
-          </button>
-        </div>
-      )}
-
       {selectMode && (
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-sketch border-2 border-dashed border-primary bg-card p-3">
           <span className="font-hand text-sm text-ink-soft">已选 {selectedIds.length} 条</span>
@@ -319,28 +301,14 @@ export default function Home() {
         </div>
       )}
 
-      {(activeCat === "__none__" || untaggedOnly) && (
-        <div className="mb-4 flex items-center gap-2 text-sm text-ink-soft">
-          {activeCat === "__none__" ? "未分类" : "无标签"}技巧共 {filtered.length} 条
-          <button
-            type="button"
-            className="text-primary hover:underline"
-            onClick={() => handleClearQuery("cat", "untagged")}
-          >
-            清除
-          </button>
-        </div>
-      )}
-
       {filtered.length === 0 ? (
         <div className="px-5 py-16 text-center">
           <div className="mb-3 text-5xl">🔍</div>
-          <h3 className="mb-2 font-display text-xl text-ink">没有找到技巧</h3>
-          <p className="mb-5 text-sm text-ink-soft">
-            {search
-              ? "换个关键词试试，或者点击「+ 新技巧」添加"
-              : "点击「+ 新技巧」开始记录你的第一个生活妙招吧"}
-          </p>
+          <h3 className="font-display text-xl text-ink">
+            {search || activeCat || activeStarred || activeTag || untaggedOnly
+              ? "没有匹配的技巧"
+              : "还没有技巧"}
+          </h3>
         </div>
       ) : (
         <div className="tip-grid">
