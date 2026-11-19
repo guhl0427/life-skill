@@ -9,7 +9,7 @@ const navClass = ({ isActive }) =>
   (isActive ? "bg-primary text-on-primary" : "text-ink-soft hover:bg-primary-light hover:text-ink")
 
 export default function Layout({ children }) {
-  const { tips, categories } = useApp()
+  const { tips, categories, tags } = useApp()
   const [menuOpen, setMenuOpen] = useState(false)
   const [closing, setClosing] = useState(false)
   const [storageError, setStorageError] = useState(false)
@@ -20,15 +20,7 @@ export default function Layout({ children }) {
   const [dark, setDark] = useState(() => localStorage.getItem("ls_dark") === "true")
   const navigate = useNavigate()
 
-  const tipsByCategory = useMemo(() => {
-    const counts = new Map()
-    for (const tip of tips) {
-      if (tip.deletedAt) continue
-      if (tip.categoryId) counts.set(tip.categoryId, (counts.get(tip.categoryId) || 0) + 1)
-    }
-    return counts
-  }, [tips])
-
+  const activeTipsCount = useMemo(() => tips.filter((t) => !t.deletedAt).length, [tips])
   const trashedCount = useMemo(() => tips.filter((t) => t.deletedAt).length, [tips])
 
   useEffect(() => {
@@ -128,6 +120,10 @@ export default function Layout({ children }) {
           Life<span className="text-primary">Skill</span>
         </Link>
 
+        <div className="px-3.5 pb-1 pt-1 text-xs tracking-wider text-ink-faint">
+          浏览
+        </div>
+
         <NavLink to="/" end className={navClass} onClick={closeMenu}>
           <Icon name="home" className="h-[18px] w-[18px]" /> 首页
         </NavLink>
@@ -136,48 +132,54 @@ export default function Layout({ children }) {
           <Icon name="chart" className="h-[18px] w-[18px]" /> 统计看板
         </NavLink>
 
-        <NavLink to="/categories" className={navClass} onClick={closeMenu}>
-          <Icon name="grid" className="h-[18px] w-[18px]" /> 分类管理
-        </NavLink>
-
-        <NavLink to="/tags" className={navClass} onClick={closeMenu}>
-          <Icon name="tag" className="h-[18px] w-[18px]" /> 标签管理
-        </NavLink>
-
-        <NavLink to="/trash" className={navClass} onClick={closeMenu}>
-          <Icon name="trash" className="h-[18px] w-[18px]" /> 回收站
-          {trashedCount > 0 && (
-            <span className="ml-auto text-xs tabular-nums opacity-60">{trashedCount}</span>
-          )}
-        </NavLink>
-
         <div className="mt-3 border-t-2 border-line-soft pt-3">
-          <div className="px-3.5 pb-2 pt-1 text-xs tracking-wider text-ink-faint">
-            分类
+          <div className="px-3.5 pb-1 pt-1 text-xs tracking-wider text-ink-faint">
+            管理
           </div>
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              to={"/?cat=" + cat.id}
-              className="flex items-center gap-2.5 rounded-sketch px-3.5 py-2.5 text-[15px] text-ink-soft transition-colors duration-200 hover:bg-primary-light hover:text-ink"
-              onClick={closeMenu}
-            >
-              <span className="text-lg">{cat.emoji}</span>
-              {cat.name}
-              {tipsByCategory.get(cat.id) > 0 && (
-                <span className="ml-auto text-xs tabular-nums opacity-60">{tipsByCategory.get(cat.id)}</span>
-              )}
-            </Link>
-          ))}
+
+          <NavLink to="/categories" className={navClass} onClick={closeMenu}>
+            <Icon name="grid" className="h-[18px] w-[18px]" /> 分类管理
+          </NavLink>
+
+          <NavLink to="/tags" className={navClass} onClick={closeMenu}>
+            <Icon name="tag" className="h-[18px] w-[18px]" /> 标签管理
+          </NavLink>
+
+          <NavLink to="/trash" className={navClass} onClick={closeMenu}>
+            <Icon name="trash" className="h-[18px] w-[18px]" /> 回收站
+            {trashedCount > 0 && (
+              <span className="ml-auto text-xs tabular-nums opacity-60">{trashedCount}</span>
+            )}
+          </NavLink>
         </div>
 
-        <button
-          className="mt-auto flex items-center gap-2.5 rounded-sketch px-3.5 py-2.5 pt-3 text-sm text-ink-soft transition-colors duration-200 hover:bg-primary-light hover:text-ink"
-          onClick={() => setDark((d) => !d)}
-        >
-          <Icon name={dark ? "sun" : "moon"} className="h-[18px] w-[18px]" />
-          {dark ? "浅色模式" : "深色模式"}
-        </button>
+        <div className="mt-auto flex flex-col gap-3 pt-4">
+          <div className="rounded-sketch border-2 border-dashed border-line-soft bg-card px-3 py-3">
+            <div className="mb-2 px-0.5 text-xs tracking-wider text-ink-faint">数据概览</div>
+            <div className="flex items-start gap-2 text-center">
+              <div className="flex-1">
+                <div className="font-display text-lg leading-tight text-ink">{activeTipsCount}</div>
+                <div className="mt-0.5 text-[11px] text-ink-faint">技巧</div>
+              </div>
+              <div className="flex-1">
+                <div className="font-display text-lg leading-tight text-ink">{categories.length}</div>
+                <div className="mt-0.5 text-[11px] text-ink-faint">分类</div>
+              </div>
+              <div className="flex-1">
+                <div className="font-display text-lg leading-tight text-ink">{tags.length}</div>
+                <div className="mt-0.5 text-[11px] text-ink-faint">标签</div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            className="flex items-center gap-2.5 rounded-sketch px-3.5 py-2.5 text-sm text-ink-soft transition-colors duration-200 hover:bg-primary-light hover:text-ink"
+            onClick={() => setDark((d) => !d)}
+          >
+            <Icon name={dark ? "sun" : "moon"} className="h-[18px] w-[18px]" />
+            {dark ? "浅色模式" : "深色模式"}
+          </button>
+        </div>
       </aside>
       {(menuOpen || closing) && (
         <div
