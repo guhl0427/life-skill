@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import { useApp } from "../context/useApp"
 
 const chipBase =
@@ -22,8 +23,17 @@ export default function FilterBar({
   sort,
   onSortChange,
 }) {
-  const { categories } = useApp()
+  const { categories, tips } = useApp()
   const isAll = !activeCat && !activeStarred && !activeTag && !untagged && !uncategorized
+
+  const tipsByCategory = useMemo(() => {
+    const counts = new Map()
+    for (const tip of tips) {
+      if (tip.deletedAt || !tip.categoryId) continue
+      counts.set(tip.categoryId, (counts.get(tip.categoryId) || 0) + 1)
+    }
+    return counts
+  }, [tips])
 
   return (
     <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -77,6 +87,11 @@ export default function FilterBar({
               aria-pressed={activeCat === cat.id}
             >
               {cat.emoji} {cat.name}
+              {tipsByCategory.get(cat.id) > 0 && (
+                <span className="ml-0.5 text-[11px] tabular-nums opacity-60">
+                  {tipsByCategory.get(cat.id)}
+                </span>
+              )}
             </button>
           ))}
         </div>
