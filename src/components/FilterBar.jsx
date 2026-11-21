@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { useApp } from "../context/useApp"
+import Select from "./Select"
 
 const chipBase =
   "cursor-pointer whitespace-nowrap rounded-sketch border-2 px-3.5 py-1 text-[13px] transition-all duration-200 max-md:shrink-0 max-[480px]:px-2.5 max-[480px]:text-xs"
@@ -97,18 +98,20 @@ export default function FilterBar({
         </div>
       </div>
 
-      <select
-        className="select-arrow shrink-0 cursor-pointer appearance-none rounded-sketch border-2 border-line bg-card py-1 pl-3.5 pr-9 text-[13px] text-ink-soft transition-colors duration-200 max-md:ml-0 max-md:w-full max-[480px]:py-0.5 max-[480px]:pl-2.5 max-[480px]:text-xs"
+      <Select
+        ariaLabel="排序方式"
+        className="shrink-0 max-md:w-full"
+        triggerClassName="cursor-pointer rounded-sketch border-2 border-line bg-card py-1 pl-3.5 pr-3 text-[13px] text-ink-soft transition-colors duration-200 hover:border-primary hover:text-ink max-[480px]:py-0.5 max-[480px]:pl-2.5 max-[480px]:text-xs"
         value={sort}
-        onChange={(e) => onSortChange(e.target.value)}
-        aria-label="排序方式"
-      >
-        <option value="newest">最新</option>
-        <option value="updated">最近更新</option>
-        <option value="most">最常用</option>
-        <option value="oldest">最早</option>
-        <option value="title">标题 A-Z</option>
-      </select>
+        onChange={onSortChange}
+        options={[
+          { value: "newest", label: "最新" },
+          { value: "updated", label: "最近更新" },
+          { value: "most", label: "最常用" },
+          { value: "oldest", label: "最早" },
+          { value: "title", label: "标题 A-Z" },
+        ]}
+      />
     </div>
   )
 }

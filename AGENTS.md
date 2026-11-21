@@ -49,7 +49,7 @@ src/
 │   ├── useApp.js             # consumer hook
 │   ├── AppContext.jsx        # AppProvider, all CRUD methods, categoryMap/tagMap
 │   └── AppContext.test.jsx
-├── components/               # Layout, TipCard, TipForm, FilterBar, ConfirmDialog, Icon, ui.js
+├── components/               # Layout, TipCard, TipForm, FilterBar, Select, ConfirmDialog, Icon, ui.js
 ├── pages/                    # Home, NewTip, EditTip, TipDetail, Categories, Tags, Stats, NotFound
 ├── data/seed.js              # initial seed data
 ├── hooks/useLocalStorage.js  # persistence + cross-tab sync hook

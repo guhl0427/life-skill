@@ -31,13 +31,19 @@ describe("TipForm 快速新建", () => {
     fireEvent.change(screen.getByLabelText("新分类名称"), { target: { value: "临时分类" } })
     fireEvent.click(screen.getByRole("button", { name: "添加" }))
 
-    const select = screen.getByLabelText("分类")
-    expect(screen.getByRole("option", { name: /临时分类/ })).toBeInTheDocument()
-    expect(select.value).not.toBe("")
+    fireEvent.click(screen.getByLabelText("分类"))
+    const created = screen.getByRole("option", { name: /临时分类/ })
+    expect(created).toBeInTheDocument()
+    fireEvent.click(created)
 
+    fireEvent.click(screen.getByLabelText("分类"))
+    expect(screen.getByRole("option", { name: /临时分类/ })).toHaveAttribute("aria-selected", "true")
+    fireEvent.click(screen.getByLabelText("分类"))
+
+    const saved = JSON.parse(localStorage.getItem("ls_categories")).find((c) => c.name === "临时分类")
     fireEvent.click(screen.getByRole("button", { name: "保存" }))
     expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ categoryId: select.value })
+      expect.objectContaining({ categoryId: saved.id })
     )
   })
 

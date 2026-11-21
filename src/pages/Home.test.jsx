@@ -63,7 +63,8 @@ describe("Home 排序", () => {
     )
     renderHome()
 
-    fireEvent.change(screen.getByLabelText("排序方式"), { target: { value: "updated" } })
+    fireEvent.click(screen.getByLabelText("排序方式"))
+    fireEvent.click(screen.getByRole("option", { name: "最近更新" }))
 
     const titles = screen.getAllByRole("heading", { level: 3 }).map((el) => el.textContent)
     expect(titles).toEqual(["新近编辑", "刚创建未编辑"])
@@ -167,7 +168,8 @@ describe("Home 批量操作", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "批量选择" }))
     fireEvent.click(screen.getByRole("button", { name: "选择 柠檬除水垢" }))
-    fireEvent.change(screen.getByLabelText("批量设置分类"), { target: { value: "cat-2" } })
+    fireEvent.click(screen.getByLabelText("批量设置分类"))
+    fireEvent.click(screen.getByRole("option", { name: /收纳整理/ }))
     fireEvent.click(screen.getByRole("button", { name: "应用分类" }))
 
     const stored = JSON.parse(localStorage.getItem("ls_tips"))

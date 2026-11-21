@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useApp } from "../context/useApp"
 import { btnPrimary, btnOutline, btnSm, field, label } from "./ui"
+import Select from "./Select"
 
 const quickAction = "mb-2 shrink-0 text-[13px] text-primary hover:underline"
 
@@ -154,19 +155,17 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
             + 新建分类
           </button>
         </div>
-        <select
+        <Select
           id="tip-category"
-          className={`${field} select-arrow cursor-pointer pr-9`}
+          className="w-full"
+          triggerClassName={`${field} cursor-pointer`}
           value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
-        >
-          <option value="">选择分类</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.emoji} {cat.name}
-            </option>
-          ))}
-        </select>
+          onChange={setCategoryId}
+          options={[
+            { value: "", label: "选择分类" },
+            ...categories.map((cat) => ({ value: cat.id, label: `${cat.emoji} ${cat.name}` })),
+          ]}
+        />
         {showNewCat && (
           <div className="mt-2 flex gap-2">
             <input

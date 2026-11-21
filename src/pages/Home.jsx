@@ -4,6 +4,7 @@ import { useApp } from "../context/useApp"
 import TipCard from "../components/TipCard"
 import FilterBar from "../components/FilterBar"
 import ConfirmDialog from "../components/ConfirmDialog"
+import Select from "../components/Select"
 import {
   buildBackup,
   parseBackup,
@@ -325,20 +326,17 @@ export default function Home() {
           <button type="button" className={`${btnOutline} ${btnSm}`} onClick={handleSelectAll}>
             全选 / 取消全选
           </button>
-          <select
-            aria-label="批量设置分类"
-            className="select-arrow cursor-pointer rounded-sketch border-2 border-line bg-card py-1 pl-3 pr-9 text-[13px] text-ink-soft"
+          <Select
+            ariaLabel="批量设置分类"
+            triggerClassName="cursor-pointer rounded-sketch border-2 border-line bg-card py-1 pl-3 pr-3 text-[13px] text-ink-soft transition-colors duration-200 hover:border-primary hover:text-ink"
             value={batchCat}
-            onChange={(e) => setBatchCat(e.target.value)}
-          >
-            <option value="">选择分类</option>
-            <option value="__none__">未分类</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.emoji} {cat.name}
-              </option>
-            ))}
-          </select>
+            onChange={setBatchCat}
+            options={[
+              { value: "", label: "选择分类" },
+              { value: "__none__", label: "未分类" },
+              ...categories.map((cat) => ({ value: cat.id, label: `${cat.emoji} ${cat.name}` })),
+            ]}
+          />
           <button
             type="button"
             className={`${btnOutline} ${btnSm}`}
