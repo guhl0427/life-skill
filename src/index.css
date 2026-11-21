@@ -224,6 +224,15 @@
     animation: slideUp 0.15s ease-out;
   }
 
+  /* 吸顶后的分类区横向滚动时隐藏滚动条 */
+  .scrollbar-none {
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Sidebar: sticky on desktop, animated drawer on mobile */
   .app-sidebar {
     display: flex;

@@ -217,7 +217,7 @@ export default function Layout({ children }) {
             + 新技巧
           </Link>
         </header>
-        <main className="min-w-0 flex-1 overflow-x-hidden px-8 py-7 max-md:px-4 max-md:py-5 max-[480px]:px-3 max-[480px]:py-4">
+        <main className="min-w-0 flex-1 overflow-x-clip px-8 py-7 max-md:px-4 max-md:py-5 max-[480px]:px-3 max-[480px]:py-4">
           {children}
         </main>
       </div>

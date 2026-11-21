@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useApp } from "../context/useApp"
 import Select from "./Select"
 
@@ -30,7 +30,34 @@ export default function FilterBar({
 }) {
   const { categories, tips } = useApp()
   const [showAllCats, setShowAllCats] = useState(false)
+  const [stuck, setStuck] = useState(false)
+  const barRef = useRef(null)
   const isAll = !activeCat && !activeStarred && !activeTag && !untagged && !uncategorized
+
+  // 吸附到顶部时切换为单行 + 横向滚动
+  useEffect(() => {
+    const bar = barRef.current
+    if (!bar) return
+    let offset = 0
+    const measure = () => {
+      offset = parseFloat(getComputedStyle(bar).top) || 0
+    }
+    const update = () => {
+      setStuck(bar.getBoundingClientRect().top <= offset + 0.5)
+    }
+    const onResize = () => {
+      measure()
+      update()
+    }
+    measure()
+    update()
+    window.addEventListener("scroll", update, { passive: true })
+    window.addEventListener("resize", onResize)
+    return () => {
+      window.removeEventListener("scroll", update)
+      window.removeEventListener("resize", onResize)
+    }
+  }, [])
 
   const visibleCategories = useMemo(() => {
     if (showAllCats || categories.length <= CAT_PREVIEW) return categories
@@ -52,9 +79,23 @@ export default function FilterBar({
   }, [tips])
 
   return (
-    <div className="mb-6 flex flex-wrap items-center gap-3">
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-        <div className="flex flex-wrap gap-2">
+    <div
+      ref={barRef}
+      className={
+        "sticky top-[73px] z-[9] -mx-8 mb-6 flex flex-wrap items-center gap-3 border-b-2 px-8 py-2 transition-[border-color,box-shadow] duration-200 max-md:-mx-4 max-md:top-[65px] max-md:px-4 max-md:py-1.5 max-[480px]:-mx-3 max-[480px]:top-[61px] max-[480px]:px-3 " +
+        (stuck ? "max-md:flex-nowrap " : "") +
+        (stuck
+          ? "border-line-soft bg-paper shadow-[0_8px_12px_-10px_rgba(61,61,61,0.5)]"
+          : "border-transparent")
+      }
+    >
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div
+          className={
+            "flex min-w-0 flex-wrap gap-2 " +
+            (stuck ? "max-md:flex-nowrap max-md:overflow-x-auto max-md:scrollbar-none" : "")
+          }
+        >
           <button
             type="button"
             className={`${chipBase} ${isAll ? chipActive : chipIdle}`}
@@ -125,7 +166,7 @@ export default function FilterBar({
 
       <Select
         ariaLabel="排序方式"
-        className="shrink-0 max-md:w-full"
+        className={"shrink-0 " + (stuck ? "" : "max-md:w-full")}
         triggerClassName="cursor-pointer rounded-sketch border-2 border-line bg-card py-1 pl-3.5 pr-3 text-[13px] text-ink-soft transition-colors duration-200 hover:border-primary hover:text-ink max-[480px]:py-0.5 max-[480px]:pl-2.5 max-[480px]:text-xs"
         value={sort}
         onChange={onSortChange}
