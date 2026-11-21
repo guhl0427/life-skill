@@ -1,11 +1,15 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useApp } from "../context/useApp"
 import Select from "./Select"
+
+const CAT_PREVIEW = 10
 
 const chipBase =
   "cursor-pointer whitespace-nowrap rounded-sketch border-2 px-3.5 py-1 text-[13px] transition-all duration-200 max-md:shrink-0 max-[480px]:px-2.5 max-[480px]:text-xs"
 const chipIdle = "border-line bg-card text-ink-soft hover:border-primary hover:text-primary"
 const chipActive = "border-primary bg-primary-light font-medium text-ink shadow-[1px_2px_0_var(--line-soft)]"
+const chipMore =
+  "cursor-pointer whitespace-nowrap rounded-sketch border-2 border-dashed border-line bg-paper-deep px-3.5 py-1 text-[13px] text-ink-faint transition-colors duration-200 hover:border-primary hover:text-primary max-md:shrink-0 max-[480px]:px-2.5 max-[480px]:text-xs"
 const chipExtra =
   "flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-sketch border-2 border-primary bg-primary-light px-3 py-1 text-[13px] text-ink transition-colors duration-200 hover:text-primary max-md:shrink-0 max-[480px]:px-2.5 max-[480px]:text-xs"
 
@@ -25,7 +29,18 @@ export default function FilterBar({
   onSortChange,
 }) {
   const { categories, tips } = useApp()
+  const [showAllCats, setShowAllCats] = useState(false)
   const isAll = !activeCat && !activeStarred && !activeTag && !untagged && !uncategorized
+
+  const visibleCategories = useMemo(() => {
+    if (showAllCats || categories.length <= CAT_PREVIEW) return categories
+    const preview = categories.slice(0, CAT_PREVIEW)
+    if (activeCat && activeCat !== "__none__" && !preview.some((cat) => cat.id === activeCat)) {
+      const active = categories.find((cat) => cat.id === activeCat)
+      if (active) preview.push(active)
+    }
+    return preview
+  }, [showAllCats, categories, activeCat])
 
   const tipsByCategory = useMemo(() => {
     const counts = new Map()
@@ -78,7 +93,7 @@ export default function FilterBar({
               <span aria-hidden="true" className="text-[11px]">✕</span>
             </button>
           )}
-          {categories.map((cat) => (
+          {visibleCategories.map((cat) => (
             <button
               key={cat.id}
               type="button"
@@ -95,6 +110,16 @@ export default function FilterBar({
               )}
             </button>
           ))}
+          {categories.length > CAT_PREVIEW && (
+            <button
+              type="button"
+              className={chipMore}
+              aria-expanded={showAllCats}
+              onClick={() => setShowAllCats((v) => !v)}
+            >
+              {showAllCats ? "收起分类" : `更多分类 +${categories.length - CAT_PREVIEW}`}
+            </button>
+          )}
         </div>
       </div>
 

@@ -1,13 +1,25 @@
-import { useMemo, useCallback } from "react"
+import { useMemo, useCallback, useEffect } from "react"
 import { AppContext } from "./app-context"
 import { useLocalStorage } from "../hooks/useLocalStorage"
 import { seedCategories, seedTags, seedTips } from "../data/seed"
+
+const SEED_VERSION = "2026-11-21.2"
+const SEED_VERSION_KEY = "ls_seed_version"
 
 let _id = 0
 function genId() {
   _id++
   return "id-" + Date.now().toString(36) + "-" + _id
 }
+
+// 预设数据升级时，只追加本地缺失的条目，保留用户自己的数据
+function mergeSeedItems(current, seeds) {
+  const ids = new Set(current.map((item) => item.id))
+  const missing = seeds.filter((item) => !ids.has(item.id))
+  return missing.length ? [...current, ...missing] : current
+}
+
+const SEED_TIP_IDS = new Set(seedTips.map((tip) => tip.id))
 
 export function AppProvider({ children }) {
   const [tips, setTips] = useLocalStorage("ls_tips", seedTips)
@@ -19,6 +31,27 @@ export function AppProvider({ children }) {
     [categories]
   )
   const tagMap = useMemo(() => new Map(tags.map((t) => [t.id, t])), [tags])
+
+  useEffect(() => {
+    let stored = null
+    try {
+      stored = localStorage.getItem(SEED_VERSION_KEY)
+    } catch {
+      return
+    }
+    if (stored === SEED_VERSION) return
+    // 只有沿用预设数据的用户才补新预设，避免影响导入的自定义数据
+    if (tips.some((tip) => SEED_TIP_IDS.has(tip.id))) {
+      setTips((prev) => mergeSeedItems(prev, seedTips))
+      setCategories((prev) => mergeSeedItems(prev, seedCategories))
+      setTags((prev) => mergeSeedItems(prev, seedTags))
+    }
+    try {
+      localStorage.setItem(SEED_VERSION_KEY, SEED_VERSION)
+    } catch {
+      // 存储不可用时忽略，下次打开再尝试
+    }
+  }, [tips, setTips, setCategories, setTags])
 
   const addTip = useCallback((tip) => {
     const now = Date.now()

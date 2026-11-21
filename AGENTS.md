@@ -38,7 +38,7 @@ No type checker. CI (`.github/workflows/ci.yml`) runs lint + test + build on Nod
 - **Hand-drawn style**: ZCOOL KuaiLe for display text, Noto Sans SC for body copy; functional icons come from `components/Icon.jsx` (category/tag emoji stay as data); card rotation via `:nth-child`; SVG `feTurbulence` filter in `index.html`
 - **Date format**: `yyyy/MM/dd` via `src/utils/format.js` (no external date library)
 - **ID gen**: `Date.now().toString(36)` + counter in `AppProvider`
-- **Seed data**: 6 tips, 5 categories, 6 tags — loaded on first visit
+- **Seed data**: 78 tips, 24 categories, 24 tags — loaded on first visit; `AppProvider` bumps `ls_seed_version` and appends only missing preset items to existing preset-based data
 
 ## Project structure
 
@@ -78,6 +78,7 @@ src/
 
 - Deleting a category or tag cascades to all tips (sets categoryId to null / removes tagId) — covered by `AppContext.test.jsx`
 - Category and starred filters compose (both can be active at once)
+- FilterBar shows the first 10 category chips plus a dashed “更多分类 +N” toggle; the active category is always kept visible and expanded state is local to the component
 - Search is URL-based (`?q=`), submitted via the top-bar form; the input is keyed by `location.key` so it resets on navigation
 - Random card rotation uses `:nth-child(3n|5n|7n)` pseudo-selectors in `index.css`
 - Dark mode is applied by an inline script in `index.html` before React mounts to avoid a flash
