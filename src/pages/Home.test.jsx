@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest"
 import { render, screen, fireEvent, within } from "@testing-library/react"
-import { MemoryRouter } from "react-router-dom"
+import { MemoryRouter, Routes, Route } from "react-router-dom"
 import { AppProvider } from "../context/AppContext"
 import Home from "./Home"
 
@@ -18,6 +18,19 @@ function renderHome(initialEntries = ["/"]) {
   )
 }
 
+function renderHomeWithDetail(initialEntries = ["/"]) {
+  return render(
+    <MemoryRouter initialEntries={initialEntries}>
+      <AppProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/tips/:id" element={<div>技巧详情页</div>} />
+        </Routes>
+      </AppProvider>
+    </MemoryRouter>
+  )
+}
+
 describe("Home 筛选", () => {
   it("点击全部时同时清除分类和收藏筛选", () => {
     renderHome(["/?cat=cat-1&starred=1"])
@@ -28,6 +41,17 @@ describe("Home 筛选", () => {
     fireEvent.click(screen.getByRole("button", { name: "全部" }))
 
     expect(screen.getByText("香蕉保鲜法")).toBeInTheDocument()
+  })
+})
+
+describe("Home 卡片点击", () => {
+  it("点击卡片空白区域进入详情页", () => {
+    renderHomeWithDetail()
+
+    const card = screen.getByText("柠檬除水垢").closest(".tip-card")
+    fireEvent.click(card)
+
+    expect(screen.getByText("技巧详情页")).toBeInTheDocument()
   })
 })
 

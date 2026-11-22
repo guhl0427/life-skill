@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import { formatDate } from "../utils/format"
 import { getSnippet, splitByKeywords } from "../utils/search"
@@ -16,6 +16,7 @@ function highlightText(text, query) {
 
 export default function TipCard({ tip, search, showActions, onDelete, selectable, selected, onSelect }) {
   const { categoryMap, tagMap, toggleStar } = useApp()
+  const navigate = useNavigate()
   const cat = categoryMap.get(tip.categoryId)
   const tipTags = (tip.tagIds || []).map((id) => tagMap.get(id)).filter(Boolean)
 
@@ -26,9 +27,9 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
   }
 
   const handleCardClick = (e) => {
-    if (!selectable) return
     if (e.target.closest("button, a")) return
-    onSelect?.(tip.id)
+    if (selectable) onSelect?.(tip.id)
+    else navigate("/tips/" + tip.id)
   }
 
   const cardBody = (
