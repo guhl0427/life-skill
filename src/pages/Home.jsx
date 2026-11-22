@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useLayoutEffect, useRef } from "react"
 import { useSearchParams, useLocation, Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import TipCard from "../components/TipCard"
@@ -36,6 +36,27 @@ export default function Home() {
     const timer = setTimeout(() => { setNotice(""); setUndoId(null) }, 4000)
     return () => clearTimeout(timer)
   }, [notice])
+
+  // 记住离开列表时的滚动位置，从详情页返回或点“首页”时恢复到原处
+  const scrollRef = useRef(0)
+  const restoredRef = useRef(false)
+
+  useLayoutEffect(() => {
+    const scrollKey = "ls_scroll:" + location.pathname + location.search
+    if (!restoredRef.current) {
+      restoredRef.current = true
+      const saved = Number(sessionStorage.getItem(scrollKey)) || 0
+      if (saved > 0) window.scrollTo(0, saved)
+    }
+    const onScroll = () => { scrollRef.current = window.scrollY }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      try {
+        sessionStorage.setItem(scrollKey, String(scrollRef.current))
+      } catch { /* 存储不可用时忽略 */ }
+    }
+  }, [location])
 
   const handleUndoDelete = () => {
     if (!undoId) return

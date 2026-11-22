@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import ConfirmDialog from "../components/ConfirmDialog"
+import Icon from "../components/Icon"
 import { formatDate, formatDateTime } from "../utils/format"
 import { btnPrimary, btnOutline, btnDanger, btnSm } from "../components/ui"
 
@@ -43,6 +44,11 @@ export default function TipDetail() {
     navigate("/", { state: { deletedId: id } })
   }
 
+  const handleBack = () => {
+    if (window.history.state?.idx > 0) navigate(-1)
+    else navigate("/")
+  }
+
   const handleCopy = async () => {
     const parts = []
     if (cat) parts.push("[" + cat.emoji + " " + cat.name + "]")
@@ -69,6 +75,15 @@ export default function TipDetail() {
 
   return (
     <div>
+      <button
+        type="button"
+        onClick={handleBack}
+        className="mb-3 inline-flex items-center gap-1.5 rounded-sketch-sm text-sm text-ink-soft transition-colors duration-200 hover:text-primary"
+      >
+        <Icon name="back" className="h-4 w-4" />
+        返回
+      </button>
+
       <h1 className="mb-6 font-display text-[30px] leading-tight tracking-[0.5px] text-ink max-md:text-2xl max-[480px]:text-[22px]">
         {tip.title}
       </h1>
