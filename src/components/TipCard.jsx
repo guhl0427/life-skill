@@ -25,8 +25,26 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
     toggleStar(tip.id)
   }
 
+  const handleCardClick = (e) => {
+    if (!selectable) return
+    if (e.target.closest("button, a")) return
+    onSelect?.(tip.id)
+  }
+
+  const cardBody = (
+    <>
+      <h3 className="line-clamp-2 font-display text-[17px] leading-snug text-ink max-[480px]:text-base">
+        {search ? highlightText(tip.title, search) : tip.title}
+      </h3>
+      <p className="mt-1.5 line-clamp-3 flex-1 text-sm leading-relaxed text-ink-soft max-md:text-[13px] max-md:line-clamp-2">
+        {search ? highlightText(getSnippet(tip.content, search), search) : tip.content}
+      </p>
+    </>
+  )
+
   return (
     <div
+      onClick={handleCardClick}
       className={
         "tip-card group relative flex cursor-pointer flex-col gap-2.5 overflow-hidden rounded-sketch-lg border-[1.5px] bg-card p-5 shadow-ink transition-[transform,box-shadow,border-color] duration-200 ease-out hover:shadow-ink-hover max-[480px]:p-3.5 " +
         (tip.starred ? "border-accent" : "border-line hover:border-primary") +
@@ -75,25 +93,30 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
           )}
         </span>
       </div>
-      <Link to={"/tips/" + tip.id} className="text-inherit">
-        <h3 className="line-clamp-2 font-display text-[17px] leading-snug text-ink max-[480px]:text-base">
-          {search ? highlightText(tip.title, search) : tip.title}
-        </h3>
-        <p className="mt-1.5 line-clamp-3 flex-1 text-sm leading-relaxed text-ink-soft max-md:text-[13px] max-md:line-clamp-2">
-          {search ? highlightText(getSnippet(tip.content, search), search) : tip.content}
-        </p>
-      </Link>
+      {selectable ? (
+        <div className="text-inherit">{cardBody}</div>
+      ) : (
+        <Link to={"/tips/" + tip.id} className="text-inherit">
+          {cardBody}
+        </Link>
+      )}
       {tipTags.length > 0 && (
         <div className="mt-1 flex flex-wrap gap-x-2.5 gap-y-1">
-          {tipTags.map((t) => (
-            <Link
-              key={t.id}
-              to={"/?tag=" + encodeURIComponent(t.id)}
-              className="text-xs text-ink-faint transition-colors duration-200 hover:text-primary"
-            >
-              #{search ? highlightText(t.name, search) : t.name}
-            </Link>
-          ))}
+          {tipTags.map((t) =>
+            selectable ? (
+              <span key={t.id} className="text-xs text-ink-faint">
+                #{search ? highlightText(t.name, search) : t.name}
+              </span>
+            ) : (
+              <Link
+                key={t.id}
+                to={"/?tag=" + encodeURIComponent(t.id)}
+                className="text-xs text-ink-faint transition-colors duration-200 hover:text-primary"
+              >
+                #{search ? highlightText(t.name, search) : t.name}
+              </Link>
+            )
+          )}
         </div>
       )}
       {showActions && (

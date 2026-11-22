@@ -173,6 +173,17 @@ describe("Home 批量操作", () => {
     expect(stored.find((t) => t.id === "tip-1").categoryId).toBe("cat-2")
   })
 
+  it("批量模式下点击卡片可切换选中", () => {
+    renderHome()
+
+    fireEvent.click(screen.getByRole("button", { name: "批量选择" }))
+    fireEvent.click(screen.getByText("柠檬除水垢"))
+    expect(screen.getByText("已选 1 条")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText("柠檬除水垢"))
+    expect(screen.getByText("已选 0 条")).toBeInTheDocument()
+  })
+
   it("批量删除移入回收站", () => {
     renderHome()
 
