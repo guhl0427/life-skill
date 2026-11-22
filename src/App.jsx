@@ -8,6 +8,7 @@ import Categories from "./pages/Categories"
 import Tags from "./pages/Tags"
 import Stats from "./pages/Stats"
 import Trash from "./pages/Trash"
+import Settings from "./pages/Settings"
 import NotFound from "./pages/NotFound"
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/tags" element={<Tags />} />
         <Route path="/stats" element={<Stats />} />
         <Route path="/trash" element={<Trash />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Layout>

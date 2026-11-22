@@ -151,6 +151,10 @@ export default function Layout({ children }) {
               <span className="ml-auto text-xs tabular-nums opacity-60">{trashedCount}</span>
             )}
           </NavLink>
+
+          <NavLink to="/settings" className={navClass} onClick={closeMenu}>
+            <Icon name="settings" className="h-[18px] w-[18px]" /> 设置
+          </NavLink>
         </div>
 
         <div className="mt-auto flex flex-col gap-3 pt-4">
