@@ -62,6 +62,8 @@ export default function Home() {
     else if (sort === "most") result.sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0) || (b.lastUsedAt || 0) - (a.lastUsedAt || 0))
     else if (sort === "least") result.sort((a, b) => (a.usageCount || 0) - (b.usageCount || 0) || (a.lastUsedAt || 0) - (b.lastUsedAt || 0) || a.createdAt - b.createdAt)
     else if (sort === "title") result.sort((a, b) => a.title.localeCompare(b.title, "zh"))
+    // 置顶的技巧始终排在最前，其余保持当前排序
+    result.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
     return result
   }, [tips, activeCat, activeTag, untaggedOnly, search, sort, activeStarred, categoryMap, tagMap])
 

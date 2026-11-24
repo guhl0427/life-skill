@@ -60,6 +60,7 @@ export function AppProvider({ children }) {
         ...tip,
         id: genId(),
         starred: false,
+        pinned: false,
         usageCount: 0,
         lastUsedAt: null,
         scenario: tip.scenario || "",
@@ -109,6 +110,12 @@ export function AppProvider({ children }) {
   const toggleStar = useCallback((id) => {
     setTips((prev) =>
       prev.map((t) => (t.id === id ? { ...t, starred: !t.starred } : t))
+    )
+  }, [setTips])
+
+  const togglePin = useCallback((id) => {
+    setTips((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, pinned: !t.pinned } : t))
     )
   }, [setTips])
 
@@ -170,7 +177,7 @@ export function AppProvider({ children }) {
       value={{
         tips, categories, tags, categoryMap, tagMap,
         addTip, updateTip, deleteTip, restoreTip, restoreAllTips, purgeTip, emptyTrash,
-        getTip, toggleStar, markUsed,
+        getTip, toggleStar, togglePin, markUsed,
         addCategory, updateCategory, deleteCategory,
         addTag, updateTag, deleteTag, importData,
       }}

@@ -15,7 +15,7 @@ function highlightText(text, query) {
 }
 
 export default function TipCard({ tip, search, showActions, onDelete, selectable, selected, onSelect }) {
-  const { categoryMap, tagMap, toggleStar } = useApp()
+  const { categoryMap, tagMap, toggleStar, togglePin } = useApp()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
@@ -104,6 +104,11 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
               {cat.emoji} {search ? highlightText(cat.name, search) : cat.name}
             </span>
           )}
+          {tip.pinned && (
+            <span className="shrink-0 text-sm leading-none" aria-label="已置顶" title="已置顶">
+              📌
+            </span>
+          )}
         </div>
         <span className="whitespace-nowrap text-xs tabular-nums text-ink-faint">
           {formatDate(tip.createdAt)}
@@ -159,6 +164,16 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
                 onClick={(e) => e.stopPropagation()}
                 className="absolute bottom-full right-0 z-20 mb-1 flex w-24 flex-col overflow-hidden rounded-sketch border-2 border-line bg-card p-1 shadow-ink-hover"
               >
+                <button
+                  type="button"
+                  className="rounded-sketch-sm px-2.5 py-1.5 text-left text-sm text-ink-soft transition-colors duration-200 hover:bg-primary-light hover:text-ink"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    togglePin(tip.id)
+                  }}
+                >
+                  {tip.pinned ? "取消置顶" : "置顶"}
+                </button>
                 <Link
                   to={"/tips/" + tip.id + "/edit"}
                   className="rounded-sketch-sm px-2.5 py-1.5 text-left text-sm text-ink-soft transition-colors duration-200 hover:bg-primary-light hover:text-ink"

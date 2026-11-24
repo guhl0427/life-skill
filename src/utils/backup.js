@@ -107,6 +107,7 @@ export function parseBackup(raw) {
       difficulty: ["简单", "适中", "较难"].includes(t.difficulty) ? t.difficulty : "",
       notes: asString(t.notes),
       starred: Boolean(t.starred),
+      pinned: Boolean(t.pinned),
       usageCount: Number.isFinite(t.usageCount) ? t.usageCount : 0,
       lastUsedAt: Number.isFinite(t.lastUsedAt) ? t.lastUsedAt : null,
       deletedAt: Number.isFinite(t.deletedAt) ? t.deletedAt : null,

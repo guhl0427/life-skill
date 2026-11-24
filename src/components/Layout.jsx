@@ -8,7 +8,7 @@ const navClass = ({ isActive }) =>
   "flex items-center gap-2.5 rounded-sketch px-3.5 py-2.5 text-[15px] transition-colors duration-200 " +
   (isActive ? "bg-primary text-on-primary" : "text-ink-soft hover:bg-primary-light hover:text-ink")
 
-function SearchBox({ initialQuery, onSubmit, onClear }) {
+function SearchBox({ initialQuery, onSubmit, onClear, inputRef }) {
   const [value, setValue] = useState(initialQuery)
 
   return (
@@ -22,14 +22,16 @@ function SearchBox({ initialQuery, onSubmit, onClear }) {
     >
       <Icon name="search" className="h-4 w-4 shrink-0 text-ink-faint" />
       <input
+        ref={inputRef}
         type="text"
         name="q"
+        aria-keyshortcuts="/ Control+K Meta+K"
         placeholder="搜索标题、内容、标签..."
         value={value}
         onChange={(e) => setValue(e.target.value)}
         className="min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-faint focus:outline-none"
       />
-      {value && (
+      {value ? (
         <button
           type="button"
           aria-label="清除搜索"
@@ -41,6 +43,10 @@ function SearchBox({ initialQuery, onSubmit, onClear }) {
         >
           ✕
         </button>
+      ) : (
+        <kbd className="hidden shrink-0 rounded border border-line-soft px-1.5 text-[11px] leading-5 text-ink-faint md:inline">
+          /
+        </kbd>
       )}
     </form>
   )
@@ -58,6 +64,7 @@ export default function Layout({ children }) {
   const [dark, setDark] = useState(() => localStorage.getItem("ls_dark") === "true")
   const navigate = useNavigate()
   const headerRef = useRef(null)
+  const searchInputRef = useRef(null)
 
   const activeTipsCount = useMemo(() => tips.filter((t) => !t.deletedAt).length, [tips])
   const trashedCount = useMemo(() => tips.filter((t) => t.deletedAt).length, [tips])
@@ -83,6 +90,34 @@ export default function Layout({ children }) {
     observer.observe(header)
     return () => observer.disconnect()
   }, [])
+
+  // 键盘快捷键：/ 或 Ctrl/Cmd+K 聚焦搜索，N 新建技巧
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (document.querySelector('[role="dialog"]')) return
+      const target = e.target
+      const typing =
+        target instanceof HTMLElement &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      if (typing) return
+      if (e.key === "/" || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k")) {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+        searchInputRef.current?.select()
+        return
+      }
+      if ((e.key === "n" || e.key === "N") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        if (location.pathname === "/tips/new") return
+        e.preventDefault()
+        navigate("/tips/new")
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [navigate, location.pathname])
 
   useEffect(() => {
     const onError = () => setStorageError(true)
@@ -269,9 +304,15 @@ export default function Layout({ children }) {
             initialQuery={urlQuery}
             onSubmit={handleSearch}
             onClear={handleClearSearch}
+            inputRef={searchInputRef}
           />
           <span className="flex-1 max-md:flex-none" />
-          <Link to="/tips/new" className={`${btnPrimary} ${btnSm} btn-wiggle`}>
+          <Link
+            to="/tips/new"
+            className={`${btnPrimary} ${btnSm} btn-wiggle`}
+            title="快捷键：N"
+            aria-keyshortcuts="N"
+          >
             + 新技巧
           </Link>
         </header>
