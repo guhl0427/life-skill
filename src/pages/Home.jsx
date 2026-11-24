@@ -85,6 +85,13 @@ export default function Home() {
     setSearchParams(params)
   }
 
+  const handleTagChange = (id) => {
+    const params = new URLSearchParams(searchParams)
+    if (id) params.set("tag", id)
+    else params.delete("tag")
+    setSearchParams(params)
+  }
+
   const handleResetFilters = () => {
     const params = new URLSearchParams(searchParams)
     params.delete("cat")
@@ -170,6 +177,7 @@ export default function Home() {
         search={search}
         onClearSearch={() => handleClearQuery("q")}
         onClearTag={() => handleClearQuery("tag")}
+        onTagChange={handleTagChange}
         onClearExtra={() => handleClearQuery("cat", "untagged")}
         onReset={handleResetFilters}
         sort={sort}

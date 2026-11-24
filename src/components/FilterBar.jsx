@@ -25,15 +25,19 @@ export default function FilterBar({
   search,
   onClearSearch,
   onClearTag,
+  onTagChange,
   onClearExtra,
   onReset,
   sort,
   onSortChange,
 }) {
-  const { categories, tips } = useApp()
+  const { categories, tags, tips } = useApp()
   const [showAllCats, setShowAllCats] = useState(false)
   const [stuck, setStuck] = useState(false)
+  const [tagOpen, setTagOpen] = useState(false)
   const barRef = useRef(null)
+  const tagButtonRef = useRef(null)
+  const tagPanelRef = useRef(null)
   const isAll = !activeCat && !activeStarred && !activeTag && !untagged && !uncategorized && !search
 
   // 吸附到顶部时切换为单行 + 横向滚动
@@ -80,6 +84,34 @@ export default function FilterBar({
     return counts
   }, [tips])
 
+  const tipsByTag = useMemo(() => {
+    const counts = new Map()
+    for (const tip of tips) {
+      if (tip.deletedAt) continue
+      for (const id of tip.tagIds || []) {
+        counts.set(id, (counts.get(id) || 0) + 1)
+      }
+    }
+    return counts
+  }, [tips])
+
+  useEffect(() => {
+    if (!tagOpen) return
+    const onPointerDown = (e) => {
+      if (tagButtonRef.current?.contains(e.target) || tagPanelRef.current?.contains(e.target)) return
+      setTagOpen(false)
+    }
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setTagOpen(false)
+    }
+    document.addEventListener("pointerdown", onPointerDown)
+    document.addEventListener("keydown", onKeyDown)
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown)
+      document.removeEventListener("keydown", onKeyDown)
+    }
+  }, [tagOpen])
+
   return (
     <div
       ref={barRef}
@@ -113,6 +145,15 @@ export default function FilterBar({
             aria-pressed={!!activeStarred}
           >
             ⭐ 已收藏
+          </button>
+          <button
+            type="button"
+            ref={tagButtonRef}
+            className={`${chipBase} ${tagOpen ? chipActive : chipIdle}`}
+            onClick={() => setTagOpen((v) => !v)}
+            aria-expanded={tagOpen}
+          >
+            🏷️ 标签
           </button>
           {search && (
             <button
@@ -191,6 +232,48 @@ export default function FilterBar({
           { value: "title", label: "标题 A-Z" },
         ]}
       />
+
+      {tagOpen && (
+        <div
+          ref={tagPanelRef}
+          className="absolute left-0 right-0 top-full z-30 mt-1 rounded-sketch border-2 border-line bg-card p-3 shadow-ink-hover"
+        >
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <span className="text-xs tracking-wider text-ink-faint">按标签筛选</span>
+            <button
+              type="button"
+              aria-label="关闭标签筛选"
+              className="text-sm text-ink-faint transition-colors hover:text-ink"
+              onClick={() => setTagOpen(false)}
+            >
+              ✕
+            </button>
+          </div>
+          <div className="flex max-h-[45vh] flex-wrap gap-2 overflow-y-auto">
+            {tags.map((tag) => {
+              const active = activeTag === tag.id
+              const count = tipsByTag.get(tag.id) || 0
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  className={`${chipBase} ${active ? chipActive : chipIdle}`}
+                  onClick={() => {
+                    onTagChange?.(active ? "" : tag.id)
+                    setTagOpen(false)
+                  }}
+                  aria-pressed={active}
+                >
+                  #{tag.name}
+                  {count > 0 && (
+                    <span className="ml-0.5 text-[11px] tabular-nums opacity-60">{count}</span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
