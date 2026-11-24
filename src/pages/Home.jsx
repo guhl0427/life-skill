@@ -11,7 +11,7 @@ import Icon from "../components/Icon"
 import { btnOutline, btnDanger, btnSm, btnPrimary, pageTitle } from "../components/ui"
 
 export default function Home() {
-  const { tips, categories, categoryMap, tagMap, deleteTip, updateTip, restoreTip } = useApp()
+  const { tips, categories, tags, categoryMap, tagMap, deleteTip, updateTip, restoreTip } = useApp()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeCat = searchParams.get("cat") || ""
@@ -30,6 +30,7 @@ export default function Home() {
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState([])
   const [batchCat, setBatchCat] = useState("")
+  const [batchTag, setBatchTag] = useState("")
   const [confirmBatchDelete, setConfirmBatchDelete] = useState(false)
 
   useEffect(() => {
@@ -125,6 +126,7 @@ export default function Home() {
     setSelectMode(false)
     setSelectedIds([])
     setBatchCat("")
+    setBatchTag("")
   }
 
   const handleSelectAll = () => {
@@ -139,6 +141,24 @@ export default function Home() {
     const categoryId = batchCat === "__none__" ? null : batchCat
     selectedIds.forEach((id) => updateTip(id, { categoryId }))
     setNotice(`已更新 ${selectedIds.length} 条技巧的分类`)
+    exitSelectMode()
+  }
+
+  const handleBatchTag = () => {
+    if (!batchTag || selectedIds.length === 0) return
+    selectedIds.forEach((id) => {
+      const tip = tips.find((t) => t.id === id)
+      if (!tip || (tip.tagIds || []).includes(batchTag)) return
+      updateTip(id, { tagIds: [...(tip.tagIds || []), batchTag] })
+    })
+    setNotice(`已为 ${selectedIds.length} 条技巧添加标签`)
+    exitSelectMode()
+  }
+
+  const handleBatchStar = (starred) => {
+    if (selectedIds.length === 0) return
+    selectedIds.forEach((id) => updateTip(id, { starred }))
+    setNotice(`已${starred ? "收藏" : "取消收藏"} ${selectedIds.length} 条技巧`)
     exitSelectMode()
   }
 
@@ -238,6 +258,40 @@ export default function Home() {
             onClick={handleBatchCategory}
           >
             应用分类
+          </button>
+          <Select
+            ariaLabel="批量添加标签"
+            triggerClassName="cursor-pointer rounded-sketch border-2 border-line bg-card py-1 pl-3 pr-3 text-[13px] text-ink-soft transition-colors duration-200 hover:border-primary hover:text-ink"
+            value={batchTag}
+            onChange={setBatchTag}
+            options={[
+              { value: "", label: "选择标签" },
+              ...tags.map((tag) => ({ value: tag.id, label: "#" + tag.name })),
+            ]}
+          />
+          <button
+            type="button"
+            className={`${btnOutline} ${btnSm}`}
+            disabled={!batchTag || selectedIds.length === 0}
+            onClick={handleBatchTag}
+          >
+            添加标签
+          </button>
+          <button
+            type="button"
+            className={`${btnOutline} ${btnSm}`}
+            disabled={selectedIds.length === 0}
+            onClick={() => handleBatchStar(true)}
+          >
+            收藏
+          </button>
+          <button
+            type="button"
+            className={`${btnOutline} ${btnSm}`}
+            disabled={selectedIds.length === 0}
+            onClick={() => handleBatchStar(false)}
+          >
+            取消收藏
           </button>
           <button
             type="button"
