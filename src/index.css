@@ -271,9 +271,6 @@
   }
 
   @media (hover: none) {
-    .tip-card-footer {
-      opacity: 1;
-    }
     .tip-card:hover {
       transform: none;
     }

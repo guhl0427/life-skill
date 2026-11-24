@@ -1,8 +1,8 @@
+import { useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import { formatDate } from "../utils/format"
 import { getSnippet, splitByKeywords } from "../utils/search"
-import { btnOutline, btnDanger, btnSm } from "./ui"
 
 function highlightText(text, query) {
   const parts = splitByKeywords(text, query)
@@ -17,8 +17,26 @@ function highlightText(text, query) {
 export default function TipCard({ tip, search, showActions, onDelete, selectable, selected, onSelect }) {
   const { categoryMap, tagMap, toggleStar } = useApp()
   const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
   const cat = categoryMap.get(tip.categoryId)
   const tipTags = (tip.tagIds || []).map((id) => tagMap.get(id)).filter(Boolean)
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const onPointerDown = (e) => {
+      if (!menuRef.current?.contains(e.target)) setMenuOpen(false)
+    }
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setMenuOpen(false)
+    }
+    document.addEventListener("pointerdown", onPointerDown)
+    document.addEventListener("keydown", onKeyDown)
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown)
+      document.removeEventListener("keydown", onKeyDown)
+    }
+  }, [menuOpen])
 
   const handleStar = (e) => {
     e.preventDefault()
@@ -121,13 +139,44 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
         </div>
       )}
       {showActions && (
-        <div className="tip-card-footer mt-1 flex justify-end gap-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100 max-md:opacity-100">
-          <Link to={"/tips/" + tip.id + "/edit"} className={`${btnOutline} ${btnSm}`}>
-            编辑
-          </Link>
-          <button className={`${btnDanger} ${btnSm}`} onClick={() => onDelete?.(tip.id)}>
-            删除
-          </button>
+        <div className="mt-1 flex justify-end">
+          <div ref={menuRef} className="relative">
+            <button
+              type="button"
+              aria-label="更多操作"
+              aria-expanded={menuOpen}
+              onClick={(e) => {
+                e.stopPropagation()
+                setMenuOpen((v) => !v)
+              }}
+              className="flex h-7 w-7 items-center justify-center rounded-sketch-sm border-2 border-line bg-card text-base leading-none text-ink-faint transition-colors duration-200 hover:border-primary hover:text-ink"
+            >
+              ⋯
+            </button>
+            {menuOpen && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="absolute bottom-full right-0 z-20 mb-1 flex w-24 flex-col overflow-hidden rounded-sketch border-2 border-line bg-card p-1 shadow-ink-hover"
+              >
+                <Link
+                  to={"/tips/" + tip.id + "/edit"}
+                  className="rounded-sketch-sm px-2.5 py-1.5 text-left text-sm text-ink-soft transition-colors duration-200 hover:bg-primary-light hover:text-ink"
+                >
+                  编辑
+                </Link>
+                <button
+                  type="button"
+                  className="rounded-sketch-sm px-2.5 py-1.5 text-left text-sm text-danger transition-colors duration-200 hover:bg-accent-light"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    onDelete?.(tip.id)
+                  }}
+                >
+                  删除
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

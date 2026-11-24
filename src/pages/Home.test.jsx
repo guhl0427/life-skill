@@ -97,6 +97,7 @@ describe("Home 回收站", () => {
     renderHome()
 
     const card = screen.getByText("柠檬除水垢").closest(".tip-card")
+    fireEvent.click(within(card).getByRole("button", { name: "更多操作" }))
     fireEvent.click(within(card).getByRole("button", { name: "删除" }))
     fireEvent.click(screen.getByRole("button", { name: "确认删除" }))
 
