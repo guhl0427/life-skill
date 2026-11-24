@@ -31,6 +31,10 @@ function renderHomeWithDetail(initialEntries = ["/"]) {
   )
 }
 
+function cardGrid() {
+  return document.querySelector(".tip-grid")
+}
+
 describe("Home 筛选", () => {
   it("点击全部时同时清除分类和收藏筛选", () => {
     renderHome(["/?cat=cat-1&starred=1"])
@@ -48,7 +52,7 @@ describe("Home 卡片点击", () => {
   it("点击卡片空白区域进入详情页", () => {
     renderHomeWithDetail()
 
-    const card = screen.getByText("柠檬除水垢").closest(".tip-card")
+    const card = within(cardGrid()).getByText("柠檬除水垢").closest(".tip-card")
     fireEvent.click(card)
 
     expect(screen.getByText("技巧详情页")).toBeInTheDocument()
@@ -96,17 +100,17 @@ describe("Home 回收站", () => {
   it("删除后移入回收站并可撤销", () => {
     renderHome()
 
-    const card = screen.getByText("柠檬除水垢").closest(".tip-card")
+    const card = within(cardGrid()).getByText("柠檬除水垢").closest(".tip-card")
     fireEvent.click(within(card).getByRole("button", { name: "更多操作" }))
     fireEvent.click(within(card).getByRole("button", { name: "删除" }))
     fireEvent.click(screen.getByRole("button", { name: "确认删除" }))
 
-    expect(screen.queryByText("柠檬除水垢")).not.toBeInTheDocument()
+    expect(within(cardGrid()).queryByText("柠檬除水垢")).not.toBeInTheDocument()
     expect(screen.getByRole("status")).toHaveTextContent("已移入回收站")
 
     fireEvent.click(screen.getByRole("button", { name: "撤销" }))
 
-    expect(screen.getByText("柠檬除水垢")).toBeInTheDocument()
+    expect(within(cardGrid()).getByText("柠檬除水垢")).toBeInTheDocument()
   })
 })
 

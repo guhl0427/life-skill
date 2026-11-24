@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react"
 import { useSearchParams, useLocation, Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import TipCard from "../components/TipCard"
+import DailyTip from "../components/DailyTip"
 import FilterBar from "../components/FilterBar"
 import ConfirmDialog from "../components/ConfirmDialog"
 import Select from "../components/Select"
@@ -154,6 +155,8 @@ export default function Home() {
       <h1 className={`${pageTitle} mb-6`}>
         <span className="hand-underline">生活小技巧</span>
       </h1>
+
+      {!hasFilters && !selectMode && <DailyTip />}
 
       <FilterBar
         activeCat={activeCat}
