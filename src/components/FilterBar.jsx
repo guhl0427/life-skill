@@ -228,6 +228,7 @@ export default function FilterBar({
           { value: "newest", label: "最新" },
           { value: "updated", label: "最近更新" },
           { value: "most", label: "最常用" },
+          { value: "least", label: "最少使用" },
           { value: "oldest", label: "最早" },
           { value: "title", label: "标题 A-Z" },
         ]}

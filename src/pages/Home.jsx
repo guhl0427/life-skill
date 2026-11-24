@@ -21,7 +21,7 @@ export default function Home() {
   const activeTag = tagMap.has(tagParam) ? tagParam : ""
   const untaggedOnly = searchParams.get("untagged") === "1"
   const sortParam = searchParams.get("sort")
-  const sort = ["newest", "oldest", "title", "updated", "most"].includes(sortParam) ? sortParam : "newest"
+  const sort = ["newest", "oldest", "title", "updated", "most", "least"].includes(sortParam) ? sortParam : "newest"
   const [deleteId, setDeleteId] = useState(null)
   const [notice, setNotice] = useState(() =>
     location.state?.deletedId ? "已移入回收站，可点击撤销" : ""
@@ -59,6 +59,7 @@ export default function Home() {
     else if (sort === "oldest") result.sort((a, b) => a.createdAt - b.createdAt)
     else if (sort === "updated") result.sort((a, b) => (b.updatedAt || b.createdAt) - (a.updatedAt || a.createdAt))
     else if (sort === "most") result.sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0) || (b.lastUsedAt || 0) - (a.lastUsedAt || 0))
+    else if (sort === "least") result.sort((a, b) => (a.usageCount || 0) - (b.usageCount || 0) || (a.lastUsedAt || 0) - (b.lastUsedAt || 0) || a.createdAt - b.createdAt)
     else if (sort === "title") result.sort((a, b) => a.title.localeCompare(b.title, "zh"))
     return result
   }, [tips, activeCat, activeTag, untaggedOnly, search, sort, activeStarred, categoryMap, tagMap])

@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import { pageTitle, btnPrimary } from "../components/ui"
+import { formatDate } from "../utils/format"
 
 export default function Stats() {
   const { tips, categories, tags } = useApp()
@@ -65,11 +66,18 @@ export default function Stats() {
           (b.lastUsedAt || 0) - (a.lastUsedAt || 0)
       )
       .slice(0, 5)
+    const staleTips = [...active]
+      .sort(
+        (a, b) =>
+          (a.lastUsedAt || 0) - (b.lastUsedAt || 0) ||
+          a.createdAt - b.createdAt
+      )
+      .slice(0, 5)
 
     return {
       total, starred, usedCats, unusedCats, uncategorizedStat,
       tagCounts, untagged, trashedCount,
-      totalUsage, usedTips, neverUsed, topUsed,
+      totalUsage, usedTips, neverUsed, topUsed, staleTips,
     }
   }, [tips, categories, tags])
 
@@ -151,6 +159,27 @@ export default function Stats() {
           还没有使用记录，在技巧详情页点“今天用到了”即可累计。
         </p>
       )}
+
+      <h3 className="mb-2 text-sm text-ink-soft">最久没用</h3>
+      <div className="mb-3 flex flex-col gap-2">
+        {stats.staleTips.map((tip) => (
+          <Link
+            key={tip.id}
+            to={"/tips/" + tip.id}
+            className="flex items-center justify-between gap-3 rounded-sketch border-[1.5px] border-line bg-card px-4 py-2.5 text-sm shadow-ink transition-colors duration-200 hover:border-primary"
+          >
+            <span className="truncate text-ink">{tip.title}</span>
+            <span className="shrink-0 text-xs tabular-nums text-ink-faint">
+              {tip.lastUsedAt ? "上次 " + formatDate(tip.lastUsedAt) : "从未用过"}
+            </span>
+          </Link>
+        ))}
+      </div>
+      <div className="mb-8">
+        <Link to="/?sort=least" className="text-sm text-primary hover:underline">
+          按最少使用查看全部 →
+        </Link>
+      </div>
 
       <h2 className="mb-4 font-display text-lg text-ink">分类分布</h2>
       <div className="mb-8 flex flex-col gap-3">
