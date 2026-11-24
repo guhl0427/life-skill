@@ -6,7 +6,7 @@ import { formatDateTime } from "../utils/format"
 import { btnOutline, btnDanger, btnSm, btnPrimary, pageTitle } from "../components/ui"
 
 export default function Trash() {
-  const { tips, restoreTip, purgeTip, emptyTrash } = useApp()
+  const { tips, restoreTip, restoreAllTips, purgeTip, emptyTrash } = useApp()
   const [purgeId, setPurgeId] = useState(null)
   const [confirmEmpty, setConfirmEmpty] = useState(false)
 
@@ -20,9 +20,14 @@ export default function Trash() {
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className={pageTitle}><span className="hand-underline">回收站</span></h1>
         {trashed.length > 0 && (
-          <button className={`${btnDanger} ${btnSm}`} onClick={() => setConfirmEmpty(true)}>
-            清空回收站
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button className={`${btnOutline} ${btnSm}`} onClick={restoreAllTips}>
+              全部恢复
+            </button>
+            <button className={`${btnDanger} ${btnSm}`} onClick={() => setConfirmEmpty(true)}>
+              清空回收站
+            </button>
+          </div>
         )}
       </div>
 

@@ -191,7 +191,10 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
       )}
 
       <div className="mb-5">
-        <label className={label} htmlFor="tip-title">标题</label>
+        <div className="flex items-center justify-between gap-3">
+          <label className={label} htmlFor="tip-title">标题</label>
+          <span className="mb-2 text-xs tabular-nums text-ink-faint">{title.length}/60</span>
+        </div>
         <input
           id="tip-title"
           className={field}
@@ -203,7 +206,10 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
       </div>
 
       <div className="mb-5">
-        <label className={label} htmlFor="tip-content">内容</label>
+        <div className="flex items-center justify-between gap-3">
+          <label className={label} htmlFor="tip-content">内容</label>
+          <span className="mb-2 text-xs tabular-nums text-ink-faint">{content.length}/2000</span>
+        </div>
         <textarea
           id="tip-content"
           className={`${field} min-h-40 resize-y leading-relaxed`}
@@ -227,20 +233,27 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
         {steps.length > 0 && (
           <div className="flex flex-col gap-2">
             {steps.map((step, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <span className="w-6 shrink-0 text-center font-hand text-sm text-ink-faint">
+              <div key={index} className="flex items-start gap-2">
+                <span className="w-6 shrink-0 pt-2 text-center font-hand text-sm text-ink-faint">
                   {index + 1}.
                 </span>
-                <input
-                  className={`${field} py-1.5 text-sm`}
-                  aria-label={`步骤 ${index + 1}`}
-                  maxLength={200}
-                  value={step}
-                  onChange={(e) => updateStep(index, e.target.value)}
-                />
+                <div className="min-w-0 flex-1">
+                  <input
+                    className={`${field} py-1.5 text-sm`}
+                    aria-label={`步骤 ${index + 1}`}
+                    maxLength={200}
+                    value={step}
+                    onChange={(e) => updateStep(index, e.target.value)}
+                  />
+                  {step.length >= 180 && (
+                    <span className="mt-1 block text-right text-[11px] tabular-nums text-ink-faint">
+                      {step.length}/200
+                    </span>
+                  )}
+                </div>
                 <button
                   type="button"
-                  className="shrink-0 px-1 text-ink-faint transition-colors hover:text-danger"
+                  className="shrink-0 px-1 pt-1.5 text-ink-faint transition-colors hover:text-danger"
                   aria-label={`删除步骤 ${index + 1}`}
                   onClick={() => removeStep(index)}
                 >

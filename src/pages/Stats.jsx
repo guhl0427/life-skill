@@ -15,8 +15,13 @@ export default function Stats() {
     const tagCount = new Map()
     const categoryIds = new Set(categories.map((cat) => cat.id))
     let uncategorized = 0
+    let totalUsage = 0
+    let usedTips = 0
 
     for (const tip of active) {
+      const usageCount = tip.usageCount || 0
+      totalUsage += usageCount
+      if (usageCount > 0) usedTips++
       if (tip.categoryId && categoryIds.has(tip.categoryId)) {
         catCount.set(tip.categoryId, (catCount.get(tip.categoryId) || 0) + 1)
       } else {
@@ -51,10 +56,20 @@ export default function Stats() {
 
     const untagged = active.filter((t) => !(t.tagIds || []).length).length
     const trashedCount = tips.filter((t) => t.deletedAt).length
+    const neverUsed = total - usedTips
+    const topUsed = active
+      .filter((tip) => (tip.usageCount || 0) > 0)
+      .sort(
+        (a, b) =>
+          (b.usageCount || 0) - (a.usageCount || 0) ||
+          (b.lastUsedAt || 0) - (a.lastUsedAt || 0)
+      )
+      .slice(0, 5)
 
     return {
       total, starred, usedCats, unusedCats, uncategorizedStat,
       tagCounts, untagged, trashedCount,
+      totalUsage, usedTips, neverUsed, topUsed,
     }
   }, [tips, categories, tags])
 
@@ -93,6 +108,49 @@ export default function Stats() {
           <div className="mt-1 text-xs text-ink-soft">已收藏</div>
         </div>
       </div>
+
+      <h2 className="mb-4 font-display text-lg text-ink">使用情况</h2>
+      <div className="mb-4 grid grid-cols-3 gap-px overflow-hidden rounded-sketch-lg border-2 border-line bg-line-soft shadow-ink max-[480px]:grid-cols-1">
+        <div className="bg-card px-4 py-4 text-center">
+          <div className="font-display text-[22px] leading-tight tabular-nums text-primary">{stats.totalUsage}</div>
+          <div className="mt-1 text-xs text-ink-soft">累计使用次数</div>
+        </div>
+        <div className="bg-card px-4 py-4 text-center">
+          <div className="font-display text-[22px] leading-tight tabular-nums text-primary">{stats.usedTips}</div>
+          <div className="mt-1 text-xs text-ink-soft">用过的技巧</div>
+        </div>
+        <div className="bg-card px-4 py-4 text-center">
+          <div className="font-display text-[22px] leading-tight tabular-nums text-primary">{stats.neverUsed}</div>
+          <div className="mt-1 text-xs text-ink-soft">从未使用</div>
+        </div>
+      </div>
+
+      {stats.topUsed.length > 0 ? (
+        <>
+          <h3 className="mb-2 text-sm text-ink-soft">最常使用</h3>
+          <div className="mb-8 flex flex-col gap-2">
+            {stats.topUsed.map((tip, index) => (
+              <Link
+                key={tip.id}
+                to={"/tips/" + tip.id}
+                className="flex items-center justify-between gap-3 rounded-sketch border-[1.5px] border-line bg-card px-4 py-2.5 text-sm shadow-ink transition-colors duration-200 hover:border-primary"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="w-4 shrink-0 text-center font-hand text-ink-faint">{index + 1}</span>
+                  <span className="truncate text-ink">{tip.title}</span>
+                </span>
+                <span className="shrink-0 text-xs tabular-nums text-ink-faint">
+                  用过 {tip.usageCount} 次
+                </span>
+              </Link>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className="mb-8 text-sm text-ink-faint">
+          还没有使用记录，在技巧详情页点“今天用到了”即可累计。
+        </p>
+      )}
 
       <h2 className="mb-4 font-display text-lg text-ink">分类分布</h2>
       <div className="mb-8 flex flex-col gap-3">

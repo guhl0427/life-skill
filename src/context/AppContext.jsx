@@ -87,6 +87,12 @@ export function AppProvider({ children }) {
     )
   }, [setTips])
 
+  const restoreAllTips = useCallback(() => {
+    setTips((prev) =>
+      prev.map((t) => (t.deletedAt ? { ...t, deletedAt: null } : t))
+    )
+  }, [setTips])
+
   const purgeTip = useCallback((id) => {
     setTips((prev) => prev.filter((t) => t.id !== id))
   }, [setTips])
@@ -158,7 +164,7 @@ export function AppProvider({ children }) {
     <AppContext.Provider
       value={{
         tips, categories, tags, categoryMap, tagMap,
-        addTip, updateTip, deleteTip, restoreTip, purgeTip, emptyTrash,
+        addTip, updateTip, deleteTip, restoreTip, restoreAllTips, purgeTip, emptyTrash,
         getTip, toggleStar, markUsed,
         addCategory, updateCategory, deleteCategory,
         addTag, updateTag, deleteTag, importData,
