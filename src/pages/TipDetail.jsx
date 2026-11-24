@@ -5,6 +5,7 @@ import ConfirmDialog from "../components/ConfirmDialog"
 import Icon from "../components/Icon"
 import { formatDate, formatDateTime } from "../utils/format"
 import { downloadTipImage } from "../utils/shareImage"
+import { downloadTipMarkdown } from "../utils/exportTip"
 import { btnPrimary, btnOutline, btnDanger, btnSm } from "../components/ui"
 
 async function copyToClipboard(text) {
@@ -254,6 +255,12 @@ export default function TipDetail() {
               disabled={sharing}
             >
               {sharing ? "生成中…" : "🖼️ 分享图"}
+            </button>
+            <button
+              className={`${btnOutline} max-md:flex-1`}
+              onClick={() => downloadTipMarkdown(tip, cat, tipTags)}
+            >
+              📄 导出 MD
             </button>
             <button className={`${btnOutline} max-md:flex-1`} onClick={handleCopy}>
               {copyState === "success" ? "✅ 已复制" : copyState === "error" ? "复制失败" : "📋 复制"}
