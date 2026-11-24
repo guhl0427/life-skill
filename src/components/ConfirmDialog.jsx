@@ -18,7 +18,8 @@ export default function ConfirmDialog({
 
   useEffect(() => {
     const previouslyFocused = document.activeElement
-    confirmRef.current?.focus()
+    // 默认聚焦“取消”，避免误按回车直接执行删除
+    cancelRef.current?.focus()
 
     const onKeyDown = (e) => {
       if (e.key === "Escape") {

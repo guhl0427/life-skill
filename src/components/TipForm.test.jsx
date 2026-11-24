@@ -5,6 +5,7 @@ import TipForm from "./TipForm"
 
 beforeEach(() => {
   localStorage.clear()
+  sessionStorage.clear()
 })
 
 function setup() {

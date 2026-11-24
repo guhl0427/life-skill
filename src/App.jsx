@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom"
 import Layout from "./components/Layout"
+import ScrollManager from "./components/ScrollManager"
 import Home from "./pages/Home"
 import NewTip from "./pages/NewTip"
 import EditTip from "./pages/EditTip"
@@ -14,6 +15,7 @@ import NotFound from "./pages/NotFound"
 export default function App() {
   return (
     <Layout>
+      <ScrollManager />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/tips/new" element={<NewTip />} />

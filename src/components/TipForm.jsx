@@ -1,22 +1,115 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useApp } from "../context/useApp"
 import { btnPrimary, btnOutline, btnSm, field, label } from "./ui"
 import Select from "./Select"
 
 const quickAction = "mb-2 shrink-0 text-[13px] text-primary hover:underline"
 
+const DRAFT_PREFIX = "ls_draft:"
+const emptyDraft = { title: "", content: "", categoryId: "", tagIds: [], steps: [] }
+
+function readDraft(key) {
+  try {
+    const raw = sessionStorage.getItem(key)
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    if (!data || typeof data !== "object") return null
+    return {
+      title: typeof data.title === "string" ? data.title : "",
+      content: typeof data.content === "string" ? data.content : "",
+      categoryId: typeof data.categoryId === "string" ? data.categoryId : "",
+      tagIds: Array.isArray(data.tagIds) ? data.tagIds.filter((id) => typeof id === "string") : [],
+      steps: Array.isArray(data.steps) ? data.steps.filter((step) => typeof step === "string") : [],
+    }
+  } catch {
+    return null
+  }
+}
+
+function normalizeDraft(draft) {
+  return {
+    title: (draft.title || "").trim(),
+    content: (draft.content || "").trim(),
+    categoryId: draft.categoryId || "",
+    tagIds: [...(draft.tagIds || [])].sort(),
+    steps: (draft.steps || []).map((step) => step.trim()).filter(Boolean),
+  }
+}
+
+function isSameDraft(a, b) {
+  const left = normalizeDraft(a)
+  const right = normalizeDraft(b)
+  return (
+    left.title === right.title &&
+    left.content === right.content &&
+    left.categoryId === right.categoryId &&
+    left.tagIds.length === right.tagIds.length &&
+    left.tagIds.every((id, index) => id === right.tagIds[index]) &&
+    left.steps.length === right.steps.length &&
+    left.steps.every((step, index) => step === right.steps[index])
+  )
+}
+
 export default function TipForm({ initial, onSubmit, onCancel }) {
   const { categories, tags, addCategory, addTag } = useApp()
-  const [title, setTitle] = useState(initial?.title || "")
-  const [content, setContent] = useState(initial?.content || "")
-  const [categoryId, setCategoryId] = useState(initial?.categoryId || "")
-  const [tagIds, setTagIds] = useState(initial?.tagIds || [])
-  const [steps, setSteps] = useState(initial?.steps || [])
+  const draftKey = DRAFT_PREFIX + (initial?.id || "new")
+  const [savedDraft] = useState(() => {
+    const draft = readDraft(draftKey)
+    return draft && !isSameDraft(draft, initial || emptyDraft) ? draft : null
+  })
+  const [showDraftNotice, setShowDraftNotice] = useState(Boolean(savedDraft))
+  const [title, setTitle] = useState(savedDraft?.title ?? initial?.title ?? "")
+  const [content, setContent] = useState(savedDraft?.content ?? initial?.content ?? "")
+  const [categoryId, setCategoryId] = useState(() => {
+    const value = savedDraft?.categoryId ?? initial?.categoryId ?? ""
+    return value && !categories.some((cat) => cat.id === value) ? "" : value
+  })
+  const [tagIds, setTagIds] = useState(() => {
+    const value = savedDraft?.tagIds ?? initial?.tagIds ?? []
+    return value.filter((id) => tags.some((tag) => tag.id === id))
+  })
+  const [steps, setSteps] = useState(savedDraft?.steps ?? initial?.steps ?? [])
   const [error, setError] = useState("")
   const [showNewCat, setShowNewCat] = useState(false)
   const [newCatName, setNewCatName] = useState("")
   const [showNewTag, setShowNewTag] = useState(false)
   const [newTagName, setNewTagName] = useState("")
+
+  // 内容有改动时自动保存草稿，离开页面后再次进入可恢复
+  useEffect(() => {
+    const draft = { title, content, categoryId, tagIds, steps }
+    try {
+      if (isSameDraft(draft, initial || emptyDraft)) sessionStorage.removeItem(draftKey)
+      else sessionStorage.setItem(draftKey, JSON.stringify(draft))
+    } catch {
+      // 草稿存储不可用时忽略，不影响正常编辑
+    }
+  }, [title, content, categoryId, tagIds, steps, draftKey, initial])
+
+  const clearDraft = () => {
+    try {
+      sessionStorage.removeItem(draftKey)
+    } catch {
+      // 存储不可用时忽略
+    }
+  }
+
+  const discardDraft = () => {
+    const base = initial || emptyDraft
+    setTitle(base.title || "")
+    setContent(base.content || "")
+    setCategoryId(base.categoryId || "")
+    setTagIds(base.tagIds || [])
+    setSteps(base.steps || [])
+    setError("")
+    setShowDraftNotice(false)
+    clearDraft()
+  }
+
+  const handleCancel = () => {
+    clearDraft()
+    onCancel()
+  }
 
   const toggleTag = (id) => {
     setTagIds((prev) =>
@@ -62,6 +155,7 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
     if (!title.trim()) { setError("请输入标题"); return }
     if (!content.trim()) { setError("请输入内容"); return }
     setError("")
+    clearDraft()
     onSubmit({
       title: title.trim(),
       content: content.trim(),
@@ -79,6 +173,18 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
           className="mb-4 rounded-sketch border-2 border-accent bg-accent-light px-4 py-2.5 text-sm"
         >
           {error}
+        </div>
+      )}
+
+      {showDraftNotice && (
+        <div
+          role="status"
+          className="mb-4 flex flex-wrap items-center gap-3 rounded-sketch border-2 border-line-soft bg-paper-deep px-4 py-2.5 text-sm text-ink-soft"
+        >
+          <span>已恢复上次未保存的草稿。</span>
+          <button type="button" className="font-display text-primary hover:underline" onClick={discardDraft}>
+            清除草稿
+          </button>
         </div>
       )}
 
@@ -235,7 +341,7 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
       </div>
 
       <div className="mt-7 flex justify-end gap-3 border-t-2 border-dashed border-line-soft pt-5 max-md:flex-col-reverse">
-        <button type="button" className={`${btnOutline} max-md:w-full`} onClick={onCancel}>
+        <button type="button" className={`${btnOutline} max-md:w-full`} onClick={handleCancel}>
           取消
         </button>
         <button type="submit" className={`${btnPrimary} max-md:w-full`}>
