@@ -107,6 +107,7 @@ export default function TipCard({ tip, search, showActions, onDelete, selectable
         </div>
         <span className="whitespace-nowrap text-xs tabular-nums text-ink-faint">
           {formatDate(tip.createdAt)}
+          {tip.duration && <span className="ml-1">· {tip.duration}</span>}
           {tip.usageCount > 0 && (
             <span className="ml-1">· 用过 {tip.usageCount} 次</span>
           )}

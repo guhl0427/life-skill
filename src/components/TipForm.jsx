@@ -6,7 +6,18 @@ import Select from "./Select"
 const quickAction = "mb-2 shrink-0 text-[13px] text-primary hover:underline"
 
 const DRAFT_PREFIX = "ls_draft:"
-const emptyDraft = { title: "", content: "", categoryId: "", tagIds: [], steps: [] }
+const emptyDraft = {
+  title: "",
+  content: "",
+  scenario: "",
+  duration: "",
+  difficulty: "",
+  materials: [],
+  notes: "",
+  categoryId: "",
+  tagIds: [],
+  steps: [],
+}
 
 function readDraft(key) {
   try {
@@ -17,6 +28,11 @@ function readDraft(key) {
     return {
       title: typeof data.title === "string" ? data.title : "",
       content: typeof data.content === "string" ? data.content : "",
+      scenario: typeof data.scenario === "string" ? data.scenario : "",
+      duration: typeof data.duration === "string" ? data.duration : "",
+      difficulty: ["简单", "适中", "较难"].includes(data.difficulty) ? data.difficulty : "",
+      materials: Array.isArray(data.materials) ? data.materials.filter((m) => typeof m === "string") : [],
+      notes: typeof data.notes === "string" ? data.notes : "",
       categoryId: typeof data.categoryId === "string" ? data.categoryId : "",
       tagIds: Array.isArray(data.tagIds) ? data.tagIds.filter((id) => typeof id === "string") : [],
       steps: Array.isArray(data.steps) ? data.steps.filter((step) => typeof step === "string") : [],
@@ -30,6 +46,11 @@ function normalizeDraft(draft) {
   return {
     title: (draft.title || "").trim(),
     content: (draft.content || "").trim(),
+    scenario: (draft.scenario || "").trim(),
+    duration: (draft.duration || "").trim(),
+    difficulty: draft.difficulty || "",
+    materials: (draft.materials || []).map((m) => m.trim()).filter(Boolean),
+    notes: (draft.notes || "").trim(),
     categoryId: draft.categoryId || "",
     tagIds: [...(draft.tagIds || [])].sort(),
     steps: (draft.steps || []).map((step) => step.trim()).filter(Boolean),
@@ -39,14 +60,18 @@ function normalizeDraft(draft) {
 function isSameDraft(a, b) {
   const left = normalizeDraft(a)
   const right = normalizeDraft(b)
+  const sameList = (x, y) => x.length === y.length && x.every((item, index) => item === y[index])
   return (
     left.title === right.title &&
     left.content === right.content &&
+    left.scenario === right.scenario &&
+    left.duration === right.duration &&
+    left.difficulty === right.difficulty &&
+    left.notes === right.notes &&
     left.categoryId === right.categoryId &&
-    left.tagIds.length === right.tagIds.length &&
-    left.tagIds.every((id, index) => id === right.tagIds[index]) &&
-    left.steps.length === right.steps.length &&
-    left.steps.every((step, index) => step === right.steps[index])
+    sameList(left.materials, right.materials) &&
+    sameList(left.tagIds, right.tagIds) &&
+    sameList(left.steps, right.steps)
   )
 }
 
@@ -60,6 +85,11 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
   const [showDraftNotice, setShowDraftNotice] = useState(Boolean(savedDraft))
   const [title, setTitle] = useState(savedDraft?.title ?? initial?.title ?? "")
   const [content, setContent] = useState(savedDraft?.content ?? initial?.content ?? "")
+  const [scenario, setScenario] = useState(savedDraft?.scenario ?? initial?.scenario ?? "")
+  const [duration, setDuration] = useState(savedDraft?.duration ?? initial?.duration ?? "")
+  const [difficulty, setDifficulty] = useState(savedDraft?.difficulty ?? initial?.difficulty ?? "")
+  const [materials, setMaterials] = useState(savedDraft?.materials ?? initial?.materials ?? [])
+  const [notes, setNotes] = useState(savedDraft?.notes ?? initial?.notes ?? "")
   const [categoryId, setCategoryId] = useState(() => {
     const value = savedDraft?.categoryId ?? initial?.categoryId ?? ""
     return value && !categories.some((cat) => cat.id === value) ? "" : value
@@ -79,14 +109,16 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
 
   // 内容有改动时自动保存草稿，离开页面后再次进入可恢复
   useEffect(() => {
-    const draft = { title, content, categoryId, tagIds, steps }
+    const draft = {
+      title, content, scenario, duration, difficulty, materials, notes, categoryId, tagIds, steps,
+    }
     try {
       if (isSameDraft(draft, initial || emptyDraft)) sessionStorage.removeItem(draftKey)
       else sessionStorage.setItem(draftKey, JSON.stringify(draft))
     } catch {
       // 草稿存储不可用时忽略，不影响正常编辑
     }
-  }, [title, content, categoryId, tagIds, steps, draftKey, initial])
+  }, [title, content, scenario, duration, difficulty, materials, notes, categoryId, tagIds, steps, draftKey, initial])
 
   const clearDraft = () => {
     try {
@@ -100,6 +132,11 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
     const base = initial || emptyDraft
     setTitle(base.title || "")
     setContent(base.content || "")
+    setScenario(base.scenario || "")
+    setDuration(base.duration || "")
+    setDifficulty(base.difficulty || "")
+    setMaterials(base.materials || [])
+    setNotes(base.notes || "")
     setCategoryId(base.categoryId || "")
     setTagIds(base.tagIds || [])
     setSteps(base.steps || [])
@@ -152,6 +189,14 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
     setSteps((prev) => prev.filter((_, i) => i !== index))
   }
 
+  const updateMaterial = (index, value) => {
+    setMaterials((prev) => prev.map((item, i) => (i === index ? value : item)))
+  }
+
+  const removeMaterial = (index) => {
+    setMaterials((prev) => prev.filter((_, i) => i !== index))
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!title.trim()) { setError("请输入标题"); return }
@@ -161,6 +206,11 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
     onSubmit({
       title: title.trim(),
       content: content.trim(),
+      scenario: scenario.trim(),
+      duration: duration.trim(),
+      difficulty,
+      materials: materials.map((m) => m.trim()).filter(Boolean),
+      notes: notes.trim(),
       categoryId,
       tagIds,
       steps: steps.map((s) => s.trim()).filter(Boolean),
@@ -219,6 +269,86 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
         />
       </div>
 
+      <div className="mb-5 grid gap-4 md:grid-cols-3">
+        <div>
+          <label className={label} htmlFor="tip-scenario">适用场景</label>
+          <input
+            id="tip-scenario"
+            className={field}
+            type="text"
+            maxLength={40}
+            placeholder="如：厨房清洁"
+            value={scenario}
+            onChange={(e) => setScenario(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className={label} htmlFor="tip-duration">耗时</label>
+          <input
+            id="tip-duration"
+            className={field}
+            type="text"
+            maxLength={20}
+            placeholder="如：10 分钟"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+          />
+        </div>
+        <div>
+          <span className={label}>难度</span>
+          <Select
+            ariaLabel="难度"
+            className="w-full"
+            triggerClassName={`${field} cursor-pointer`}
+            value={difficulty}
+            onChange={setDifficulty}
+            options={[
+              { value: "", label: "未设置" },
+              { value: "简单", label: "简单" },
+              { value: "适中", label: "适中" },
+              { value: "较难", label: "较难" },
+            ]}
+          />
+        </div>
+      </div>
+
+      <div className="mb-5">
+        <div className="flex items-center justify-between gap-3">
+          <span className={label}>材料</span>
+          <button
+            type="button"
+            className={quickAction}
+            onClick={() => setMaterials((prev) => [...prev, ""])}
+          >
+            + 添加材料
+          </button>
+        </div>
+        {materials.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {materials.map((item, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <span className="w-6 shrink-0 text-center font-hand text-sm text-ink-faint">·</span>
+                <input
+                  className={`${field} py-1.5 text-sm`}
+                  aria-label={`材料 ${index + 1}`}
+                  maxLength={40}
+                  value={item}
+                  onChange={(e) => updateMaterial(index, e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="shrink-0 px-1 text-ink-faint transition-colors hover:text-danger"
+                  aria-label={`删除材料 ${index + 1}`}
+                  onClick={() => removeMaterial(index)}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="mb-5">
         <div className="flex items-center justify-between gap-3">
           <span className={label}>步骤</span>
@@ -263,6 +393,21 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
             ))}
           </div>
         )}
+      </div>
+
+      <div className="mb-5">
+        <div className="flex items-center justify-between gap-3">
+          <label className={label} htmlFor="tip-notes">注意事项</label>
+          <span className="mb-2 text-xs tabular-nums text-ink-faint">{notes.length}/300</span>
+        </div>
+        <textarea
+          id="tip-notes"
+          className={`${field} min-h-24 resize-y leading-relaxed`}
+          maxLength={300}
+          placeholder="可选，例如安全提醒、容易失败的环节"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
       </div>
 
       <div className="mb-5">

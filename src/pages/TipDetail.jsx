@@ -83,10 +83,27 @@ export default function TipDetail() {
     parts.push(tip.title)
     parts.push("")
     parts.push(tip.content)
+    const meta = []
+    if (tip.duration) meta.push("耗时：" + tip.duration)
+    if (tip.difficulty) meta.push("难度：" + tip.difficulty)
+    if (tip.scenario) meta.push("适用场景：" + tip.scenario)
+    if (meta.length > 0) {
+      parts.push("")
+      parts.push(meta.join(" · "))
+    }
+    if (tip.materials?.length > 0) {
+      parts.push("")
+      parts.push("材料：")
+      tip.materials.forEach((item) => parts.push("- " + item))
+    }
     if (tip.steps?.length > 0) {
       parts.push("")
       parts.push("步骤：")
       tip.steps.forEach((step, index) => parts.push(`${index + 1}. ${step}`))
+    }
+    if (tip.notes) {
+      parts.push("")
+      parts.push("注意：" + tip.notes)
     }
     if (tipTags.length > 0) {
       parts.push("")
@@ -148,11 +165,34 @@ export default function TipDetail() {
           <span className="text-sm tabular-nums text-ink-faint">
             {formatDate(tip.createdAt)}
           </span>
+          {tip.duration && <span className="text-sm text-ink-faint">耗时 {tip.duration}</span>}
+          {tip.difficulty && <span className="text-sm text-ink-faint">难度 {tip.difficulty}</span>}
         </div>
 
         <div className="whitespace-pre-wrap rounded-sketch-lg border-[1.5px] border-line bg-card p-6 text-base leading-loose text-ink shadow-ink max-md:p-[18px] max-[480px]:p-3.5">
           {tip.content}
         </div>
+
+        {tip.scenario && (
+          <div className="mt-4 rounded-sketch border-2 border-dashed border-line-soft bg-paper-deep px-4 py-2.5 text-sm leading-relaxed text-ink-soft">
+            <span className="font-display text-ink">适用场景：</span>
+            {tip.scenario}
+          </div>
+        )}
+
+        {tip.materials?.length > 0 && (
+          <section className="mt-5">
+            <h2 className="mb-2 font-display text-base text-ink">材料清单</h2>
+            <ul className="flex flex-col gap-1.5 rounded-sketch border-[1.5px] border-line bg-card p-4 shadow-ink">
+              {tip.materials.map((item, index) => (
+                <li key={index} className="flex gap-2 text-[15px] leading-relaxed text-ink">
+                  <span className="text-primary">·</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {tip.steps?.length > 0 && (
           <ol className="mt-5 flex flex-col gap-2.5">
@@ -168,6 +208,13 @@ export default function TipDetail() {
               </li>
             ))}
           </ol>
+        )}
+
+        {tip.notes && (
+          <div className="mt-5 rounded-sketch border-2 border-accent bg-card px-4 py-3 text-sm leading-relaxed text-ink shadow-ink">
+            <span className="font-display text-accent-hover">注意：</span>
+            {tip.notes}
+          </div>
         )}
 
         <div className="mt-5 flex flex-wrap items-center gap-3">

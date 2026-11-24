@@ -5,7 +5,17 @@ export function getKeywords(query) {
 function buildHaystack(tip, categoryMap, tagMap) {
   const cat = categoryMap?.get(tip.categoryId)
   const tagNames = (tip.tagIds || []).map((id) => tagMap?.get(id)?.name || "")
-  return [tip.title, tip.content, cat?.name, ...tagNames].filter(Boolean).join("\n").toLowerCase()
+  return [
+    tip.title,
+    tip.content,
+    tip.scenario,
+    tip.duration,
+    tip.difficulty,
+    tip.notes,
+    ...(tip.materials || []),
+    cat?.name,
+    ...tagNames,
+  ].filter(Boolean).join("\n").toLowerCase()
 }
 
 export function matchesTip(tip, query, categoryMap, tagMap) {

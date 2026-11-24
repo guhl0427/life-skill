@@ -99,6 +99,13 @@ export function parseBackup(raw) {
       steps: Array.isArray(t.steps)
         ? t.steps.filter((s) => typeof s === "string" && s.trim()).map((s) => s.trim())
         : [],
+      materials: Array.isArray(t.materials)
+        ? t.materials.filter((m) => typeof m === "string" && m.trim()).map((m) => m.trim())
+        : [],
+      scenario: asString(t.scenario),
+      duration: asString(t.duration),
+      difficulty: ["简单", "适中", "较难"].includes(t.difficulty) ? t.difficulty : "",
+      notes: asString(t.notes),
       starred: Boolean(t.starred),
       usageCount: Number.isFinite(t.usageCount) ? t.usageCount : 0,
       lastUsedAt: Number.isFinite(t.lastUsedAt) ? t.lastUsedAt : null,
