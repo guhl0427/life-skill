@@ -22,6 +22,8 @@ export default function FilterBar({
   activeTagName,
   untagged,
   uncategorized,
+  search,
+  onClearSearch,
   onClearTag,
   onClearExtra,
   onReset,
@@ -32,7 +34,7 @@ export default function FilterBar({
   const [showAllCats, setShowAllCats] = useState(false)
   const [stuck, setStuck] = useState(false)
   const barRef = useRef(null)
-  const isAll = !activeCat && !activeStarred && !activeTag && !untagged && !uncategorized
+  const isAll = !activeCat && !activeStarred && !activeTag && !untagged && !uncategorized && !search
 
   // 吸附到顶部时切换为单行 + 横向滚动
   useEffect(() => {
@@ -82,7 +84,7 @@ export default function FilterBar({
     <div
       ref={barRef}
       className={
-        "sticky top-[73px] z-[9] -mx-8 mb-6 flex flex-wrap items-center gap-3 border-b-2 px-8 py-2 transition-[border-color,box-shadow] duration-200 max-md:-mx-4 max-md:top-[65px] max-md:px-4 max-md:py-1.5 max-[480px]:-mx-3 max-[480px]:top-[61px] max-[480px]:px-3 " +
+        "sticky top-[var(--header-height)] z-[9] -mx-8 mb-6 flex flex-wrap items-center gap-3 border-b-2 px-8 py-2 transition-[border-color,box-shadow] duration-200 max-md:-mx-4 max-md:px-4 max-md:py-1.5 max-[480px]:-mx-3 max-[480px]:px-3 " +
         (stuck ? "max-md:flex-nowrap " : "") +
         (stuck
           ? "border-line-soft bg-paper shadow-[0_8px_12px_-10px_rgba(61,61,61,0.5)]"
@@ -112,6 +114,17 @@ export default function FilterBar({
           >
             ⭐ 已收藏
           </button>
+          {search && (
+            <button
+              type="button"
+              className={chipExtra}
+              onClick={onClearSearch}
+              aria-label={`清除搜索：${search}`}
+            >
+              <span className="max-w-[160px] truncate">搜索「{search}」</span>
+              <span aria-hidden="true" className="text-[11px]">✕</span>
+            </button>
+          )}
           {activeTag && (
             <button
               type="button"
@@ -140,7 +153,7 @@ export default function FilterBar({
               type="button"
               className={`${chipBase} ${activeCat === cat.id ? chipActive : chipIdle}`}
               style={activeCat === cat.id ? { background: cat.color + "2E", borderColor: cat.color } : undefined}
-              onClick={() => onCatChange(cat.id)}
+              onClick={() => onCatChange(activeCat === cat.id ? "" : cat.id)}
               aria-pressed={activeCat === cat.id}
             >
               {cat.emoji} {cat.name}

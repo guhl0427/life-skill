@@ -70,6 +70,8 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
   })
   const [steps, setSteps] = useState(savedDraft?.steps ?? initial?.steps ?? [])
   const [error, setError] = useState("")
+  const [catError, setCatError] = useState("")
+  const [tagError, setTagError] = useState("")
   const [showNewCat, setShowNewCat] = useState(false)
   const [newCatName, setNewCatName] = useState("")
   const [showNewTag, setShowNewTag] = useState(false)
@@ -122,9 +124,9 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
 
   const handleAddCategory = () => {
     const trimmed = newCatName.trim()
-    if (!trimmed) { setError("请输入分类名称"); return }
-    if (hasSameName(categories, trimmed)) { setError("已有同名分类"); return }
-    setError("")
+    if (!trimmed) { setCatError("请输入分类名称"); return }
+    if (hasSameName(categories, trimmed)) { setCatError("已有同名分类"); return }
+    setCatError("")
     const created = addCategory({ name: trimmed, emoji: "📌", color: "#7EB8A0" })
     setCategoryId(created.id)
     setNewCatName("")
@@ -133,9 +135,9 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
 
   const handleAddTag = () => {
     const trimmed = newTagName.trim()
-    if (!trimmed) { setError("请输入标签名称"); return }
-    if (hasSameName(tags, trimmed)) { setError("已有同名标签"); return }
-    setError("")
+    if (!trimmed) { setTagError("请输入标签名称"); return }
+    if (hasSameName(tags, trimmed)) { setTagError("已有同名标签"); return }
+    setTagError("")
     const created = addTag({ name: trimmed })
     setTagIds((prev) => [...prev, created.id])
     setNewTagName("")
@@ -256,7 +258,7 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
           <button
             type="button"
             className={quickAction}
-            onClick={() => { setShowNewCat((v) => !v); setError("") }}
+            onClick={() => { setShowNewCat((v) => !v); setCatError("") }}
           >
             + 新建分类
           </button>
@@ -273,19 +275,22 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
           ]}
         />
         {showNewCat && (
-          <div className="mt-2 flex gap-2">
-            <input
-              className={`${field} py-1.5 text-sm`}
-              aria-label="新分类名称"
-              placeholder="分类名称"
-              maxLength={12}
-              value={newCatName}
-              onChange={(e) => setNewCatName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCategory() } }}
-            />
-            <button type="button" className={`${btnPrimary} ${btnSm} shrink-0`} onClick={handleAddCategory}>
-              添加
-            </button>
+          <div className="mt-2">
+            <div className="flex gap-2">
+              <input
+                className={`${field} py-1.5 text-sm`}
+                aria-label="新分类名称"
+                placeholder="分类名称"
+                maxLength={12}
+                value={newCatName}
+                onChange={(e) => { setNewCatName(e.target.value); setCatError("") }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCategory() } }}
+              />
+              <button type="button" className={`${btnPrimary} ${btnSm} shrink-0`} onClick={handleAddCategory}>
+                添加
+              </button>
+            </div>
+            {catError && <p role="alert" className="mt-1.5 text-sm text-danger">{catError}</p>}
           </div>
         )}
       </div>
@@ -296,25 +301,28 @@ export default function TipForm({ initial, onSubmit, onCancel }) {
           <button
             type="button"
             className={quickAction}
-            onClick={() => { setShowNewTag((v) => !v); setError("") }}
+            onClick={() => { setShowNewTag((v) => !v); setTagError("") }}
           >
             + 新建标签
           </button>
         </div>
         {showNewTag && (
-          <div className="mb-2 flex gap-2">
-            <input
-              className={`${field} py-1.5 text-sm`}
-              aria-label="新标签名称"
-              placeholder="标签名称"
-              maxLength={12}
-              value={newTagName}
-              onChange={(e) => setNewTagName(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddTag() } }}
-            />
-            <button type="button" className={`${btnPrimary} ${btnSm} shrink-0`} onClick={handleAddTag}>
-              添加
-            </button>
+          <div className="mb-2">
+            <div className="flex gap-2">
+              <input
+                className={`${field} py-1.5 text-sm`}
+                aria-label="新标签名称"
+                placeholder="标签名称"
+                maxLength={12}
+                value={newTagName}
+                onChange={(e) => { setNewTagName(e.target.value); setTagError("") }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddTag() } }}
+              />
+              <button type="button" className={`${btnPrimary} ${btnSm} shrink-0`} onClick={handleAddTag}>
+                添加
+              </button>
+            </div>
+            {tagError && <p role="alert" className="mt-1.5 text-sm text-danger">{tagError}</p>}
           </div>
         )}
         <div className="flex flex-wrap gap-2 py-2">

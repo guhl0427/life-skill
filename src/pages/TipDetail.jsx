@@ -6,12 +6,37 @@ import Icon from "../components/Icon"
 import { formatDate, formatDateTime } from "../utils/format"
 import { btnPrimary, btnOutline, btnDanger, btnSm } from "../components/ui"
 
+async function copyToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch {
+      // 继续尝试兜底方案
+    }
+  }
+  try {
+    const area = document.createElement("textarea")
+    area.value = text
+    area.setAttribute("readonly", "")
+    area.style.position = "fixed"
+    area.style.top = "-9999px"
+    document.body.appendChild(area)
+    area.select()
+    const ok = document.execCommand("copy")
+    area.remove()
+    return ok
+  } catch {
+    return false
+  }
+}
+
 export default function TipDetail() {
   const { id } = useParams()
   const { tips, getTip, categoryMap, tagMap, toggleStar, deleteTip, markUsed } = useApp()
   const navigate = useNavigate()
   const [showDelete, setShowDelete] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [copyState, setCopyState] = useState("idle")
   const tip = getTip(id)
 
   if (!tip) {
@@ -66,11 +91,9 @@ export default function TipDetail() {
     }
     parts.push("")
     parts.push("来源: LifeSkill (" + formatDateTime(tip.createdAt) + ")")
-    try {
-      await navigator.clipboard.writeText(parts.join("\n"))
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch { /* silent fail */ }
+    const ok = await copyToClipboard(parts.join("\n"))
+    setCopyState(ok ? "success" : "error")
+    setTimeout(() => setCopyState("idle"), ok ? 2000 : 4000)
   }
 
   return (
@@ -163,13 +186,19 @@ export default function TipDetail() {
           </Link>
           <div className="flex gap-3 max-md:w-full">
             <button className={`${btnOutline} max-md:flex-1`} onClick={handleCopy}>
-              {copied ? "✅ 已复制" : "📋 复制"}
+              {copyState === "success" ? "✅ 已复制" : copyState === "error" ? "复制失败" : "📋 复制"}
             </button>
             <button className={`${btnDanger} max-md:flex-1`} onClick={() => setShowDelete(true)}>
               删除
             </button>
           </div>
         </div>
+
+        {copyState === "error" && (
+          <p role="alert" className="mt-2 text-sm text-danger">
+            复制失败，请长按或选中上方内容手动复制。
+          </p>
+        )}
 
         {related.length > 0 && (
           <div className="mt-8">

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from "react"
 import { NavLink, Link, useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import Icon from "./Icon"
@@ -7,6 +7,44 @@ import { btnPrimary, btnSm } from "./ui"
 const navClass = ({ isActive }) =>
   "flex items-center gap-2.5 rounded-sketch px-3.5 py-2.5 text-[15px] transition-colors duration-200 " +
   (isActive ? "bg-primary text-on-primary" : "text-ink-soft hover:bg-primary-light hover:text-ink")
+
+function SearchBox({ initialQuery, onSubmit, onClear }) {
+  const [value, setValue] = useState(initialQuery)
+
+  return (
+    <form
+      role="search"
+      className="flex max-w-[360px] flex-1 items-center gap-2 rounded-pill border-2 border-line bg-card px-4 py-2 transition-all duration-200 focus-within:border-primary focus-within:shadow-[0_0_0_3px_var(--primary-light)] max-md:min-w-0 max-md:max-w-full"
+      onSubmit={(e) => {
+        e.preventDefault()
+        onSubmit(value.trim())
+      }}
+    >
+      <Icon name="search" className="h-4 w-4 shrink-0 text-ink-faint" />
+      <input
+        type="text"
+        name="q"
+        placeholder="搜索标题、内容、标签..."
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-faint focus:outline-none"
+      />
+      {value && (
+        <button
+          type="button"
+          aria-label="清除搜索"
+          className="shrink-0 rounded-full px-1 text-base leading-none text-ink-faint transition-colors duration-200 hover:text-ink"
+          onClick={() => {
+            setValue("")
+            onClear()
+          }}
+        >
+          ✕
+        </button>
+      )}
+    </form>
+  )
+}
 
 export default function Layout({ children }) {
   const { tips, categories, tags } = useApp()
@@ -19,6 +57,7 @@ export default function Layout({ children }) {
   const urlQuery = searchParams.get("q") || ""
   const [dark, setDark] = useState(() => localStorage.getItem("ls_dark") === "true")
   const navigate = useNavigate()
+  const headerRef = useRef(null)
 
   const activeTipsCount = useMemo(() => tips.filter((t) => !t.deletedAt).length, [tips])
   const trashedCount = useMemo(() => tips.filter((t) => t.deletedAt).length, [tips])
@@ -27,6 +66,23 @@ export default function Layout({ children }) {
     document.documentElement.setAttribute("data-theme", dark ? "dark" : "")
     localStorage.setItem("ls_dark", dark)
   }, [dark])
+
+  // 把顶部栏实际高度同步给 CSS 变量，供吸顶筛选栏定位
+  useLayoutEffect(() => {
+    const header = headerRef.current
+    if (!header) return
+    const update = () => {
+      document.documentElement.style.setProperty(
+        "--header-height",
+        header.getBoundingClientRect().height + "px"
+      )
+    }
+    update()
+    if (typeof ResizeObserver === "undefined") return
+    const observer = new ResizeObserver(update)
+    observer.observe(header)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const onError = () => setStorageError(true)
@@ -49,14 +105,20 @@ export default function Layout({ children }) {
     }
   }, [])
 
-  const handleSearch = (e) => {
-    e.preventDefault()
-    const q = (new FormData(e.currentTarget).get("q") || "").trim()
+  const handleSearch = (q) => {
     if (q) {
       navigate("/?q=" + encodeURIComponent(q))
     } else {
       navigate("/")
     }
+  }
+
+  const handleClearSearch = () => {
+    if (!searchParams.get("q")) return
+    const params = new URLSearchParams(searchParams)
+    params.delete("q")
+    const query = params.toString()
+    navigate("/" + (query ? "?" + query : ""))
   }
 
   const closeMenu = useCallback(() => {
@@ -193,7 +255,7 @@ export default function Layout({ children }) {
       )}
 
       <div className="flex min-h-screen min-w-0 flex-col">
-        <header className="sticky top-0 z-10 flex items-center gap-4 border-b-2 border-line-soft bg-paper px-8 py-4 backdrop-blur-sm max-md:gap-2 max-md:px-4 max-md:py-3 max-[480px]:px-3 max-[480px]:py-2.5">
+        <header ref={headerRef} className="sticky top-0 z-10 flex items-center gap-4 border-b-2 border-line-soft bg-paper px-8 py-4 backdrop-blur-sm max-md:gap-2 max-md:px-4 max-md:py-3 max-[480px]:px-3 max-[480px]:py-2.5">
           <button
             className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-sketch-sm border-2 border-line bg-card text-xl max-md:flex max-[480px]:h-9 max-[480px]:w-9"
             onClick={toggleMenu}
@@ -202,20 +264,12 @@ export default function Layout({ children }) {
           >
             <Icon name={menuOpen ? "close" : "menu"} className="h-5 w-5" />
           </button>
-          <form
-            className="flex max-w-[360px] flex-1 items-center gap-2 rounded-pill border-2 border-line bg-card px-4 py-2 transition-all duration-200 focus-within:border-primary focus-within:shadow-[0_0_0_3px_var(--primary-light)] max-md:min-w-0 max-md:max-w-full"
+          <SearchBox
+            key={location.key}
+            initialQuery={urlQuery}
             onSubmit={handleSearch}
-          >
-            <Icon name="search" className="h-4 w-4 shrink-0 text-ink-faint" />
-            <input
-              key={location.key}
-              type="text"
-              name="q"
-              placeholder="搜索标题、内容、标签..."
-              defaultValue={urlQuery}
-              className="min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-faint focus:outline-none"
-            />
-          </form>
+            onClear={handleClearSearch}
+          />
           <span className="flex-1 max-md:flex-none" />
           <Link to="/tips/new" className={`${btnPrimary} ${btnSm} btn-wiggle`}>
             + 新技巧

@@ -90,12 +90,19 @@ export default function Home() {
     params.delete("starred")
     params.delete("tag")
     params.delete("untagged")
+    params.delete("q")
     setSearchParams(params)
   }
 
   const handleClearQuery = (...keys) => {
     const params = new URLSearchParams(searchParams)
     keys.forEach((key) => params.delete(key))
+    setSearchParams(params)
+  }
+
+  const handleResetAll = () => {
+    const params = new URLSearchParams(searchParams)
+    ;["cat", "starred", "tag", "untagged", "q"].forEach((key) => params.delete(key))
     setSearchParams(params)
   }
 
@@ -140,6 +147,8 @@ export default function Home() {
     setSearchParams(params)
   }
 
+  const hasFilters = Boolean(search || activeCat || activeStarred || activeTag || untaggedOnly)
+
   return (
     <div>
       <h1 className={`${pageTitle} mb-6`}>
@@ -155,6 +164,8 @@ export default function Home() {
         activeTagName={tagMap.get(activeTag)?.name || ""}
         untagged={untaggedOnly}
         uncategorized={activeCat === "__none__"}
+        search={search}
+        onClearSearch={() => handleClearQuery("q")}
         onClearTag={() => handleClearQuery("tag")}
         onClearExtra={() => handleClearQuery("cat", "untagged")}
         onReset={handleResetFilters}
@@ -162,7 +173,8 @@ export default function Home() {
         onSortChange={handleSortChange}
       />
 
-      <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <span className="text-sm tabular-nums text-ink-faint">共 {filtered.length} 条</span>
         <button
           className={`${selectMode ? btnDanger : btnOutline} ${btnSm}`}
           onClick={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
@@ -230,13 +242,18 @@ export default function Home() {
         <div className="px-5 py-16 text-center">
           <div className="mb-3 text-3xl">🔍</div>
           <h3 className="mb-4 font-display text-xl text-ink">
-            {search || activeCat || activeStarred || activeTag || untaggedOnly
-              ? "没有匹配的技巧"
-              : "还没有技巧"}
+            {hasFilters ? "没有匹配的技巧" : "还没有技巧"}
           </h3>
-          <Link to="/tips/new" className={btnPrimary}>
-            新建技巧
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {hasFilters && (
+              <button type="button" className={btnOutline} onClick={handleResetAll}>
+                清除筛选
+              </button>
+            )}
+            <Link to="/tips/new" className={btnPrimary}>
+              新建技巧
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="tip-grid">
