@@ -4,8 +4,8 @@ import { useApp } from "../context/useApp"
 import ConfirmDialog from "../components/ConfirmDialog"
 import Icon from "../components/Icon"
 import { formatDate, formatDateTime } from "../utils/format"
-import { downloadTipImage } from "../utils/shareImage"
 import { downloadTipMarkdown } from "../utils/exportTip"
+import ShareImageDialog from "../components/ShareImageDialog"
 import { btnPrimary, btnOutline, btnDanger, btnSm } from "../components/ui"
 
 async function copyToClipboard(text) {
@@ -39,8 +39,7 @@ export default function TipDetail() {
   const navigate = useNavigate()
   const [showDelete, setShowDelete] = useState(false)
   const [copyState, setCopyState] = useState("idle")
-  const [sharing, setSharing] = useState(false)
-  const [shareError, setShareError] = useState("")
+  const [showShare, setShowShare] = useState(false)
   const tip = getTip(id)
 
   if (!tip) {
@@ -115,19 +114,6 @@ export default function TipDetail() {
     const ok = await copyToClipboard(parts.join("\n"))
     setCopyState(ok ? "success" : "error")
     setTimeout(() => setCopyState("idle"), ok ? 2000 : 4000)
-  }
-
-  const handleShareImage = async () => {
-    if (sharing) return
-    setSharing(true)
-    setShareError("")
-    try {
-      await downloadTipImage({ tip, category: cat, tags: tipTags })
-    } catch {
-      setShareError("生成分享图失败，请稍后重试。")
-    } finally {
-      setSharing(false)
-    }
   }
 
   return (
@@ -251,10 +237,9 @@ export default function TipDetail() {
           <div className="flex flex-wrap gap-3 max-md:w-full">
             <button
               className={`${btnOutline} max-md:flex-1`}
-              onClick={handleShareImage}
-              disabled={sharing}
+              onClick={() => setShowShare(true)}
             >
-              {sharing ? "生成中…" : "🖼️ 分享图"}
+              🖼️ 分享图
             </button>
             <button
               className={`${btnOutline} max-md:flex-1`}
@@ -274,12 +259,6 @@ export default function TipDetail() {
         {copyState === "error" && (
           <p role="alert" className="mt-2 text-sm text-danger">
             复制失败，请长按或选中上方内容手动复制。
-          </p>
-        )}
-
-        {shareError && (
-          <p role="alert" className="mt-2 text-sm text-danger">
-            {shareError}
           </p>
         )}
 
@@ -309,6 +288,15 @@ export default function TipDetail() {
           />
         )}
       </div>
+
+      {showShare && (
+        <ShareImageDialog
+          tip={tip}
+          category={cat}
+          tags={tipTags}
+          onClose={() => setShowShare(false)}
+        />
+      )}
     </div>
   )
 }
