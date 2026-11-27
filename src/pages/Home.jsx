@@ -8,6 +8,7 @@ import ConfirmDialog from "../components/ConfirmDialog"
 import Select from "../components/Select"
 import { matchesTip } from "../utils/search"
 import { readRecentTipIds, clearRecentTips } from "../utils/recentTips"
+import { downloadTipsMarkdown } from "../utils/exportTip"
 import Icon from "../components/Icon"
 import { btnOutline, btnDanger, btnSm, btnPrimary, pageTitle } from "../components/ui"
 
@@ -194,6 +195,12 @@ export default function Home() {
     setSearchParams(params)
   }
 
+  const handleExportMarkdown = () => {
+    if (filtered.length === 0) return
+    downloadTipsMarkdown(filtered, categoryMap, tagMap)
+    setNotice(`已导出 ${filtered.length} 条技巧为 Markdown`)
+  }
+
   const hasFilters = Boolean(search || activeCat || activeStarred || activeTag || untaggedOnly)
 
   return (
@@ -260,17 +267,29 @@ export default function Home() {
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <span className="text-sm tabular-nums text-ink-faint">共 {filtered.length} 条</span>
-        <button
-          className={`${selectMode ? btnDanger : btnOutline} ${btnSm}`}
-          onClick={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
-        >
-          {selectMode ? "退出多选" : (
-            <>
-              <Icon name="checkbox" className="h-4 w-4" />
-              批量选择
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className={`${btnOutline} ${btnSm} disabled:cursor-not-allowed disabled:opacity-50`}
+            onClick={handleExportMarkdown}
+            disabled={filtered.length === 0}
+            title="将当前筛选结果导出为 Markdown"
+          >
+            <Icon name="download" className="h-4 w-4" />
+            导出 MD
+          </button>
+          <button
+            className={`${selectMode ? btnDanger : btnOutline} ${btnSm}`}
+            onClick={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
+          >
+            {selectMode ? "退出多选" : (
+              <>
+                <Icon name="checkbox" className="h-4 w-4" />
+                批量选择
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {notice && (

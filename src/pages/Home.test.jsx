@@ -1,10 +1,16 @@
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen, fireEvent, within } from "@testing-library/react"
 import { MemoryRouter, Routes, Route } from "react-router-dom"
 import { AppProvider } from "../context/AppContext"
+import { downloadTipsMarkdown } from "../utils/exportTip"
 import Home from "./Home"
 
+vi.mock("../utils/exportTip", () => ({
+  downloadTipsMarkdown: vi.fn(),
+}))
+
 beforeEach(() => {
+  vi.clearAllMocks()
   localStorage.clear()
 })
 
@@ -308,5 +314,25 @@ describe("Home 最近浏览", () => {
     renderHome(["/?cat=cat-1"])
 
     expect(screen.queryByRole("region", { name: "最近浏览" })).not.toBeInTheDocument()
+  })
+})
+
+describe("Home 导出 Markdown", () => {
+  it("导出当前筛选结果并提示数量", () => {
+    renderHome(["/?q=香蕉"])
+
+    fireEvent.click(screen.getByRole("button", { name: /导出 MD/ }))
+
+    expect(downloadTipsMarkdown).toHaveBeenCalledTimes(1)
+    const [exported] = downloadTipsMarkdown.mock.calls[0]
+    expect(exported.map((tip) => tip.id)).toEqual(["tip-4"])
+    expect(screen.getByRole("status")).toHaveTextContent("已导出 1 条技巧为 Markdown")
+  })
+
+  it("没有匹配结果时禁用导出", () => {
+    renderHome(["/?q=不存在的关键词"])
+
+    expect(screen.getByRole("button", { name: /导出 MD/ })).toBeDisabled()
+    expect(downloadTipsMarkdown).not.toHaveBeenCalled()
   })
 })
