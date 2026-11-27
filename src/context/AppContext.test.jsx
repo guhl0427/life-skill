@@ -48,6 +48,19 @@ describe("AppProvider", () => {
     expect(api.tips.every((t) => !t.tagIds.includes("tag-1"))).toBe(true)
   })
 
+  it("合并标签时替换技巧标签、去重并移除源标签", () => {
+    renderApp()
+    // 预置数据中存在同时使用 tag-1 与 tag-3 的技巧
+    expect(api.tips.some((t) => t.tagIds.includes("tag-3"))).toBe(true)
+
+    act(() => api.mergeTags("tag-3", "tag-1"))
+
+    expect(api.tags.some((t) => t.id === "tag-3")).toBe(false)
+    expect(api.tips.every((t) => !t.tagIds.includes("tag-3"))).toBe(true)
+    expect(api.tips.some((t) => t.tagIds.includes("tag-1"))).toBe(true)
+    api.tips.forEach((t) => expect(new Set(t.tagIds).size).toBe(t.tagIds.length))
+  })
+
   it("切换收藏状态", () => {
     renderApp()
     const before = api.tips.find((t) => t.id === "tip-1").starred
