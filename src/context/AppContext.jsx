@@ -151,6 +151,15 @@ export function AppProvider({ children }) {
     setTips((prev) => prev.map((t) => (t.categoryId === id ? { ...t, categoryId: null } : t)))
   }, [setCategories, setTips])
 
+  // 合并分类：把源分类下的技巧改归目标分类，源分类删除
+  const mergeCategories = useCallback((sourceId, targetId) => {
+    if (!sourceId || !targetId || sourceId === targetId) return
+    setTips((prev) =>
+      prev.map((t) => (t.categoryId === sourceId ? { ...t, categoryId: targetId } : t))
+    )
+    setCategories((prev) => prev.filter((c) => c.id !== sourceId))
+  }, [setTips, setCategories])
+
   const addTag = useCallback((tag) => {
     const created = { ...tag, id: genId() }
     setTags((prev) => [...prev, created])
@@ -192,7 +201,7 @@ export function AppProvider({ children }) {
         tips, categories, tags, categoryMap, tagMap,
         addTip, updateTip, deleteTip, restoreTip, restoreAllTips, purgeTip, emptyTrash,
         getTip, toggleStar, togglePin, markUsed,
-        addCategory, updateCategory, deleteCategory,
+        addCategory, updateCategory, deleteCategory, mergeCategories,
         addTag, updateTag, deleteTag, mergeTags, importData,
       }}
     >

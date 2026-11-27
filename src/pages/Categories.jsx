@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { useApp } from "../context/useApp"
 import ConfirmDialog from "../components/ConfirmDialog"
+import Select from "../components/Select"
 import { btnPrimary, btnOutline, btnDanger, btnSm, field, label, pageTitle } from "../components/ui"
 
 const colorOptions = ["#7EB8A0","#F4A261","#E8A87C","#A8D5BA","#C9B8E0","#F7C6C6","#B8D4E3","#D4C9B8"]
@@ -92,7 +93,7 @@ function ColorControl({ value, onPick }) {
 }
 
 export default function Categories() {
-  const { categories, tips, addCategory, updateCategory, deleteCategory } = useApp()
+  const { categories, tips, addCategory, updateCategory, deleteCategory, mergeCategories } = useApp()
   const [name, setName] = useState("")
   const [emoji, setEmoji] = useState("📌")
   const [color, setColor] = useState(colorOptions[0])
@@ -102,6 +103,9 @@ export default function Categories() {
   const [editColor, setEditColor] = useState("")
   const [deleteId, setDeleteId] = useState(null)
   const [error, setError] = useState("")
+  const [mergeSourceId, setMergeSourceId] = useState(null)
+  const [mergeTargetId, setMergeTargetId] = useState("")
+  const [notice, setNotice] = useState("")
 
   const countByCat = useMemo(() => {
     const counts = new Map()
@@ -133,6 +137,35 @@ export default function Categories() {
     setEditEmoji(cat.emoji)
     setEditColor(cat.color)
     setError("")
+    setMergeSourceId(null)
+    setMergeTargetId("")
+  }
+
+  const mergeSource = categories.find((cat) => cat.id === mergeSourceId) || null
+  const mergeTargets = mergeSource ? categories.filter((cat) => cat.id !== mergeSource.id) : []
+  const mergeCount = mergeSource
+    ? tips.filter((tip) => tip.categoryId === mergeSource.id).length
+    : 0
+
+  const startMerge = (cat) => {
+    setMergeSourceId(cat.id)
+    setMergeTargetId("")
+    setEditingId(null)
+    setError("")
+    setNotice("")
+  }
+
+  const cancelMerge = () => {
+    setMergeSourceId(null)
+    setMergeTargetId("")
+  }
+
+  const handleMerge = () => {
+    const target = categories.find((cat) => cat.id === mergeTargetId)
+    if (!mergeSource || !target) return
+    mergeCategories(mergeSource.id, target.id)
+    setNotice(`已将「${mergeSource.name}」合并到「${target.name}」，共迁移 ${mergeCount} 条技巧`)
+    cancelMerge()
   }
 
   const handleUpdate = () => {
@@ -191,6 +224,50 @@ export default function Categories() {
 
         {error && <p role="alert" className="mb-3 text-sm text-danger">{error}</p>}
 
+        {notice && (
+          <div
+            role="status"
+            className="mb-3 rounded-sketch border-2 border-primary bg-primary-light px-4 py-2.5 text-sm text-ink"
+          >
+            {notice}
+          </div>
+        )}
+
+        {mergeSource && (
+          <div className="mb-4 rounded-sketch border-2 border-primary bg-card p-4">
+            <div className="mb-1 font-display text-[15px] text-ink">
+              合并分类「{mergeSource.name}」
+            </div>
+            <p className="mb-3 text-[13px] leading-relaxed text-ink-soft">
+              该分类下 {mergeCount} 条技巧（含回收站），合并后会改归目标分类，原分类将被删除，此操作不可撤销。
+            </p>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <Select
+                ariaLabel="合并目标分类"
+                className="min-w-[160px] flex-1"
+                triggerClassName={`${field} cursor-pointer`}
+                value={mergeTargetId}
+                onChange={setMergeTargetId}
+                options={[
+                  { value: "", label: "选择目标分类" },
+                  ...mergeTargets.map((cat) => ({ value: cat.id, label: `${cat.emoji} ${cat.name}` })),
+                ]}
+              />
+              <button
+                type="button"
+                className={`${btnPrimary} ${btnSm} disabled:cursor-not-allowed disabled:opacity-50`}
+                disabled={!mergeTargetId}
+                onClick={handleMerge}
+              >
+                确认合并
+              </button>
+              <button type="button" className={`${btnOutline} ${btnSm}`} onClick={cancelMerge}>
+                取消
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col gap-3">
           {categories.map((cat) => (
             <div
@@ -233,6 +310,15 @@ export default function Categories() {
                   </div>
                   <div className="flex gap-1.5 opacity-40 transition-opacity duration-200 group-hover:opacity-100 max-md:opacity-100">
                     <button className={`${btnOutline} ${btnSm}`} onClick={() => startEdit(cat)}>编辑</button>
+                    <button
+                      className={`${btnOutline} ${btnSm} disabled:cursor-not-allowed disabled:opacity-40`}
+                      aria-label={"合并分类 " + cat.name}
+                      title={categories.length < 2 ? "至少需要两个分类才能合并" : undefined}
+                      disabled={categories.length < 2}
+                      onClick={() => startMerge(cat)}
+                    >
+                      合并
+                    </button>
                     <button className={`${btnDanger} ${btnSm}`} onClick={() => setDeleteId(cat.id)}>删除</button>
                   </div>
                 </>
@@ -245,7 +331,11 @@ export default function Categories() {
           <ConfirmDialog
             title="删除分类"
             message="删除后该分类下的技巧将变为未分类。确定删除吗？"
-            onConfirm={() => { deleteCategory(deleteId); setDeleteId(null) }}
+            onConfirm={() => {
+              if (deleteId === mergeSourceId) cancelMerge()
+              deleteCategory(deleteId)
+              setDeleteId(null)
+            }}
             onCancel={() => setDeleteId(null)}
           />
         )}
