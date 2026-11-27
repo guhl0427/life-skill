@@ -194,6 +194,77 @@ describe("Home 标签筛选", () => {
   })
 })
 
+describe("Home 多标签筛选", () => {
+  beforeEach(() => {
+    localStorage.setItem(
+      "ls_tips",
+      JSON.stringify([
+        {
+          id: "multi-a",
+          title: "双标签技巧",
+          content: "内容",
+          categoryId: null,
+          tagIds: ["tag-1", "tag-6"],
+          starred: false,
+          createdAt: 3,
+          updatedAt: 3,
+        },
+        {
+          id: "multi-b",
+          title: "仅省钱标签",
+          content: "内容",
+          categoryId: null,
+          tagIds: ["tag-1"],
+          starred: false,
+          createdAt: 2,
+          updatedAt: 2,
+        },
+        {
+          id: "multi-c",
+          title: "仅冷知识标签",
+          content: "内容",
+          categoryId: null,
+          tagIds: ["tag-6"],
+          starred: false,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      ])
+    )
+  })
+
+  it("多个标签同时生效时只展示同时包含这些标签的技巧", () => {
+    renderHome(["/?tag=tag-1&tag=tag-6"])
+
+    expect(screen.getByText("双标签技巧")).toBeInTheDocument()
+    expect(screen.queryByText("仅省钱标签")).not.toBeInTheDocument()
+    expect(screen.queryByText("仅冷知识标签")).not.toBeInTheDocument()
+  })
+
+  it("在标签面板中可继续追加标签筛选", () => {
+    renderHome(["/?tag=tag-1"])
+    expect(screen.getByText("双标签技巧")).toBeInTheDocument()
+    expect(screen.getByText("仅省钱标签")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: /🏷️ 标签/ }))
+    const panel = screen.getByRole("group", { name: "标签筛选" })
+    fireEvent.click(within(panel).getByRole("button", { name: /#冷知识/ }))
+
+    expect(screen.getByText("双标签技巧")).toBeInTheDocument()
+    expect(screen.queryByText("仅省钱标签")).not.toBeInTheDocument()
+  })
+
+  it("可单独清除某个已选标签", () => {
+    renderHome(["/?tag=tag-1&tag=tag-6"])
+
+    fireEvent.click(screen.getByRole("button", { name: "清除标签筛选：省钱" }))
+
+    expect(screen.getByText("双标签技巧")).toBeInTheDocument()
+    expect(screen.getByText("仅冷知识标签")).toBeInTheDocument()
+    expect(screen.queryByText("仅省钱标签")).not.toBeInTheDocument()
+  })
+})
+
 describe("Home 批量操作", () => {
   it("批量设置分类", () => {
     renderHome()
