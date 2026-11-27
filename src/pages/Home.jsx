@@ -7,6 +7,7 @@ import FilterBar from "../components/FilterBar"
 import ConfirmDialog from "../components/ConfirmDialog"
 import Select from "../components/Select"
 import { matchesTip } from "../utils/search"
+import { readRecentTipIds, clearRecentTips } from "../utils/recentTips"
 import Icon from "../components/Icon"
 import { btnOutline, btnDanger, btnSm, btnPrimary, pageTitle } from "../components/ui"
 
@@ -32,6 +33,7 @@ export default function Home() {
   const [batchCat, setBatchCat] = useState("")
   const [batchTag, setBatchTag] = useState("")
   const [confirmBatchDelete, setConfirmBatchDelete] = useState(false)
+  const [recentIds, setRecentIds] = useState(() => readRecentTipIds())
 
   useEffect(() => {
     if (!notice) return
@@ -66,6 +68,20 @@ export default function Home() {
     result.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
     return result
   }, [tips, activeCat, activeTag, untaggedOnly, search, sort, activeStarred, categoryMap, tagMap])
+
+  // 最近浏览按记录顺序取出仍存在的技巧，过滤已删除或已失效的条目
+  const recentTips = useMemo(
+    () =>
+      recentIds
+        .map((id) => tips.find((t) => t.id === id && !t.deletedAt))
+        .filter(Boolean),
+    [recentIds, tips]
+  )
+
+  const handleClearRecent = () => {
+    clearRecentTips()
+    setRecentIds([])
+  }
 
   // 筛选条件变化时清空选中项，避免误删看不见的技巧
   const selectionKey = [activeCat, activeTag, untaggedOnly, activeStarred, search].join("|")
@@ -187,6 +203,41 @@ export default function Home() {
       </h1>
 
       {!hasFilters && !selectMode && <DailyTip />}
+
+      {!hasFilters && !selectMode && recentTips.length > 0 && (
+        <section
+          aria-labelledby="recent-tips-heading"
+          className="mb-6 rounded-sketch-lg border-2 border-dashed border-line-soft bg-paper-deep px-4 py-3 max-[480px]:px-3"
+        >
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h2 id="recent-tips-heading" className="font-display text-sm text-ink-soft">
+              最近浏览
+            </h2>
+            <button
+              type="button"
+              className="rounded-sketch-sm text-xs text-ink-faint transition-colors duration-200 hover:text-primary"
+              onClick={handleClearRecent}
+            >
+              清空
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentTips.map((tip) => {
+              const cat = categoryMap.get(tip.categoryId)
+              return (
+                <Link
+                  key={tip.id}
+                  to={"/tips/" + tip.id}
+                  className="flex max-w-full items-center gap-1 rounded-sketch border-2 border-line bg-card px-3 py-1 text-[13px] text-ink-soft shadow-[1px_2px_0_var(--line-soft)] transition-colors duration-200 hover:border-primary hover:text-primary"
+                >
+                  {cat && <span aria-hidden="true">{cat.emoji}</span>}
+                  <span className="max-w-[180px] truncate">{tip.title}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       <FilterBar
         activeCat={activeCat}
