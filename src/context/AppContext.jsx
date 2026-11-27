@@ -166,6 +166,20 @@ export function AppProvider({ children }) {
     setTips((prev) => prev.map((t) => ({ ...t, tagIds: t.tagIds.filter((tid) => tid !== id) })))
   }, [setTags, setTips])
 
+  // 合并标签：把源标签替换为目标标签，已存在目标标签时不重复添加
+  const mergeTags = useCallback((sourceId, targetId) => {
+    if (!sourceId || !targetId || sourceId === targetId) return
+    setTips((prev) =>
+      prev.map((t) => {
+        const tagIds = t.tagIds || []
+        if (!tagIds.includes(sourceId)) return t
+        const rest = tagIds.filter((id) => id !== sourceId)
+        return { ...t, tagIds: rest.includes(targetId) ? rest : [...rest, targetId] }
+      })
+    )
+    setTags((prev) => prev.filter((t) => t.id !== sourceId))
+  }, [setTags, setTips])
+
   const importData = useCallback(({ tips: nextTips, categories: nextCategories, tags: nextTags }) => {
     setTips(nextTips)
     setCategories(nextCategories)
@@ -179,7 +193,7 @@ export function AppProvider({ children }) {
         addTip, updateTip, deleteTip, restoreTip, restoreAllTips, purgeTip, emptyTrash,
         getTip, toggleStar, togglePin, markUsed,
         addCategory, updateCategory, deleteCategory,
-        addTag, updateTag, deleteTag, importData,
+        addTag, updateTag, deleteTag, mergeTags, importData,
       }}
     >
       {children}
