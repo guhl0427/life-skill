@@ -18,27 +18,27 @@ export default function FilterBar({
   onCatChange,
   activeStarred,
   onStarredChange,
-  activeTag,
-  activeTagName,
+  activeTags,
   untagged,
   uncategorized,
   search,
   onClearSearch,
   onClearTag,
-  onTagChange,
+  onClearTags,
+  onTagToggle,
   onClearExtra,
   onReset,
   sort,
   onSortChange,
 }) {
-  const { categories, tags, tips } = useApp()
+  const { categories, tags, tips, tagMap } = useApp()
   const [showAllCats, setShowAllCats] = useState(false)
   const [stuck, setStuck] = useState(false)
   const [tagOpen, setTagOpen] = useState(false)
   const barRef = useRef(null)
   const tagButtonRef = useRef(null)
   const tagPanelRef = useRef(null)
-  const isAll = !activeCat && !activeStarred && !activeTag && !untagged && !uncategorized && !search
+  const isAll = !activeCat && !activeStarred && activeTags.length === 0 && !untagged && !uncategorized && !search
 
   // 吸附到顶部时切换为单行 + 横向滚动
   useEffect(() => {
@@ -149,11 +149,16 @@ export default function FilterBar({
           <button
             type="button"
             ref={tagButtonRef}
-            className={`${chipBase} ${tagOpen ? chipActive : chipIdle}`}
+            className={`${chipBase} ${tagOpen || activeTags.length > 0 ? chipActive : chipIdle}`}
             onClick={() => setTagOpen((v) => !v)}
             aria-expanded={tagOpen}
           >
             🏷️ 标签
+            {activeTags.length > 0 && (
+              <span className="ml-1 rounded-full bg-primary px-1.5 text-[10px] leading-4 tabular-nums text-on-primary">
+                {activeTags.length}
+              </span>
+            )}
           </button>
           {search && (
             <button
@@ -166,17 +171,21 @@ export default function FilterBar({
               <span aria-hidden="true" className="text-[11px]">✕</span>
             </button>
           )}
-          {activeTag && (
-            <button
-              type="button"
-              className={chipExtra}
-              onClick={onClearTag}
-              aria-label={`清除标签筛选：${activeTagName}`}
-            >
-              #{activeTagName}
-              <span aria-hidden="true" className="text-[11px]">✕</span>
-            </button>
-          )}
+          {activeTags.map((id) => {
+            const name = tagMap.get(id)?.name || ""
+            return (
+              <button
+                key={id}
+                type="button"
+                className={chipExtra}
+                onClick={() => onClearTag?.(id)}
+                aria-label={`清除标签筛选：${name}`}
+              >
+                #{name}
+                <span aria-hidden="true" className="text-[11px]">✕</span>
+              </button>
+            )
+          })}
           {(untagged || uncategorized) && (
             <button
               type="button"
@@ -240,29 +249,44 @@ export default function FilterBar({
           className="absolute left-0 right-0 top-full z-30 mt-1 rounded-sketch border-2 border-line bg-card p-3 shadow-ink-hover"
         >
           <div className="mb-2 flex items-center justify-between gap-3">
-            <span className="text-xs tracking-wider text-ink-faint">按标签筛选</span>
-            <button
-              type="button"
-              aria-label="关闭标签筛选"
-              className="text-sm text-ink-faint transition-colors hover:text-ink"
-              onClick={() => setTagOpen(false)}
-            >
-              ✕
-            </button>
+            <span className="text-xs tracking-wider text-ink-faint">
+              按标签筛选
+              {activeTags.length > 0 && `（已选 ${activeTags.length} 个，需同时满足）`}
+            </span>
+            <div className="flex items-center gap-3">
+              {activeTags.length > 0 && (
+                <button
+                  type="button"
+                  className="text-xs text-primary hover:underline"
+                  onClick={onClearTags}
+                >
+                  清除
+                </button>
+              )}
+              <button
+                type="button"
+                aria-label="关闭标签筛选"
+                className="text-sm text-ink-faint transition-colors hover:text-ink"
+                onClick={() => setTagOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
           </div>
-          <div className="flex max-h-[45vh] flex-wrap gap-2 overflow-y-auto">
+          <div
+            role="group"
+            aria-label="标签筛选"
+            className="flex max-h-[45vh] flex-wrap gap-2 overflow-y-auto"
+          >
             {tags.map((tag) => {
-              const active = activeTag === tag.id
+              const active = activeTags.includes(tag.id)
               const count = tipsByTag.get(tag.id) || 0
               return (
                 <button
                   key={tag.id}
                   type="button"
                   className={`${chipBase} ${active ? chipActive : chipIdle}`}
-                  onClick={() => {
-                    onTagChange?.(active ? "" : tag.id)
-                    setTagOpen(false)
-                  }}
+                  onClick={() => onTagToggle?.(tag.id)}
                   aria-pressed={active}
                 >
                   #{tag.name}

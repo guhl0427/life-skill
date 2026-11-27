@@ -19,8 +19,10 @@ export default function Home() {
   const activeCat = searchParams.get("cat") || ""
   const search = searchParams.get("q") || ""
   const activeStarred = searchParams.get("starred") === "1"
-  const tagParam = searchParams.get("tag") || ""
-  const activeTag = tagMap.has(tagParam) ? tagParam : ""
+  const activeTags = useMemo(
+    () => [...new Set(searchParams.getAll("tag"))].filter((id) => tagMap.has(id)),
+    [searchParams, tagMap]
+  )
   const untaggedOnly = searchParams.get("untagged") === "1"
   const sortParam = searchParams.get("sort")
   const sort = ["newest", "oldest", "title", "updated", "most", "least"].includes(sortParam) ? sortParam : "newest"
@@ -54,7 +56,9 @@ export default function Home() {
     if (activeStarred) result = result.filter((t) => t.starred)
     if (activeCat === "__none__") result = result.filter((t) => !t.categoryId)
     else if (activeCat) result = result.filter((t) => t.categoryId === activeCat)
-    if (activeTag) result = result.filter((t) => (t.tagIds || []).includes(activeTag))
+    if (activeTags.length > 0) {
+      result = result.filter((t) => activeTags.every((id) => (t.tagIds || []).includes(id)))
+    }
     if (untaggedOnly) result = result.filter((t) => !(t.tagIds || []).length)
     if (search) {
       result = result.filter((t) => matchesTip(t, search, categoryMap, tagMap))
@@ -68,7 +72,7 @@ export default function Home() {
     // 置顶的技巧始终排在最前，其余保持当前排序
     result.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
     return result
-  }, [tips, activeCat, activeTag, untaggedOnly, search, sort, activeStarred, categoryMap, tagMap])
+  }, [tips, activeCat, activeTags, untaggedOnly, search, sort, activeStarred, categoryMap, tagMap])
 
   // 最近浏览按记录顺序取出仍存在的技巧，过滤已删除或已失效的条目
   const recentTips = useMemo(
@@ -85,7 +89,7 @@ export default function Home() {
   }
 
   // 筛选条件变化时清空选中项，避免误删看不见的技巧
-  const selectionKey = [activeCat, activeTag, untaggedOnly, activeStarred, search].join("|")
+  const selectionKey = [activeCat, activeTags.join(","), untaggedOnly, activeStarred, search].join("|")
   const [selectionFilter, setSelectionFilter] = useState(selectionKey)
   if (selectionFilter !== selectionKey) {
     setSelectionFilter(selectionKey)
@@ -106,10 +110,28 @@ export default function Home() {
     setSearchParams(params)
   }
 
-  const handleTagChange = (id) => {
+  const handleTagToggle = (id) => {
     const params = new URLSearchParams(searchParams)
-    if (id) params.set("tag", id)
-    else params.delete("tag")
+    const current = params.getAll("tag")
+    const next = current.includes(id)
+      ? current.filter((tagId) => tagId !== id)
+      : [...current, id]
+    params.delete("tag")
+    next.forEach((tagId) => params.append("tag", tagId))
+    setSearchParams(params)
+  }
+
+  const handleClearTag = (id) => {
+    const params = new URLSearchParams(searchParams)
+    const next = params.getAll("tag").filter((tagId) => tagId !== id)
+    params.delete("tag")
+    next.forEach((tagId) => params.append("tag", tagId))
+    setSearchParams(params)
+  }
+
+  const handleClearTags = () => {
+    const params = new URLSearchParams(searchParams)
+    params.delete("tag")
     setSearchParams(params)
   }
 
@@ -201,7 +223,7 @@ export default function Home() {
     setNotice(`已导出 ${filtered.length} 条技巧为 Markdown`)
   }
 
-  const hasFilters = Boolean(search || activeCat || activeStarred || activeTag || untaggedOnly)
+  const hasFilters = Boolean(search || activeCat || activeStarred || activeTags.length || untaggedOnly)
 
   return (
     <div>
@@ -251,14 +273,14 @@ export default function Home() {
         onCatChange={handleCatChange}
         activeStarred={activeStarred}
         onStarredChange={handleStarredChange}
-        activeTag={activeTag}
-        activeTagName={tagMap.get(activeTag)?.name || ""}
+        activeTags={activeTags}
         untagged={untaggedOnly}
         uncategorized={activeCat === "__none__"}
         search={search}
         onClearSearch={() => handleClearQuery("q")}
-        onClearTag={() => handleClearQuery("tag")}
-        onTagChange={handleTagChange}
+        onClearTag={handleClearTag}
+        onClearTags={handleClearTags}
+        onTagToggle={handleTagToggle}
         onClearExtra={() => handleClearQuery("cat", "untagged")}
         onReset={handleResetFilters}
         sort={sort}
