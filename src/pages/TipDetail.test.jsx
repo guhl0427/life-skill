@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { AppProvider } from "../context/AppContext"
 import TipDetail from "./TipDetail"
@@ -115,5 +115,24 @@ describe("TipDetail 使用记录", () => {
     fireEvent.click(screen.getByRole("button", { name: "✅ 今天用到了" }))
 
     expect(screen.getByText(/已使用 1 次/)).toBeInTheDocument()
+  })
+})
+
+describe("TipDetail 最近浏览", () => {
+  it("打开详情页时记录到最近浏览", async () => {
+    renderDetail("tip-2")
+
+    await waitFor(() => {
+      expect(JSON.parse(localStorage.getItem("ls_recent_tips"))).toEqual(["tip-2"])
+    })
+  })
+
+  it("技巧不存在时不记录浏览", async () => {
+    renderDetail("not-exist")
+
+    expect(screen.getByText("技巧不存在")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(localStorage.getItem("ls_recent_tips")).toBeNull()
+    })
   })
 })

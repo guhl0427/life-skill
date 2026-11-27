@@ -283,3 +283,30 @@ describe("Home 搜索", () => {
     expect(screen.queryByText("衣服折叠法省空间")).not.toBeInTheDocument()
   })
 })
+
+describe("Home 最近浏览", () => {
+  it("按浏览顺序展示最近浏览的技巧并支持清空", () => {
+    localStorage.setItem("ls_recent_tips", JSON.stringify(["tip-3", "tip-1"]))
+
+    renderHome()
+
+    const region = screen.getByRole("region", { name: "最近浏览" })
+    const links = within(region).getAllByRole("link")
+    expect(links).toHaveLength(2)
+    expect(links[0]).toHaveTextContent("切洋葱不流泪")
+    expect(links[1]).toHaveTextContent("柠檬除水垢")
+
+    fireEvent.click(within(region).getByRole("button", { name: "清空" }))
+
+    expect(screen.queryByRole("region", { name: "最近浏览" })).not.toBeInTheDocument()
+    expect(localStorage.getItem("ls_recent_tips")).toBeNull()
+  })
+
+  it("筛选状态下不展示最近浏览", () => {
+    localStorage.setItem("ls_recent_tips", JSON.stringify(["tip-1"]))
+
+    renderHome(["/?cat=cat-1"])
+
+    expect(screen.queryByRole("region", { name: "最近浏览" })).not.toBeInTheDocument()
+  })
+})

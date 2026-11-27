@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { useApp } from "../context/useApp"
 import ConfirmDialog from "../components/ConfirmDialog"
 import Icon from "../components/Icon"
 import { formatDate, formatDateTime } from "../utils/format"
 import { downloadTipMarkdown } from "../utils/exportTip"
+import { rememberRecentTip } from "../utils/recentTips"
 import ShareImageDialog from "../components/ShareImageDialog"
 import { btnPrimary, btnOutline, btnDanger, btnSm } from "../components/ui"
 
@@ -41,6 +42,10 @@ export default function TipDetail() {
   const [copyState, setCopyState] = useState("idle")
   const [showShare, setShowShare] = useState(false)
   const tip = getTip(id)
+
+  useEffect(() => {
+    if (tip) rememberRecentTip(id)
+  }, [id, tip])
 
   if (!tip) {
     return (
