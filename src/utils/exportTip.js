@@ -9,8 +9,9 @@ function safeFileName(text) {
   )
 }
 
-export function buildTipMarkdown(tip, category, tags = []) {
-  const lines = [`# ${tip.title}`, ""]
+// 单条技巧正文（不含标题与页脚），供单条与批量导出复用
+function buildTipBodyLines(tip, category, tags = []) {
+  const lines = []
   const meta = []
   if (category) meta.push(`分类：${category.emoji} ${category.name}`)
   if (tip.duration) meta.push(`耗时：${tip.duration}`)
@@ -36,20 +37,62 @@ export function buildTipMarkdown(tip, category, tags = []) {
   if (tags.length > 0) {
     lines.push("## 标签", "", tags.map((tag) => `#${tag.name}`).join(" "), "")
   }
-  lines.push("---", "", `来自 LifeSkill · ${formatDate(Date.now())}`)
-  return lines.join("\n")
+  return lines
 }
 
-export function downloadTipMarkdown(tip, category, tags = []) {
-  const blob = new Blob([buildTipMarkdown(tip, category, tags)], {
-    type: "text/markdown;charset=utf-8",
+export function buildTipMarkdown(tip, category, tags = []) {
+  return [
+    `# ${tip.title}`,
+    "",
+    ...buildTipBodyLines(tip, category, tags),
+    "---",
+    "",
+    `来自 LifeSkill · ${formatDate(Date.now())}`,
+  ].join("\n")
+}
+
+// 将当前筛选结果导出为一份 Markdown 合集，按顺序编号，去掉单条页脚
+export function buildTipsMarkdown(tips = [], categoryMap, tagMap) {
+  if (!tips.length) return ""
+  const header = [
+    "# LifeSkill 技巧集",
+    "",
+    `> 共 ${tips.length} 条技巧 · 导出于 ${formatDate(Date.now())}`,
+  ].join("\n")
+  const sections = tips.map((tip, index) => {
+    const tags = (tip.tagIds || []).map((id) => tagMap?.get(id)).filter(Boolean)
+    return [
+      `## ${index + 1}. ${tip.title}`,
+      "",
+      ...buildTipBodyLines(tip, categoryMap?.get(tip.categoryId), tags),
+    ].join("\n")
   })
+  return [header, ...sections].join("\n\n---\n\n")
+}
+
+function triggerDownload(content, fileName) {
+  const blob = new Blob([content], { type: "text/markdown;charset=utf-8" })
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
   link.href = url
-  link.download = "lifeskill-" + safeFileName(tip.title) + ".md"
+  link.download = fileName
   document.body.appendChild(link)
   link.click()
   link.remove()
   setTimeout(() => URL.revokeObjectURL(url), 0)
+}
+
+export function downloadTipMarkdown(tip, category, tags = []) {
+  triggerDownload(
+    buildTipMarkdown(tip, category, tags),
+    "lifeskill-" + safeFileName(tip.title) + ".md"
+  )
+}
+
+export function downloadTipsMarkdown(tips = [], categoryMap, tagMap) {
+  if (!tips.length) return
+  triggerDownload(
+    buildTipsMarkdown(tips, categoryMap, tagMap),
+    "lifeskill-技巧集-" + formatDate(Date.now()).replaceAll("/", "-") + ".md"
+  )
 }
