@@ -61,6 +61,19 @@ describe("AppProvider", () => {
     api.tips.forEach((t) => expect(new Set(t.tagIds).size).toBe(t.tagIds.length))
   })
 
+  it("合并分类时把技巧迁移到目标分类并移除源分类", () => {
+    renderApp()
+    expect(api.tips.some((t) => t.categoryId === "cat-2")).toBe(true)
+    const targetCount = api.tips.filter((t) => t.categoryId === "cat-1").length
+    const sourceCount = api.tips.filter((t) => t.categoryId === "cat-2").length
+
+    act(() => api.mergeCategories("cat-2", "cat-1"))
+
+    expect(api.categories.some((c) => c.id === "cat-2")).toBe(false)
+    expect(api.tips.some((t) => t.categoryId === "cat-2")).toBe(false)
+    expect(api.tips.filter((t) => t.categoryId === "cat-1")).toHaveLength(targetCount + sourceCount)
+  })
+
   it("切换收藏状态", () => {
     renderApp()
     const before = api.tips.find((t) => t.id === "tip-1").starred
